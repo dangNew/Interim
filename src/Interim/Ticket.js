@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
-import { faHome, faShoppingCart, faUser, faUsers, faPlus, faFileContract, faSearch, faTicketAlt, faCog, faPen, faTrash} from '@fortawesome/free-solid-svg-icons';
+import { faHome, faShoppingCart, faUser, faUsers, faPlus, faFileContract, faSearch, faTicketAlt, faCog, faPen, faTrash, faCheck} from '@fortawesome/free-solid-svg-icons';
 import { rentmobileDb } from '../components/firebase.config';
 import { collection, getDocs, doc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
 
@@ -458,12 +458,31 @@ const Dashboard = () => {
   </SidebarItem>
 </Link>
 
-  <Link to="/settings" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faCog} className="icon" />
-      <span>Settings</span>
-    </SidebarItem>
-  </Link>
+<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+    <FontAwesomeIcon icon={faUser} className="icon" />
+    <span>Manage Ambulant</span>
+  </SidebarItem>
+
+  {isDropdownOpen && (
+    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+      <Link to="/assign" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+            <FontAwesomeIcon icon={faCheck} className="icon" />
+            <span> Assign Collector</span>
+          </SidebarItem>
+        </li>
+      </Link>
+      <Link to="/addcollector" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+            <FontAwesomeIcon icon={faPlus} className="icon" />
+            <span>Add Ambulant Collector</span>
+          </SidebarItem>
+        </li>
+      </Link>
+    </ul>
+  )}
 </SidebarMenu>
 
       <SidebarFooter isSidebarOpen={isSidebarOpen}>
@@ -473,8 +492,6 @@ const Dashboard = () => {
           </LogoutButton>
         </SidebarFooter>
       </Sidebar>
-
-
 
         <MainContent isSidebarOpen={isSidebarOpen}>
         

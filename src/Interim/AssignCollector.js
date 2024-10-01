@@ -161,8 +161,6 @@ const ProfileImage = styled.img`
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // Subtle shadow for a polished look
 `;
 
-
-
 const FormContainer = styled.div`
   margin-top: 2rem;
   padding: 1rem;
@@ -313,9 +311,13 @@ const Dashboard = () => {
       await fetchStallholders();
       await fetchCollectors();
     };
+    
+    
   
     fetchData();
   }, []);
+
+  
 
   const handleSaveAssignments = async () => {
     try {
@@ -329,6 +331,22 @@ const Dashboard = () => {
       alert('Failed to save assignments.');
     }
   };
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
+      if (loggedInUserData) {
+        const usersCollection = collection(interimDb, 'users');
+        const userDocs = await getDocs(usersCollection);
+        const users = userDocs.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        const currentUser = users.find(user => user.email === loggedInUserData.email);
+        setLoggedInUser(currentUser || loggedInUserData);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   
   const handleZoneChange = (id, newZone) => {
     setZoneAssignments(prevAssignments =>

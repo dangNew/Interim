@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { FaBars, FaSearch, FaUserCircle, FaFilter, FaPrint } from 'react-icons/fa';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { FaSignOutAlt } from 'react-icons/fa';
 import { collection, getDocs } from 'firebase/firestore';
 import { stallholderDb } from '../components/firebase.config';
@@ -622,6 +622,7 @@ const Dashboard = () => {
       <span>Contract</span>
     </SidebarItem>
   </Link>
+
   <Link to="/ticket" style={{ textDecoration: 'none' }}>
   <SidebarItem isSidebarOpen={isSidebarOpen}>
     <FontAwesomeIcon icon={faTicketAlt} className="icon" />
@@ -629,12 +630,31 @@ const Dashboard = () => {
   </SidebarItem>
 </Link>
 
-  <Link to="/settings" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faCog} className="icon" />
-      <span>Settings</span>
-    </SidebarItem>
-  </Link>
+<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+    <FontAwesomeIcon icon={faUser} className="icon" />
+    <span>Manage Ambulant</span>
+  </SidebarItem>
+
+  {isDropdownOpen && (
+    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+      <Link to="/assign" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+            <FontAwesomeIcon icon={faCheck} className="icon" />
+            <span> Assign Collector</span>
+          </SidebarItem>
+        </li>
+      </Link>
+      <Link to="/addcollector" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+            <FontAwesomeIcon icon={faPlus} className="icon" />
+            <span>Add Ambulant Collector</span>
+          </SidebarItem>
+        </li>
+      </Link>
+    </ul>
+  )}
 </SidebarMenu>
 
       <SidebarFooter isSidebarOpen={isSidebarOpen}>

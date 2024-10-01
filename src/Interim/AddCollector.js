@@ -5,9 +5,13 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
 import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { initializeApp } from 'firebase/app';
 import { rentmobileDb, rentmobileAuth } from '../components/firebase.config';
-import { collection, addDoc } from 'firebase/firestore';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { collection, getDocs, deleteDoc, doc, addDoc } from 'firebase/firestore';
+import { interimDb } from '../components/firebase.config';
+import ConfirmationModal from './ConfirmationModal'; // Import the modal
+
 
 
 const DashboardContainer = styled.div`
@@ -374,6 +378,7 @@ const Dashboard = () => {
       password: '',
       status: ''
     });
+    const [isModalOpen, setIsModalOpen] = useState(false);
   
     // Handling form input changes
     const handleChange = (e) => {
@@ -387,40 +392,63 @@ const Dashboard = () => {
     
     // Submitting the form and adding data to Firestore
     const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        try {
+      e.preventDefault();
+  
+      // Input validation
+      if (!formData.email || !formData.password) {
+          alert("Email and password are required!");
+          return;
+      }
+  
+      try {
           // Create user in Firebase Authentication
           const userCredential = await createUserWithEmailAndPassword(rentmobileAuth, formData.email, formData.password);
           const user = userCredential.user;
-
+  
+          const collectorData = {
+              firstName: formData.firstName,
+              lastName: formData.lastName,
+              middleName: formData.middleName,
+              contactNum: formData.contactNum,
+              email: formData.email,
+              address: formData.address,
+              location: formData.location,
+              collector: formData.collector,
+              Image: null,
+              status: formData.status,
+          };
+  
           // Save email and other details to Firestore
-          await addDoc(collection(rentmobileDb, 'ambulant_collector'), {
-            ...formData,
-          // Optionally store user ID for reference
-          });
-
+          await addDoc(collection(rentmobileDb, 'ambulant_collector'), collectorData);
+  
           alert('Collector added successfully!');
-          
+  
           // Reset the form after submission
           setFormData({
-            firstName: '',
-            lastName: '',
-            middleName: '',
-            contactNum: '',
-            email: '',
-            address: '',
-            location: '',
-            collector: '',
-            status: '',
-            password: '' // Reset password field
+              firstName: '',
+              lastName: '',
+              middleName: '',
+              contactNum: '',
+              email: '',
+              address: '',
+              location: '',
+              collector: '',
+              Image: null,
+              status: '',
+              password: '' // Reset password field
           });
-        } catch (error) {
-          console.error('Error adding document: ', error);
-          alert('Failed to add collector or create user.');
-        }
-    };
-
+      } catch (error) {
+          console.error('Error adding document: ', error.message); // Log the error message
+          alert('Failed to add collector or create user: ' + error.message); // Provide the specific error message
+      }
+      setIsModalOpen(true);
+  };
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    navigate('/some-route'); // Replace with your desired route
+};
+  
+  
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -444,7 +472,21 @@ const Dashboard = () => {
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); 
 
-  // Fetch total users and recent user data from Firestore
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
+      if (loggedInUserData) {
+        const usersCollection = collection(interimDb, 'users');
+        const userDocs = await getDocs(usersCollection);
+        const users = userDocs.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        const currentUser = users.find(user => user.email === loggedInUserData.email);
+        setLoggedInUser(currentUser || loggedInUserData);
+      }
+    };
+
+    fetchUserData();
+  }, []);
   
 
   const handleLogout = () => {
@@ -463,7 +505,7 @@ const Dashboard = () => {
 
 
     <DashboardContainer>
-        <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
+         <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
         <Link to="/profile" style={{ textDecoration: 'none' }}>
         <ProfileHeader isSidebarOpen={isSidebarOpen}>
           {loggedInUser && loggedInUser.Image ? (
@@ -483,7 +525,6 @@ const Dashboard = () => {
           </span>
         </ProfileHeader>
       </Link>
-
 
         <SearchBarContainer isSidebarOpen={isSidebarOpen}>
           <FaSearch />
@@ -625,6 +666,18 @@ const Dashboard = () => {
     />
   </div>
   <div className="form-section">
+    <label htmlFor="middleName">Middle Name</label>
+    <input
+      type="text"
+      id="middleName"
+      name="middleName"
+      value={formData.middleName}
+      onChange={handleChange}
+      placeholder="Enter Middle Name" // Ensure the placeholder is present
+      required
+    />
+  </div>
+  <div className="form-section">
     <label htmlFor="lastName">Last Name</label>
     <input
       type="text"
@@ -717,7 +770,7 @@ const Dashboard = () => {
         </div>
         
 
-            <div>
+        <div>
             <label htmlFor="toggleSwitch">Active Status</label>
             <ToggleSwitch>
             <span>Active</span>
@@ -727,18 +780,22 @@ const Dashboard = () => {
             </label>
           </ToggleSwitch>
                 </div>
-
     
 
-    <div className="button-group">
-      <button className="cancel" type="button">Cancel</button>
-      <button type="submit">Save</button>
-    </div>
+                <div className="button-group">
+    <button className="cancel" type="button" onClick={() => {/* Logic for cancel */}}>Cancel</button>
+    <button type="submit">Save</button> {/* This should trigger handleSubmit */}
+</div>
   </FormContainer>
-
-      </MainContent>
-      </DashboardContainer>
-  );
+  {/* Confirmation modal */}
+  <ConfirmationModal
+                    isOpen={isModalOpen}
+                    onClose={handleModalClose}
+                    message="User Created"
+                />
+            </MainContent>
+        </DashboardContainer>
+    );
 };
 
 export default Dashboard;

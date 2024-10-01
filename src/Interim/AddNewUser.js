@@ -3,7 +3,7 @@ import { Link, useNavigate} from 'react-router-dom';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import styled from 'styled-components';
-import { faBars, faList, faPlus, faIdBadge, faMagnifyingGlass, faHouseChimney, faUsers, faTriangleExclamation, faEye, faCircleUser, faPlusCircle, faStore, faTicketAlt } from '@fortawesome/free-solid-svg-icons';
+import { faBars, faList, faPlus, faIdBadge, faMagnifyingGlass, faHouseChimney, faUsers, faTriangleExclamation, faEye, faCircleUser, faPlusCircle, faStore, faTicketAlt, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { FaSignOutAlt } from 'react-icons/fa';
 import { FaSearch, FaUserCircle, FaBars } from 'react-icons/fa';
 import { collection, addDoc, setDoc, doc, getDocs} from 'firebase/firestore';
@@ -680,12 +680,31 @@ const NewUnit = () => {
   </SidebarItem>
 </Link>
 
-  <Link to="/settings" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faCog} className="icon" />
-      <span>Settings</span>
-    </SidebarItem>
-  </Link>
+<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+    <FontAwesomeIcon icon={faUser} className="icon" />
+    <span>Manage Ambulant</span>
+  </SidebarItem>
+
+  {isDropdownOpen && (
+    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+      <Link to="/assign" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+            <FontAwesomeIcon icon={faCheck} className="icon" />
+            <span> Assign Collector</span>
+          </SidebarItem>
+        </li>
+      </Link>
+      <Link to="/addcollector" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+            <FontAwesomeIcon icon={faPlus} className="icon" />
+            <span>Add Ambulant Collector</span>
+          </SidebarItem>
+        </li>
+      </Link>
+    </ul>
+  )}
 </SidebarMenu>
 
       <SidebarFooter isSidebarOpen={isSidebarOpen}>
@@ -695,7 +714,6 @@ const NewUnit = () => {
           </LogoutButton>
         </SidebarFooter>
       </Sidebar>
-
         <MainContent isSidebarOpen={isSidebarOpen}>
         <AppBar>
         <div className="title">INTERIM</div>

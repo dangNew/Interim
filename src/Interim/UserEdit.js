@@ -6,7 +6,7 @@ import { FaBars, FaSearch, FaUserCircle } from 'react-icons/fa';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleUser } from '@fortawesome/free-solid-svg-icons';
 import { FaSignOutAlt } from 'react-icons/fa';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt} from '@fortawesome/free-solid-svg-icons';
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt, faCheck} from '@fortawesome/free-solid-svg-icons';
 import { interimDb } from '../components/firebase.config';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore'; // Import Firestore functions
 
@@ -483,6 +483,18 @@ const LogoutButton = styled(SidebarItem)`
     transform: scale(1.05); /* Slightly scale up on hover */
   }
 `;
+const AppBar = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 40px 50px;
+  background-color: #188423; /* Updated color */
+  color: white;
+  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+  font-size: 22px;
+  font-family: 'Inter', sans-serif; /* Use a professional font */
+  font-weight: bold; /* Apply bold weight */
+`;
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [users, setUsers] = useState([]);
@@ -723,12 +735,31 @@ const Dashboard = () => {
   </SidebarItem>
 </Link>
 
-  <Link to="/settings" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faCog} className="icon" />
-      <span>Settings</span>
-    </SidebarItem>
-  </Link>
+<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+    <FontAwesomeIcon icon={faUser} className="icon" />
+    <span>Manage Ambulant</span>
+  </SidebarItem>
+
+  {isDropdownOpen && (
+    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+      <Link to="/assign" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+            <FontAwesomeIcon icon={faCheck} className="icon" />
+            <span> Assign Collector</span>
+          </SidebarItem>
+        </li>
+      </Link>
+      <Link to="/addcollector" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+            <FontAwesomeIcon icon={faPlus} className="icon" />
+            <span>Add Ambulant Collector</span>
+          </SidebarItem>
+        </li>
+      </Link>
+    </ul>
+  )}
 </SidebarMenu>
 
       <SidebarFooter isSidebarOpen={isSidebarOpen}>
@@ -746,15 +777,12 @@ const Dashboard = () => {
         </ToggleButton>
 
         
-        <div className="app-bar">
-          <div className="title">INTERIM</div>
-          <div className="profile-section">
-            <Link to="/manage-profile" className="profile-link">
-              <span>Profile</span>
-              <FontAwesomeIcon icon={faCircleUser} size="2xl" style={{ color: "#B197FC" }} />
-            </Link>
-          </div>
-        </div>
+        <AppBar>
+          <ToggleButton onClick={toggleSidebar}>
+            <FaBars />
+          </ToggleButton>
+          <div>USER MANAGEMENT</div>
+        </AppBar>
         <ProfileHeader>
           <h1>Edit User</h1>
         </ProfileHeader>
