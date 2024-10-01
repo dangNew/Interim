@@ -1,0 +1,412 @@
+/* DashboardContainer */
+.DashboardContainer {
+    display: flex;
+    height: 100vh;
+  }
+  
+  /* Sidebar */
+  .Sidebar {
+    width: 230px;
+    background-color: #f8f9fa;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ddd;
+    justify-content: space-between;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: width 0.3s ease;
+    position: fixed;
+    height: 100vh;
+    z-index: 100;
+    overflow: hidden;
+  }
+  
+  .Sidebar.closed {
+    width: 60px;
+  }
+  
+  /* SidebarMenu */
+  .SidebarMenu {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* SidebarItem */
+  .SidebarItem {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 10px;
+    margin-top: -10px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .SidebarItem.active {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .SidebarItem:hover {
+    background-color: #f1f3f5;
+  }
+  
+  .SidebarItem.active:hover {
+    background-color: #007bff;
+  }
+  
+  .Icon {
+    font-size: 1rem;
+    color: #000;
+    transition: margin-left 0.2s ease;
+  }
+  
+  .SidebarItem span:last-child {
+    margin-left: 10px;
+  }
+  
+  .SidebarItem.closed span:last-child {
+    display: none;
+  }
+  
+  /* ToggleButton */
+  .ToggleButton {
+    display: block;
+    position: absolute;
+    top: 5px;
+    left: 15px;
+    font-size: 1.8rem;
+    color: #333;
+    cursor: pointer;
+    z-index: 200;
+  }
+  
+  .ToggleButton.open {
+    display: none;
+  }
+  
+  /* ToggleSwitch */
+  .ToggleSwitch {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+  }
+  
+  .ToggleSwitch input {
+    display: none;
+  }
+  
+  .ToggleSwitch .Switch {
+    position: relative;
+    width: 50px;
+    height: 28px;
+    background-color: #e0e0e0;
+    border-radius: 50px;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  }
+  
+  .ToggleSwitch .Slider {
+    position: absolute;
+    cursor: pointer;
+    top: 2px;
+    left: 2px;
+    width: 24px;
+    height: 24px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .ToggleSwitch input:checked + .Switch {
+    background-color: #4caf50;
+  }
+  
+  .ToggleSwitch input:checked + .Switch .Slider {
+    transform: translateX(22px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+  
+  .ToggleSwitch input:not(:checked) + .Switch .Slider {
+    transform: translateX(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .StatusLabel {
+    margin-left: 12px;
+    font-size: 0.9rem;
+    color: #333;
+    font-weight: 600;
+  }
+  
+  @media (max-width: 768px) {
+    .ToggleSwitch .Switch {
+      width: 45px;
+      height: 26px;
+    }
+  
+    .ToggleSwitch .Slider {
+      width: 22px;
+      height: 22px;
+      left: 2px;
+    }
+  
+    .StatusLabel {
+      font-size: 0.8rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .ToggleSwitch .Switch {
+      width: 40px;
+      height: 24px;
+    }
+  
+    .ToggleSwitch .Slider {
+      width: 20px;
+      height: 20px;
+      left: 2px;
+    }
+  
+    .StatusLabel {
+      font-size: 0.7rem;
+    }
+  }
+  
+  /* BackButton */
+  .BackButton {
+    background-color: red !important;
+    color: white !important;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    transition: background-color 0.3s ease;
+  }
+  
+  .BackButton:hover {
+    background-color: darkred !important;
+  }
+  
+  /* MainContent */
+  .MainContent {
+    margin-left: 230px;
+    padding-left: 40px;
+    background-color: #fff;
+    padding: 2rem;
+    width: 100%;
+    transition: margin-left 0.3s ease;
+    overflow-y: auto;
+  }
+  
+  .MainContent.closed {
+    margin-left: 70px;
+  }
+  
+  /* ProfileHeader */
+  .ProfileHeader {
+    display: flex;
+    align-items: center;
+    padding: 40px 10px;
+    position: relative;
+    flex-direction: column;
+  }
+  
+  .ProfileIcon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: #6c757d;
+  }
+  
+  .ProfileName {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: black;
+  }
+  
+  .ProfilePosition {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #007bff;
+    margin-top: 5px;
+  }
+  
+  .ProfileHeader hr {
+    width: 100%;
+    border: 0.5px solid #ccc;
+    margin-top: 15px;
+  }
+  
+  /* ProfileImage */
+  .ProfileImage {
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* FormContainerLarge */
+  .FormContainerLarge {
+    flex: 3;
+    margin-top: 2rem;
+    padding: 2rem;
+    border-radius: 12px;
+    background-color: #f8f9fa;
+    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+    border: 2px solid #ced4da;
+  }
+  
+  .FormContainerLarge h3 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 1.5rem;
+  }
+  
+  .FormContainerLarge form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .FormContainerLarge label {
+    font-size: 1rem;
+    color: #495057;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+  
+  .FormContainerLarge input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #495057;
+    background-color: #f8f9fa;
+    transition: border-color 0.3s;
+  }
+  
+  .FormContainerLarge input:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+  
+  .FormContainerLarge button {
+    grid-column: span 2;
+    padding: 0.75rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .FormContainerLarge button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* FormContainerSmall */
+  .FormContainerSmall {
+    flex: 1;
+    margin-top: 2rem;
+    padding: 2rem;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    width: 100%;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ced4da;
+  }
+  
+  .FormContainerSmall img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 8px;
+  }
+  
+  /* SearchBarContainer */
+  .SearchBarContainer {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #e9ecef;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    margin-top: -25px;
+  }
+  
+  .SearchBarContainer.closed {
+    display: none;
+  }
+  
+  .SearchInput {
+    flex: 1;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 20px;
+    margin-right: 10px;
+    font-size: 1rem;
+    background-color: white;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  
+  .SearchInput:focus {
+    outline: none;
+  }
+  
+  .SearchButton {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .SearchButton:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Table */
+  .Table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+  
+  .Table th, .Table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .Table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .Table tr:hover {
+    background-color: #f1f3f5;
+  }
+  
