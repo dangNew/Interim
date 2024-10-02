@@ -311,9 +311,7 @@ const Dashboard = () => {
   };
 
   const handleClickOutside = (event) => {
-    if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
-      setIsSidebarOpen(false);
-    }
+   
   };
 
   useEffect(() => {
@@ -322,7 +320,6 @@ const Dashboard = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-
   // Fetch total users and recent user data from Firestore
   useEffect(() => {
     const fetchUsers = async () => {

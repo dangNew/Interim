@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
+import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt,FaPlus } from 'react-icons/fa';
 import { faHome, faShoppingCart, faUser, faUsers, faPlus, faFileContract, faSearch, faTicketAlt, faCog, faPen, faTrash, faCheck} from '@fortawesome/free-solid-svg-icons';
 import { rentmobileDb } from '../components/firebase.config';
 import { collection, getDocs, doc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
@@ -164,11 +164,12 @@ const ProfileImage = styled.img`
 const FormContainer = styled.div`
   margin-top: 2rem;
   padding: 1.5rem;
-  border-radius: 20px;
-  background-color: #f8f9fa;
+  border-radius: 10px; /* Less rounded for a more professional look */
+  background-color: #ffffff;
   border: 1px solid #ddd;
-  box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
-
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  margin-bottom: 2rem;
+  
   h3 {
     margin-bottom: 1.5rem;
     font-size: 1.8rem;
@@ -180,40 +181,53 @@ const FormContainer = styled.div`
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px;
-
+    font-size: 16px;
+    color: #495057; /* Darker text for better contrast */
+    margin-top: 20px;
+    
     th, td {
-      padding: 15px;
+      padding: 12px 15px; /* More padding for better readability */
       text-align: left;
-      border-bottom: 2px solid #dee2e6;
+      border-bottom: 1px solid #e2e6ea; /* Light border for separation */
+      vertical-align: middle;
     }
 
     th {
-      background-color: #e9ecef;
+      background-color: #f8f9fa; /* Subtle header background */
+      color: #495057;
+      font-weight: 600;
     }
 
     tr:nth-child(even) {
-      background-color: #f9f9f9;
+      background-color: #f9f9f9; /* Alternating row colors */
+    }
+
+    tr:hover {
+      background-color: #e9ecef; /* Highlight on hover */
     }
 
     .actions {
+     margin-left: 0px;
       display: flex;
-      gap: 20px;
-      justify-content: center;
+      justify-content: left;
+      gap: 15px; /* Consistent spacing */
     }
 
     .icon {
-      font-size: 28px;
-      color: #000;
+     margin-left: 10px;
+      font-size: 20px;
+      color: #007bff; /* Blue icons for better visibility */
+      justify-content: left;
       cursor: pointer;
-      transition: color 0.2s ease;
+      transition: color 0.3s ease;
 
       &:hover {
-        color: #007bff; /* Hover effect */
+        color: #0056b3; /* Darker blue on hover */
       }
     }
   }
 `;
+
 
 
 const AppBar = styled.div`
@@ -251,6 +265,79 @@ const SearchInput = styled.input`
   margin-left: 10px;
   width: 100%;
 `;
+const AddTicketButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #28a745; /* Green color */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #218838; /* Darker green on hover */
+  }
+
+  .icon {
+    margin-right: 10px;
+    font-size: 1.2rem;
+  }
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 200;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const ModalContainer = styled.div`
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 300px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+`;
+
+const ModalButton = styled.button`
+  padding: 10px 20px;
+  margin: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 1rem;
+`;
+
+const CancelButton = styled(ModalButton)`
+  background-color: #6c757d;
+  color: white;
+
+  &:hover {
+    background-color: #5a6268;
+  }
+`;
+
+const DeleteButton = styled(ModalButton)`
+  background-color: #dc3545;
+  color: white;
+
+  &:hover {
+    background-color: #c82333;
+  }
+`;
 
 const Dashboard = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -259,7 +346,10 @@ const Dashboard = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const navigate = useNavigate();
     const [rates, setRates] = useState([]);
-    
+    const [loading, setLoading] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedRateId, setSelectedRateId] = useState(null);
+
     useEffect(() => {
       const fetchRates = async () => {
         try {
@@ -284,15 +374,7 @@ const Dashboard = () => {
       };
       
     
-      const handleDelete = async (id) => {
-        try {
-          await deleteDoc(doc(rentmobileDb, 'rate', id));
-          setRates(rates.filter((rate) => rate.id !== id));
-        } catch (error) {
-          console.error("Error deleting rate:", error);
-        }
-      };
-
+      
    
     useEffect(() => {
       const fetchUserData = async () => {
@@ -331,11 +413,13 @@ const Dashboard = () => {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+  const handleAddTicket = () => {
+    setLoading(true);
+    navigate('/newticket');
+  };
 
   const handleClickOutside = (event) => {
-    if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
-      setIsSidebarOpen(false);
-    }
+    
   };
 
   useEffect(() => {
@@ -351,6 +435,29 @@ const Dashboard = () => {
     localStorage.removeItem('userData'); 
     navigate('/login');
   };
+
+  const openModal = (id) => {
+    setSelectedRateId(id);
+    setIsModalOpen(true);
+  };
+  
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedRateId(null);
+  };
+
+
+  const handleDelete = async (id) => {
+    try {
+      const rateDocRef = doc(rentmobileDb, 'rate', id);
+      await deleteDoc(rateDocRef);
+      setRates(rates.filter(rate => rate.id !== id)); // Update the state to remove the deleted item
+      closeModal(); // Close the modal after deletion
+    } catch (error) {
+      console.error('Error deleting rate: ', error); // You can keep this if needed for error handling
+    }
+  };
+  
 
 
   const handleDropdownToggle = () => {
@@ -507,6 +614,9 @@ const Dashboard = () => {
           <ProfileHeader>
             <h1>Manage Ticket</h1>
           </ProfileHeader>
+          <AddTicketButton onClick={handleAddTicket} disabled={loading}>
+  {loading ? 'Loading...' : 'Add New Ticket'}
+</AddTicketButton>
 
           <FormContainer>
           <h3>Rates Table</h3>
@@ -520,19 +630,32 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {rates.map(rate => (
+            {rates.map(rate => (
                 <tr key={rate.id}>
-                  <td>{rate.name}</td> {/* Assuming 'name' is a field in your Firestore data */}
-                  <td>{rate.rate}</td> {/* Adjust according to your field name for rate */}
-                  <td>{new Date(rate.dateIssued).toLocaleDateString()}</td> {/* Adjust the field for date */}
+                  <td>{rate.name}</td>
+                  <td>{rate.rate}</td>
+                  <td>{new Date(rate.dateIssued).toLocaleDateString()}</td> 
                   <td className="actions">
-                    <FontAwesomeIcon icon={faPen} className="icon" onClick={() => handleEdit(rate.id)} />
-                    <FontAwesomeIcon icon={faTrash} className="icon" onClick={() => handleDelete(rate.id)} />
+                  <FontAwesomeIcon icon={faPen} onClick={() => handleEdit(rate.id)} />
+                  <FontAwesomeIcon icon={faTrash} onClick={() => openModal(rate.id)} />
                   </td>
                 </tr>
               ))}
+
             </tbody>
           </table>
+
+          {isModalOpen && (
+  <ModalOverlay>
+    <ModalContainer>
+  <h3>Are you sure you want to delete this rate?</h3>
+  <DeleteButton onClick={() => handleDelete(selectedRateId)}>Delete</DeleteButton>
+  <CancelButton onClick={closeModal}>Cancel</CancelButton>
+</ModalContainer>
+
+  </ModalOverlay>
+)}
+
         </FormContainer>
 
       </MainContent>

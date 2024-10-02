@@ -5,12 +5,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt, FaCalendarAlt  } from 'react-icons/fa';
 import { faHome, faShoppingCart, faUser, faUsers, faPlus, faFileContract, faCog, faTicketAlt,faSearch } from '@fortawesome/free-solid-svg-icons';
 import { rentmobileDb } from '../components/firebase.config';
-import { collection, getDoc, doc, updateDoc, getDocs } from 'firebase/firestore';
+import { collection, getDoc, doc, updateDoc, getDocs,setDoc } from 'firebase/firestore';
 import DatePicker from 'react-datepicker';
 import { Timestamp } from 'firebase/firestore';
 import 'react-datepicker/dist/react-datepicker.css';
 
-const DashboardContainer = styled.div`
+const NewTicketContainer = styled.div`
   display: flex;
   height: 100vh;
 `;
@@ -409,49 +409,109 @@ const ConfirmButton = styled.button`
   }
 `;
 
-const Dashboard = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const sidebarRef = useRef(null);
-  const [loggedInUser, setLoggedInUser] = useState(null);
-   const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const navigate = useNavigate();
-  const [selectedDate, setSelectedDate] = useState(null); 
-  const [dateIssued, setDateIssued] = useState(null);
-  const { id } = useParams(); 
-  const dateIssuedTimestamp = dateIssued ? Timestamp.fromDate(new Date(dateIssued)) : null;
-  const [ticket, setTicket] = useState(null); 
-  const [ticketName, setTicketName] = useState('');
-  const [rate, setRate] = useState('');
+const NewTicket = () => {
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const sidebarRef = useRef(null);
+    const [loggedInUser, setLoggedInUser] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false); 
+    const [isErrorModal, setIsErrorModal] = useState(false);
+    const [showModal, setShowModal] = useState(false); 
+    const [modalMessage, setModalMessage] = useState(''); // Define modalMessage state
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const navigate = useNavigate();
+    const [selectedDate, setSelectedDate] = useState(null); 
+    const [dateIssued, setDateIssued] = useState(null);
+    const { id } = useParams(); 
+    const dateIssuedTimestamp = dateIssued ? Timestamp.fromDate(new Date(dateIssued)) : null;
+    const [ticket, setTicket] = useState(null); 
+    const [ticketName, setTicketName] = useState('');
+    const [rate, setRate] = useState('');
+ 
+    const saveTicket = async () => {
+        try {
+          
+            setIsModalOpen(true);
+        } catch (error) {
+            console.error("Error saving ticket:", error);
+            setModalMessage('There was an error saving the ticket. Please try again.');
+            setShowModal(true); // Show the modal with the error message
+        }
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false); // Close the modal
+        navigate("/ticket");  // Redirect to /ticket after closing the modal
+      };
+    const closeErrorModal = () => { // Function to close the error modal
+        setIsErrorModal(false);
+    };
 
 
-  // Fetch the ticket data, ensuring hooks are called in the same order
   useEffect(() => {
     const fetchTicket = async () => {
       try {
-        const ticketDoc = doc(rentmobileDb, 'rate', id);
-        const ticketSnapshot = await getDoc(ticketDoc);
-        if (ticketSnapshot.exists()) {
-          const ticketData = ticketSnapshot.data();
-          setTicket(ticketData);
-          setTicketName(ticketData.name);
-          setRate(ticketData.rate);
-          // Check if dateIssued is a valid Firestore timestamp
-          if (ticketData.dateIssued && ticketData.dateIssued.seconds) {
-            setDateIssued(new Date(ticketData.dateIssued.seconds * 1000));
+        if (id) {
+          const ticketDoc = doc(rentmobileDb, 'rate', id);
+          const ticketSnapshot = await getDoc(ticketDoc);
+          if (ticketSnapshot.exists()) {
+            const ticketData = ticketSnapshot.data();
+            setTicket(ticketData);
+            setTicketName(ticketData.name || ''); // Assuming the field is 'name'
+            setRate(ticketData.rate || ''); // Assuming the field is 'rate'
+          } else {
+            console.log('No ticket found!');
           }
-        } else {
-          console.log('No such document!');
         }
       } catch (error) {
-        console.error('Error fetching ticket details: ', error);
+        console.error('Error fetching ticket:', error);
       }
     };
   
     fetchTicket();
-  }, [id]); // Fetch ticket on component mount or when the ID changes
+  }, [id]); // The effect will re-run whenever `id` changes
+  useEffect(() => {
+    // Set current date as default for dateIssued
+    const today = new Date();
+    setSelectedDate(today);
+    setDateIssued(today);  // Set dateIssued to current date
+  }, []);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Ensure the fields are not empty and the rate is a number
+    if (!ticketName || !rate || !dateIssued) {
+        alert("Please fill out all fields.");
+        return;
+    }
+    
+    const ticketData = {
+        name: ticketName,
+        rate: parseFloat(rate),  // Ensure it's stored as a number
+        dateIssued: Timestamp.fromDate(new Date(dateIssued)),  // Store as Firestore Timestamp
+      };
+      
+      try {
+        // Add ticket to Firestore 'rate' collection
+        const ticketRef = collection(rentmobileDb, 'rate');
+        await setDoc(doc(ticketRef), ticketData);
+        
+        // Show success modal instead of alert
+        setShowModal(true);  // Show the modal with success message
+        setModalMessage("Ticket saved successfully!");  // Set success message
+        setTimeout(() => {
+          navigate("/tickets");  // Redirect to tickets page after saving
+        }, 2000);  // Delay the redirect to give user time to see the message
+        
+      } catch (error) {
+        console.error("Error saving ticket:", error);
+        
+        // Show error modal instead of alert
+        setShowModal(true);  // Show the modal with error message
+        setModalMessage("There was an error saving the ticket. Please try again.");
+      }
+    };
 
-  // Fetch user data
+  
   useEffect(() => {
     const fetchUserData = async () => {
       const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
@@ -519,12 +579,9 @@ const Dashboard = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  if (!ticket) {
-    return <div>Loading...</div>; // Still safe to show loading indicator since hooks are called before this
-  }
-
+  
   return (
-    <DashboardContainer>
+    <NewTicketContainer>
         <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
         <Link to="/profile" style={{ textDecoration: 'none' }}>
         <ProfileHeader isSidebarOpen={isSidebarOpen}>
@@ -651,75 +708,70 @@ const Dashboard = () => {
       </AppBar>
          
          <br></br> <br></br>
-          <FormContainer>
-  <h3>Edit Ticket</h3>
-  <form onSubmit={handleSaveChanges}>
-    <div>
-      <label htmlFor="ticketName">Ticket Name:</label>
-      <input
-        id="ticketName"
-        type="text"
-        value={ticketName}
-        onChange={(e) => setTicketName(e.target.value)}
-        placeholder="Ticket Name"
-      />
-    </div>
-    
-    <div>
-      <label htmlFor="rate">Rate:</label>
-      <input
-        id="rate"
-        type="number"
-        value={rate}
-        onChange={(e) => setRate(e.target.value)}
-        placeholder="Rate"
-      />
-    </div>
-    
-    <div>
-      <label htmlFor="dateIssued">Date Issued:</label>
-      <div style={{ position: 'relative' }}>
-        <DatePicker
-          selected={dateIssued}
-          onChange={(date) => setDateIssued(date)}
-          dateFormat="yyyy/MM/dd"
-          className="react-datepicker-input" // Custom class for styling
-        />
-        <FaCalendarAlt 
-          style={{ 
-            position: 'absolute', 
-            right: '20px',
-            top: '30%', 
-            transform: 'translateY(-50%)', 
-            pointerEvents: 'none' // Prevent click events on the icon
-          }} 
-        />
-      </div>
-    </div>
-    
-    <button type="submit">Update Changes</button>
-  </form>
+         <FormContainer>
+            <h3>New Ticket</h3>
+            <form onSubmit={handleSubmit}>
+                <label htmlFor="ticketName">Ticket Name</label>
+                <input
+                    type="text"
+                    id="ticketName"
+                    value={ticketName}
+                    onChange={(e) => setTicketName(e.target.value)}
+                    placeholder="Enter ticket name"
+                />
+                <label htmlFor="rate">Rate</label>
+                <input
+                    type="number"
+                    id="rate"
+                    value={rate}
+                    onChange={(e) => setRate(e.target.value)}
+                    placeholder="Enter rate"
+                />
+                <label htmlFor="dateIssued">Date Issued</label>
+                <DatePicker
+                    selected={selectedDate}
+                    onChange={(date) => {
+                        setSelectedDate(date);
+                        setDateIssued(date);
+                    }}
+                    dateFormat="MMMM d, yyyy"
+                />
+                 <button onClick={saveTicket}>Save Ticket</button>
+            </form>
+        
+       
 
-  {isModalOpen && (
-  <Modal>
-    <ModalContent>
-      <ModalHeader>Save Changes</ModalHeader>
-      <ModalText>Are you sure you want to save changes?</ModalText>
-      <ModalButtons>
-        <CancelButton onClick={() => setIsModalOpen(false)}>Cancel</CancelButton>
-      <OkButton onClick={() => navigate('/ticket')}>OK</OkButton>
-      </ModalButtons>
-    </ModalContent>
-  </Modal>
-)}
+            {isModalOpen && !isErrorModal && (
+       <Modal>
+           <ModalContent>
+               <ModalHeader>Ticket Saved Successfully!</ModalHeader>
+               <ModalText>Your ticket has been successfully saved.</ModalText>
+               <ModalButtons>
+                   <OkButton onClick={closeModal}>OKAYYYY GUD</OkButton>
+               </ModalButtons>
+           </ModalContent>
+       </Modal>
+   )}
+
+   {isErrorModal && (
+       <Modal>
+           <ModalContent>
+               <ModalHeader>Error Saving Ticket</ModalHeader>
+               <ModalText>There was an error while saving the ticket. Please try again.</ModalText>
+               <ModalButtons>
+                   <OkButton onClick={closeErrorModal}>TRY AGAIN</OkButton>
+               </ModalButtons>
+           </ModalContent>
+       </Modal>
+   )}
 
 </FormContainer>
 
 
 
       </MainContent>
-      </DashboardContainer>
+      </NewTicketContainer>
   );
 };
 
-export default Dashboard;
+export default NewTicket;

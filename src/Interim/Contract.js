@@ -311,9 +311,7 @@ const Contract = () => {
   };
 
   const handleClickOutside = (event) => {
-    if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
-      setIsSidebarOpen(false);
-    }
+   
   };
 
   useEffect(() => {

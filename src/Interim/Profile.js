@@ -5,7 +5,7 @@ import { FaBars, FaSearch, FaUserCircle } from 'react-icons/fa';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { interimDb } from '../components/firebase.config';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
-import {  FaSignOutAlt,FaPen  } from 'react-icons/fa';
+import {  FaSignOutAlt  } from 'react-icons/fa';
 import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt} from '@fortawesome/free-solid-svg-icons';
 
 
@@ -120,59 +120,6 @@ const ProfileImage = styled.img`
   width: 40px; /* Adjust as needed */
   height: 40px; /* Adjust as needed */
   margin-bottom: 10px;
-`;
-
-const StatsContainer = styled.div`
-  display: flex;
-  gap: 2rem;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    gap: 1rem;
-  }
-`;
-
-const StatBox = styled.div`
-  background-color: ${({ bgColor }) => bgColor || '#f4f4f4'};
-  padding: 2rem;
-  border-radius: 12px;
-  border: 1px solid #ddd;  /* ADD THIS */
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease;
-
-  &:hover {
-    transform: translateY(-5px);
-  }
-
-  h3 {
-    margin: 0;
-    font-size: 1.2rem;
-    color: white;
-  }
-
-  p {
-    font-size: 2rem;
-    margin: 0;
-    font-weight: bold;
-    color: white;
-  }
-
-  @media (max-width: 768px) {
-    padding: 1rem;
-
-    h3 {
-      font-size: 1rem;
-    }
-
-    p {
-      font-size: 1.6rem;
-    }
-  }
 `;
 
 const FormContainer = styled.div`
@@ -362,16 +309,26 @@ const Dashboard = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [userData, setUserData] = useState({ firstName: '', lastName: '', email: '', position: '' });
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const sidebarItems = [
+    { name: 'Home', icon: faHome },
+    { name: 'Users', icon: faUsers },
+    { name: 'Products', icon: faShoppingCart },
+    { name: 'Settings', icon: faCog },
+    { name: 'Reports', icon: faFileContract },
+    { name: 'Tickets', icon: faTicketAlt },
+  ];
 
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  const filteredItems = sidebarItems.filter(item =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
   const handleClickOutside = (event) => {
-    if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
-      setIsSidebarOpen(false);
-    }
+    
   };
 
   useEffect(() => {

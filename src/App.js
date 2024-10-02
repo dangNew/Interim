@@ -21,6 +21,7 @@ import Ticket from './Interim/Ticket';
 import TicketEdit from './Interim/TicketEdit';
 import AssignCollector from './Interim/AssignCollector';
 import AddCollector from './Interim/AddCollector';
+import NewTicket from './Interim/NewTicket';
 
 
 
@@ -48,6 +49,7 @@ function App() {
         <Route path="/ticketEdit/:id" element={<TicketEdit />} />
         <Route path="/assign" element={<AssignCollector />} />
         <Route path="/addcollector" element={<AddCollector />} />
+        <Route path="/newticket" element={<NewTicket />} />
       </Routes>
     </Router>
   );
