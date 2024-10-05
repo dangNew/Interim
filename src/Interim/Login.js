@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Link, useNavigate } from 'react-router-dom'; // Changed useHistory to useNavigate
-import { interimAuth, interimDb } from '../components/firebase.config'; // Import Firebase Auth and Firestore
+import { Link, useNavigate } from 'react-router-dom';
+import { interimAuth, interimDb } from '../components/firebase.config';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 
@@ -11,39 +11,79 @@ const LoginContainer = styled.div`
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 1rem;
-  background-color: #f9f9f9;
+  padding: 2rem; 
+  background-color: #f0f2f5;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+`;
+
+const FormContainer = styled.div`
+  background-color: #ffffff;
+  padding: 3rem;
+  border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); 
+  width: 100%;
+  max-width: 500px; 
+`;
+
+const Title = styled.h2`
+  margin-bottom: 2rem;
+  text-align: center;
+  color: #333;
+  font-size: 2rem; 
+  font-weight: bold;
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  width: 100%;
-  max-width: 400px;
+  gap: 1.5rem;
 `;
 
 const Input = styled.input`
-  padding: 0.75rem;
+  padding: 1.25rem; 
   border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 8px;
+  font-size: 1.25rem; 
   width: 100%;
   box-sizing: border-box;
+  transition: box-shadow 0.3s ease-in-out;
 
   &:focus {
     outline: none;
     border-color: #4caf50;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.4);
+  }
+`;
+
+const PasswordContainer = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+`;
+
+const TogglePassword = styled.span`
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  font-size: 1.25rem;
+  color: #999;
+
+  &:hover {
+    color: #4caf50;
   }
 `;
 
 const SubmitButton = styled.button`
-  padding: 0.75rem;
+  padding: 1rem; 
   background-color: #4caf50;
   color: white;
   border: none;
-  border-radius: 4px;
-  font-size: 1rem;
+  border-radius: 8px;
+  font-size: 1.25rem; 
+  font-weight: bold;
   cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
 
   &:hover {
     background-color: #45a049;
@@ -51,9 +91,11 @@ const SubmitButton = styled.button`
 `;
 
 const SignUpLink = styled.p`
-  margin-top: 1rem;
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 1.1rem;
   color: #666;
-  
+
   a {
     color: #4caf50;
     text-decoration: none;
@@ -64,11 +106,18 @@ const SignUpLink = styled.p`
   }
 `;
 
+const ErrorMessage = styled.p`
+  color: #e74c3c;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+`;
 
 const Login = () => {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
-  const navigate = useNavigate(); // Changed useHistory to useNavigate
+  const [showPassword, setShowPassword] = useState(false); // State for password visibility
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
@@ -79,10 +128,9 @@ const Login = () => {
     const { username, password } = credentials;
 
     try {
-      // Query Firestore to check if the user exists in the 'interim' collection
       const q = query(
         collection(interimDb, 'users'),
-        where('email', '==', username) // Assuming username is the email
+        where('email', '==', username)
       );
       const querySnapshot = await getDocs(q);
 
@@ -91,55 +139,60 @@ const Login = () => {
         return;
       }
 
-      // Sign in with Firebase Authentication
       await signInWithEmailAndPassword(interimAuth, username, password);
 
       const loggedInUserData = querySnapshot.docs[0].data();
       localStorage.setItem('userData', JSON.stringify({
         ...loggedInUserData,
-        image: loggedInUserData.image, // Ensure 'image' field exists in your Firestore document
+        image: loggedInUserData.image,
       }));
 
-
-      // Redirect to dashboard or home after successful login
-      navigate('/dashboard'); // Replace '/dashboard' with your actual route
-  } catch (error) {
-    console.error('Login failed:', error);
-    if (error.code === 'auth/user-not-found') {
-      setError('User not found');
-    } else if (error.code === 'auth/wrong-password') {
-      setError('Invalid password');
-    } else {
-      setError('Invalid email or password');
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Login failed:', error);
+      if (error.code === 'auth/user-not-found') {
+        setError('User not found');
+      } else if (error.code === 'auth/wrong-password') {
+        setError('Invalid password');
+      } else {
+        setError('Invalid email or password');
+      }
     }
-  }
-};
+  };
+
   return (
     <LoginContainer>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {/* Logo and form components */}
-      <Form onSubmit={handleSubmit}>
-        <Input
-          type="text"
-          name="username"
-          placeholder="Email/Username"
-          value={credentials.username}
-          onChange={handleChange}
-          required
-        />
-        <Input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={credentials.password}
-          onChange={handleChange}
-          required
-        />
-        <SubmitButton type="submit">Login</SubmitButton>
-      </Form>
-      <SignUpLink>
-        Don’t have an account? <Link to="/signup">Create a new Account</Link>
-      </SignUpLink>
+      <FormContainer>
+        {error && <ErrorMessage>{error}</ErrorMessage>}
+        <Title>Login</Title>
+        <Form onSubmit={handleSubmit}>
+          <Input
+            type="text"
+            name="username"
+            placeholder="Email/Username"
+            value={credentials.username}
+            onChange={handleChange}
+            required
+          />
+          <PasswordContainer>
+            <Input
+              type={showPassword ? 'text' : 'password'} // Toggle between text and password types
+              name="password"
+              placeholder="Password"
+              value={credentials.password}
+              onChange={handleChange}
+              required
+            />
+            <TogglePassword onClick={() => setShowPassword(!showPassword)}>
+              {showPassword ? '🙈' : '👁'} {/* Emoji for toggle */}
+            </TogglePassword>
+          </PasswordContainer>
+          <SubmitButton type="submit">Login</SubmitButton>
+        </Form>
+        <SignUpLink>
+          Don’t have an account? <Link to="/signup">Create a new Account</Link>
+        </SignUpLink>
+      </FormContainer>
     </LoginContainer>
   );
 };

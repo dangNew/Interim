@@ -11,6 +11,7 @@ import { collection, getDocs } from 'firebase/firestore';
 const DashboardContainer = styled.div`
   display: flex;
   height: 100vh;
+  background-color: #f4f5f7;
 `;
 
 const Sidebar = styled.div`

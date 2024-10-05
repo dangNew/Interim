@@ -520,9 +520,7 @@ const Dashboard = () => {
         <div className="title">INTERIM</div>
       </AppBar>
          
-          <ProfileHeader>
-            <h1>Add New Unit</h1>
-          </ProfileHeader>
+          
           <FormContainer>
           <h3>Edit User Information</h3>
           <InputField
