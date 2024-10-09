@@ -3,9 +3,11 @@ import { Link,  useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
+import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt,FaUserSlash, FaUser, FaUsers, FaWallet} from 'react-icons/fa';
 import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt, faCheck} from '@fortawesome/free-solid-svg-icons';
 import { interimDb } from '../components/firebase.config';
+import { rentmobileDb } from '../components/firebase.config';
+
 import { collection, getDocs } from 'firebase/firestore';
 
 const DashboardContainer = styled.div`
@@ -262,18 +264,16 @@ const FormContainer = styled.div`
 `;
 
 const AppBar = styled.div`
-  background-color: #188423; // Set the desired color
-  padding: 40px 50px;
-  color: white;
-  font-size: 1.5rem;
-  font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+  padding: 40px 50px;
+  background-color: #188423; /* Updated color */
+  color: white;
+  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+  font-size: 22px;
+  font-family: 'Inter', sans-serif; /* Use a professional font */
+  font-weight: bold; /* Apply bold weight */
 `;
 
 
@@ -297,16 +297,77 @@ const SearchInput = styled.input`
   width: 100%;
 `;
 
+const CollectorTableContainer = styled(FormContainer)`
+  margin-top: 2rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+`;
+
+const CollectorTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  th, td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 2px solid #dee2e6;
+    transition: background-color 0.2s ease;
+  }
+
+  th {
+    background-color: #e9ecef;
+    font-weight: bold;
+    color: #495057;
+  }
+
+  td {
+    background-color: #fff;
+  }
+
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  tr:hover {
+    background-color: #f1f3f5;
+  }
+`;
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const sidebarRef = useRef(null);
   const [totalUsers, setTotalUsers] = useState(0);
   const [activeUsers, setActiveUsers] = useState(0);
+  const [inactiveUsers, setInactiveUsers] = useState(0);
+  const [totalCollectors, setTotalCollectors] = useState(0);
+  const [collectorsData, setCollectorsData] = useState([]);
   const [recentUsers, setRecentUsers] = useState([]);
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const fetchCollectors = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(rentmobileDb, 'ambulant_collector'));
+        const collectorsCount = querySnapshot.size; 
+        console.log('Number of collectors fetched:', collectorsCount); 
+
+        setTotalCollectors(collectorsCount);
+        
+        // Set the collectors data in the state
+        const collectorsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        console.log('Fetched Collectors Data:', collectorsData);
+        setCollectorsData(collectorsData); 
+      } catch (error) {
+        console.error('Error fetching collectors:', error);
+      }
+    };
+
+    fetchCollectors();
+  }, []);
+    
+  
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -314,6 +375,7 @@ const Dashboard = () => {
   const handleClickOutside = (event) => {
    
   };
+  
 
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
@@ -321,7 +383,7 @@ const Dashboard = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-  // Fetch total users and recent user data from Firestore
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -336,7 +398,14 @@ const Dashboard = () => {
         const activeUsersCount = validUsers.filter(user => user.status?.toLowerCase() === 'active').length;
         setActiveUsers(activeUsersCount);
 
+        const inactiveUsersCount = validUsers.filter(user => user.status?.toLowerCase() === 'inactive').length;
+        setInactiveUsers(inactiveUsersCount);
+
+       
+
         setRecentUsers(validUsers.slice(-5));
+
+        
 
         const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
         if (loggedInUserData) {
@@ -362,6 +431,7 @@ const Dashboard = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
+  
     
   return (
 
@@ -478,6 +548,14 @@ const Dashboard = () => {
           </SidebarItem>
         </li>
       </Link>
+      <Link to="/assign" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+          <FontAwesomeIcon icon={faSearch} className="icon" />
+            <span> View Collector</span>
+          </SidebarItem>
+        </li>
+      </Link>
       <Link to="/addcollector" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
@@ -515,18 +593,54 @@ const Dashboard = () => {
           </ProfileHeader>
 
           <StatsContainer>
-          <StatBox bgColor="#11768C">
-          
-            <h3>Total Users</h3>
-            <p>{totalUsers}</p> {/* Display the total user count */}
-          </StatBox>
+      <StatBox bgColor="#11768C">
+        <h3>Total Users</h3>
+        <p>{totalUsers}</p> {/* Display the total user count */}
+        <div className="icon-container">
+          <FaUsers className="fading-icon" style={{ 
+            fontSize: '30px', 
+            opacity: 0.5, 
+            animation: 'fade 2s infinite alternate' 
+          }} />
+        </div>
+      </StatBox>
+    
+      <StatBox bgColor="#11768C">
+        <h3>Active Users</h3>
+        <p>{activeUsers}</p> {/* Display the total user count */}
+        <div className="icon-container">
+          <FaUser className="fading-icon" style={{ 
+            fontSize: '30px', 
+            opacity: 0.5, 
+            animation: 'fade 2s infinite alternate' 
+          }} />
+        </div>
+      </StatBox>
 
-          <StatBox bgColor="#188423">
-            <h3>Active Users</h3>
-            <p>{activeUsers}</p> {/* Display the count of active users */}
-          </StatBox>
-        </StatsContainer>
+      <StatBox bgColor="#11768C">
+  <h3>Inactive Users</h3> 
+  <p>{inactiveUsers}</p> {/* Display the total user count */} 
+  <div className="icon-container">
+    <FaUserSlash className="fading-icon" style={{ 
+      fontSize: '30px', 
+      opacity: 0.5, 
+      animation: 'fade 2s infinite alternate' 
+    }} />
+  </div>
+</StatBox>
+<StatBox bgColor="#007bff">
+  <h3>Total Collectors</h3>
+  <p>{totalCollectors}</p>
+  <div className="icon-container">
+    <FaWallet className="fading-icon" style={{ 
+      fontSize: '30px', 
+      opacity: 0.5, 
+      animation: 'fade 2s infinite alternate' 
+    }} />
+  </div>
+</StatBox>
 
+</StatsContainer>
         
 
         {/* Recently Registered Users Section */}
@@ -554,10 +668,41 @@ const Dashboard = () => {
     </tbody>
   </table>
 </FormContainer>
-
+<CollectorTableContainer>
+  <h3>Collector Users</h3>
+  <CollectorTable>
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>Name</th>
+        <th>Address</th>
+        <th>Collector</th>
+        <th>Location</th>
+        <th>Contact Number</th>
+      </tr>
+    </thead>
+    <tbody>
+      {collectorsData.length > 0 ? (
+        collectorsData.map((collector) => (
+          <tr key={collector.id}> {/* Ensure you have a unique identifier for each collector */}
+            <td>{collector.email}</td> {/* Make sure to display email if required */}
+            <td>{collector.firstName + ' ' + collector.lastName}</td> {/* Concatenate firstName and lastName */}
+            <td>{collector.address}</td>
+            <td>{collector.collector}</td>
+            <td>{collector.location}</td>
+            <td>{collector.contactNum}</td>
+          </tr>
+        ))
+      ) : (
+        <tr>
+          <td colSpan="6">No collectors found.</td> {/* Adjusted colSpan to match the number of columns */}
+        </tr>
+      )}
+    </tbody>
+  </CollectorTable>
+</CollectorTableContainer>
       </MainContent>
       </DashboardContainer>
   );
 };
-
 export default Dashboard;

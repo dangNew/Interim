@@ -22,6 +22,9 @@ import TicketEdit from './Interim/TicketEdit';
 import AssignCollector from './Interim/AssignCollector';
 import AddCollector from './Interim/AddCollector';
 import NewTicket from './Interim/NewTicket';
+import Payroll from './payroll/payroll';
+import Quiz from './quiz';
+
 
 
 
@@ -50,6 +53,8 @@ function App() {
         <Route path="/assign" element={<AssignCollector />} />
         <Route path="/addcollector" element={<AddCollector />} />
         <Route path="/newticket" element={<NewTicket />} />
+        <Route path="/payroll" element={<Payroll />} /> {/* Capitalized 'Payroll' */}
+        <Route path="/quiz" element={<Quiz />} /> 
       </Routes>
     </Router>
   );
