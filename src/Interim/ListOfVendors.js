@@ -27,7 +27,8 @@ const Sidebar = styled.div`
   position: fixed;
   height: 100vh;
   z-index: 100;
-  overflow: hidden;
+  overflow: auto;
+  max-height: 100vh;
 `;
 
 const SidebarMenu = styled.ul`

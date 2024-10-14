@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link,  useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt,FaPlus } from 'react-icons/fa';
-import { faHome, faShoppingCart, faUser, faUsers, faPlus, faFileContract, faSearch, faTicketAlt, faCog, faPen, faTrash, faCheck} from '@fortawesome/free-solid-svg-icons';
+import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt,FaUserSlash, FaUser, FaUsers, FaWallet, FaEye,FaPen, FaTrash } from 'react-icons/fa';
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt, faCheck} from '@fortawesome/free-solid-svg-icons';
 import { rentmobileDb } from '../components/firebase.config';
-import { collection, getDocs, doc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
-
+import { collection, getDocs } from 'firebase/firestore';
 
 const DashboardContainer = styled.div`
   display: flex;
   height: 100vh;
+  background-color: #f4f5f7;
 `;
 
 const Sidebar = styled.div`
@@ -26,7 +27,7 @@ const Sidebar = styled.div`
   position: fixed;
   height: 100vh;
   z-index: 100;
-  overflow: auto  ;
+   overflow-y: auto;
 `;
 
 const SidebarMenu = styled.ul`
@@ -161,88 +162,131 @@ const ProfileImage = styled.img`
 `;
 
 
+const StatsContainer = styled.div`
+  display: flex;
+  gap: 2rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+  }
+`;
+
+const StatBox = styled.div`
+  background-color: ${({ bgColor }) => bgColor || '#f4f4f4'};
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid #ddd;  /* ADD THIS */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: white;
+  }
+
+  p {
+    font-size: 2rem;
+    margin: 0;
+    font-weight: bold;
+    color: white;
+  }
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+
+    h3 {
+      font-size: 1rem;
+    }
+
+    p {
+      font-size: 1.6rem;
+    }
+  }
+`;
+
 const FormContainer = styled.div`
   margin-top: 2rem;
-  padding: 1.5rem;
-  border-radius: 10px; /* Less rounded for a more professional look */
-  background-color: #ffffff;
-  border: 1px solid #ddd;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-  margin-bottom: 2rem;
-  
+  padding: 1rem;
+  border: 1px solid #ddd;  /* ADD THIS */
+  border-radius: 15px;
+  background-color: #f8f9fa;
+  box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
+
   h3 {
-    margin-bottom: 1.5rem;
-    font-size: 1.8rem;
-    font-weight: bold;
-    text-align: center;
-    color: #333;
+    margin-bottom: 1rem;
+    font-size: 16px; /* Adjusted for headings */
   }
 
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 16px;
-    color: #495057; /* Darker text for better contrast */
-    margin-top: 20px;
-    
+    font-size: 14px; /* ADD THIS */
+    border: 1px solid #ddd;  /* ADD THIS */
+
     th, td {
-      padding: 12px 15px; /* More padding for better readability */
+      padding: 15px; 
       text-align: left;
-      border-bottom: 1px solid #e2e6ea; /* Light border for separation */
-      vertical-align: middle;
+      border-bottom: 2px solid #dee2e6;
+      transition: background-color 0.2s ease;
     }
 
     th {
-      background-color: #f8f9fa; /* Subtle header background */
-      color: #495057;
-      font-weight: 600;
+      background-color: #e9ecef;
+      font-weight: bold;
+      color: #495057; 
+    }
+
+    td {
+      background-color: #fff;
     }
 
     tr:nth-child(even) {
-      background-color: #f9f9f9; /* Alternating row colors */
+      background-color: #f9f9f9; 
     }
 
     tr:hover {
-      background-color: #e9ecef; /* Highlight on hover */
+      background-color: #f1f3f5; 
     }
 
-    .actions {
-     margin-left: 0px;
+ .actions {
       display: flex;
-      justify-content: left;
-      gap: 15px; /* Consistent spacing */
+      gap: 15px; /* Space between the icons */
     }
 
     .icon {
-     margin-left: 10px;
-      font-size: 20px;
-      color: #007bff; /* Blue icons for better visibility */
-      justify-content: left;
+      font-size: 24px; /* Increase icon size */
+      color: black;
       cursor: pointer;
-      transition: color 0.3s ease;
+      transition: color 0.2s ease;
 
       &:hover {
-        color: #0056b3; /* Darker blue on hover */
+        color: #0056b3; /* Darken on hover */
       }
     }
   }
 `;
-
-
-
 const AppBar = styled.div`
-  background-color: #188423; // Set the desired color
-  padding: 40px 50px;
-  color: white;
-  font-size: 1.5rem;
-  font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+  padding: 40px 50px;
+  background-color: #188423; /* Updated color */
+  color: white;
+  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+  font-size: 22px;
+  font-family: 'Inter', sans-serif; /* Use a professional font */
+  font-weight: bold; /* Apply bold weight */
 `;
 
 
@@ -265,162 +309,30 @@ const SearchInput = styled.input`
   margin-left: 10px;
   width: 100%;
 `;
-const AddTicketButton = styled.button`
-  display: inline-flex;
-  align-items: center;
-  padding: 10px 20px;
-  background-color: #28a745; /* Green color */
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-size: 1rem;
-  font-weight: bold;
-  cursor: pointer;
-  margin-bottom: 20px;
-  transition: background-color 0.3s ease;
-
-  &:hover {
-    background-color: #218838; /* Darker green on hover */
-  }
-
-  .icon {
-    margin-right: 10px;
-    font-size: 1.2rem;
-  }
-`;
-
-const ModalOverlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 200;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
-const ModalContainer = styled.div`
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 300px;
-  text-align: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-`;
-
-const ModalButton = styled.button`
-  padding: 10px 20px;
-  margin: 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  font-size: 1rem;
-`;
-
-const CancelButton = styled(ModalButton)`
-  background-color: #6c757d;
-  color: white;
-
-  &:hover {
-    background-color: #5a6268;
-  }
-`;
-
-const DeleteButton = styled(ModalButton)`
-  background-color: #dc3545;
-  color: white;
-
-  &:hover {
-    background-color: #c82333;
-  }
-`;
 
 const Dashboard = () => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const sidebarRef = useRef(null);
-    const [loggedInUser, setLoggedInUser] = useState(null);
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const navigate = useNavigate();
-    const [rates, setRates] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedRateId, setSelectedRateId] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const sidebarRef = useRef(null);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [activeUsers, setActiveUsers] = useState(0);
+  const [inactiveUsers, setInactiveUsers] = useState(0);
+  const [totalCollectors, setTotalCollectors] = useState(0);
+  const [collectorsData, setCollectorsData] = useState([]);
+  const [recentUsers, setRecentUsers] = useState([]);
+  const [loggedInUser, setLoggedInUser] = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const navigate = useNavigate();
 
-    useEffect(() => {
-      const fetchRates = async () => {
-        try {
-          const ratesCollection = collection(rentmobileDb, 'rate');
-          const ratesSnapshot = await getDocs(ratesCollection);
-          const ratesList = ratesSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          setRates(ratesList);
-        } catch (error) {
-          console.error('Error fetching rates: ', error);
-        }
-      };
-  
-      fetchRates();
-    }, [])
-    
-      const handleEdit = (id) => {
-        // Navigate to the /ticketEdit route with the ticket ID as a parameter
-        navigate(`/ticketEdit/${id}`);
-      };
-      
-    
-      
-   
-    useEffect(() => {
-      const fetchUserData = async () => {
-        const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
-        if (loggedInUserData) {
-          const usersCollection = collection(rentmobileDb, 'users');
-          const userDocs = await getDocs(usersCollection);
-          const users = userDocs.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          
-          const currentUser = users.find(user => user.email === loggedInUserData.email);
-          setLoggedInUser(currentUser || loggedInUserData);
-        }
-      };
-
-      fetchUserData();
-    }, []); 
-
-    const fetchRates = async () => {
-        try {
-          const ratesCollection = collection(rentmobileDb, 'rate');
-          const ratesSnapshot = await getDocs(ratesCollection);
-          const ratesList = ratesSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          setRates(ratesList);
-        } catch (error) {
-          console.error('Error fetching rates: ', error);
-        }
-      };
-    
-      useEffect(() => {
-        fetchRates();
-      }, []);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-  const handleAddTicket = () => {
-    setLoading(true);
-    navigate('/newticket');
-  };
 
   const handleClickOutside = (event) => {
-    
+   
   };
+  const tableData = collectorsData; 
+  
 
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
@@ -428,45 +340,86 @@ const Dashboard = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+  useEffect(() => {
+    const fetchCollectors = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(rentmobileDb, 'ambulant_collector'));
+        const allCollectors = querySnapshot.docs.map(doc => doc.data());
+        
+        // Filter only those with necessary fields and combine firstName + lastName
+        const validCollectors = allCollectors.map(collector => ({
+          email: collector.email,
+          collector: collector.collector,
+          fullName: `${collector.firstName} ${collector.lastName}`,
+          location: collector.location,
+          status: collector.status,
+        }));
 
-  
+        setCollectorsData(validCollectors);
+      } catch (error) {
+        console.error('Error fetching collectors:', error);
+      }
+    };
+
+    fetchCollectors();
+  }, []);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(rentmobileDb, 'ambulant_collector'));
+        const allUsers = querySnapshot.docs.map(doc => doc.data());
+
+        console.log('Fetched Users:', allUsers); 
+        const validUsers = allUsers.filter(user => user.email && user.firstName && user.lastName);
+        setTotalUsers(validUsers.length);
+        
+     
+        const activeUsersCount = validUsers.filter(user => user.status?.toLowerCase() === 'active').length;
+        setActiveUsers(activeUsersCount);
+
+        const inactiveUsersCount = validUsers.filter(user => user.status?.toLowerCase() === 'inactive').length;
+        setInactiveUsers(inactiveUsersCount);
+
+        setRecentUsers(validUsers.slice(-5));
+
+        const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
+        if (loggedInUserData) {
+          const currentUser = allUsers.find(user => user.email === loggedInUserData.email);
+          setLoggedInUser(currentUser || loggedInUserData);
+        }
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
   const handleLogout = () => {
    
     localStorage.removeItem('userData'); 
     navigate('/login');
   };
 
-  const openModal = (id) => {
-    setSelectedRateId(id);
-    setIsModalOpen(true);
-  };
-  
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedRateId(null);
-  };
-
-
-  const handleDelete = async (id) => {
-    try {
-      const rateDocRef = doc(rentmobileDb, 'rate', id);
-      await deleteDoc(rateDocRef);
-      setRates(rates.filter(rate => rate.id !== id)); // Update the state to remove the deleted item
-      closeModal(); // Close the modal after deletion
-    } catch (error) {
-      console.error('Error deleting rate: ', error); // You can keep this if needed for error handling
-    }
-  };
-  
-
 
   const handleDropdownToggle = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
-
-    
+  const handleEditClick = (collectorId) => {
+    // Your edit logic here, for example:
+    console.log("Edit clicked for collector:", collectorId);
+    // You can navigate to an edit page or open a modal, depending on your requirements
+  };
+  
+  const handleDeleteClick = (collectorId) => {
+    // Your delete logic here, for example:
+    console.log("Delete clicked for collector:", collectorId);
+    // You can trigger a delete action with Firestore or a confirmation modal
+  };
+  
+ 
   return (
-
 
     <DashboardContainer>
         <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
@@ -580,6 +533,14 @@ const Dashboard = () => {
           </SidebarItem>
         </li>
       </Link>
+      <Link to="/View" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+          <FontAwesomeIcon icon={faSearch} className="icon" />
+            <span> View Collector</span>
+          </SidebarItem>
+        </li>
+      </Link>
       <Link to="/addcollector" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
@@ -600,6 +561,7 @@ const Dashboard = () => {
         </SidebarFooter>
       </Sidebar>
 
+
         <MainContent isSidebarOpen={isSidebarOpen}>
         
           <ToggleButton onClick={toggleSidebar}>
@@ -612,55 +574,71 @@ const Dashboard = () => {
       </AppBar>
          
           <ProfileHeader>
-            <h1>Manage Ticket</h1>
+            <h1>Add New Unit</h1>
           </ProfileHeader>
-          <AddTicketButton onClick={handleAddTicket} disabled={loading}>
-  {loading ? 'Loading...' : 'Add New Ticket'}
-</AddTicketButton>
 
-          <FormContainer>
-          <h3>Rates Table</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>TICKET NAME</th>
-                <th>RATES</th>
-                <th>DATE ISSUED</th>
-                <th>ACTION</th>
-              </tr>
-            </thead>
-            <tbody>
-            {rates.map(rate => (
-                <tr key={rate.id}>
-                  <td>{rate.name}</td>
-                  <td>{rate.rate}</td>
-                  <td>{new Date(rate.dateIssued).toLocaleDateString()}</td> 
-                  <td className="actions">
-                  <FontAwesomeIcon icon={faPen} onClick={() => handleEdit(rate.id)} />
-                  <FontAwesomeIcon icon={faTrash} onClick={() => openModal(rate.id)} />
-                  </td>
-                </tr>
-              ))}
+          <StatsContainer>
+      <StatBox bgColor="#11768C">
+        <h3>Total Users</h3>
+        <p>{totalUsers}</p> {/* Display the total user count */}
+        <div className="icon-container">
+          <FaUsers className="fading-icon" style={{ 
+            fontSize: '30px', 
+            opacity: 0.5, 
+            animation: 'fade 2s infinite alternate' 
+          }} />
+        </div>
+      </StatBox>
 
-            </tbody>
-          </table>
+<StatBox bgColor="#007bff">
+  <h3>Total Collectors</h3>
+  <p>{totalCollectors}</p>
+  <div className="icon-container">
+    <FaWallet className="fading-icon" style={{ 
+      fontSize: '30px', 
+      opacity: 0.5, 
+      animation: 'fade 2s infinite alternate' 
+    }} />
+  </div>
+</StatBox>
 
-          {isModalOpen && (
-  <ModalOverlay>
-    <ModalContainer>
-  <h3>Are you sure you want to delete this rate?</h3>
-  <DeleteButton onClick={() => handleDelete(selectedRateId)}>Delete</DeleteButton>
-  <CancelButton onClick={closeModal}>Cancel</CancelButton>
-</ModalContainer>
+</StatsContainer>
+        
 
-  </ModalOverlay>
-)}
-
-        </FormContainer>
+<FormContainer>
+  <h3>Collectors Data</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>Collector No.</th>
+        <th>Full Name</th>
+        <th>Location</th>
+        <th>Status</th>
+        <th>Actions</th> {/* New column for actions */}
+      </tr>
+    </thead>
+    <tbody>
+      {collectorsData.map((collector, index) => (
+        <tr key={index}>
+          <td>{collector.email}</td>
+          <td>{collector.collector}</td>
+          <td>{collector.fullName}</td>
+          <td>{collector.location}</td>
+          <td>{collector.status}</td>
+          <td className="actions"> {/* Adding actions column */}
+            <FaEye className="icon" title="View" />
+            <FaPen className="icon" title="Edit" onClick={() => handleEditClick(collector.id)} />
+            <FaTrash className="icon" title="Delete" onClick={() => handleDeleteClick(collector)} />
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</FormContainer>
 
       </MainContent>
       </DashboardContainer>
   );
 };
-
 export default Dashboard;

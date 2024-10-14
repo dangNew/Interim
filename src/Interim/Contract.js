@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link,  useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { library } from '@fortawesome/fontawesome-svg-core';
+import { FaBars, FaSearch, FaUserCircle, FaFilter, FaPrint } from 'react-icons/fa';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt } from '@fortawesome/free-solid-svg-icons';
-import { interimDb } from '../components/firebase.config';
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { FaSignOutAlt } from 'react-icons/fa';
 import { collection, getDocs } from 'firebase/firestore';
+import { stallholderDb } from '../components/firebase.config';
+import ContractForm from './ContractForm';
 
-const DashboardContainer = styled.div`
-  display: flex;
+const ContractContainer = styled.div`
+  display: flex; 
   height: 100vh;
 `;
 
@@ -26,7 +27,8 @@ const Sidebar = styled.div`
   position: fixed;
   height: 100vh;
   z-index: 100;
-  overflow: hidden;
+  overflow: auto;
+  max-height: 100vh;
 `;
 
 const SidebarMenu = styled.ul`
@@ -69,32 +71,6 @@ const SidebarItem = styled.li`
 `;
 
 
-const SidebarFooter = styled.div`
-  padding: 10px;
-  margin-top: auto; /* Pushes the footer to the bottom */
-  display: flex;
-  align-items: center;
-  justify-content: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
-`;
-
-const LogoutButton = styled(SidebarItem)`
-  margin-top: 5px; /* Add some margin */
-  background-color: #dc3545; /* Bootstrap danger color */
-  color: white;
-  align-items: center;
-  margin-left: 20px;
-  padding: 5px 15px; /* Add padding for a better button size */
-  border-radius: 5px; /* Rounded corners */
-  font-weight: bold; /* Make text bold */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-  transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transitions */
-
-  &:hover {
-    background-color: #c82333; /* Darker red on hover */
-    transform: scale(1.05); /* Slightly scale up on hover */
-  }
-`;
-
 const ToggleButton = styled.div`
   display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'none' : 'block')};
   position: absolute;
@@ -107,14 +83,30 @@ const ToggleButton = styled.div`
 `;
 
 const MainContent = styled.div`
-  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '70px')};
+  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')};
   padding-left: 40px;
   background-color: #fff;
   padding: 2rem;
   width: 100%;
   transition: margin-left 0.3s ease;
   overflow-y: auto;
+  flex: 1;
 `;
+
+const AppBar = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 40px 50px;
+  background-color: #188423; /* Updated color */
+  color: white;
+  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+  font-size: 22px;
+  font-family: 'Inter', sans-serif; /* Use a professional font */
+  font-weight: bold; /* Apply bold weight */
+`;
+
+
 
 const ProfileHeader = styled.div`
   display: flex;
@@ -164,6 +156,7 @@ const ProfileImage = styled.img`
 const StatsContainer = styled.div`
   display: flex;
   gap: 2rem;
+  margin-top: 50px; /* Added margin to avoid overlapping with AppBar */
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -173,9 +166,8 @@ const StatsContainer = styled.div`
 
 const StatBox = styled.div`
   background-color: ${({ bgColor }) => bgColor || '#f4f4f4'};
-  padding: 2rem;
+  padding: 3rem;
   border-radius: 12px;
-  border: 1px solid #ddd;  /* ADD THIS */
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -217,65 +209,35 @@ const StatBox = styled.div`
 const FormContainer = styled.div`
   margin-top: 2rem;
   padding: 1rem;
-  border: 1px solid #ddd;  /* ADD THIS */
-  border-radius: 15px;
+  border-radius: 20px;
   background-color: #f8f9fa;
+  border: 1px solid #ddd;
   box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
 
   h3 {
     margin-bottom: 1rem;
-    font-size: 16px; /* Adjusted for headings */
   }
 
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px; /* ADD THIS */
-    border: 1px solid #ddd;  /* ADD THIS */
+    font-size: 14px;
 
     th, td {
-      padding: 15px; 
+      padding: 15px;
       text-align: left;
       border-bottom: 2px solid #dee2e6;
-      transition: background-color 0.2s ease;
     }
 
     th {
       background-color: #e9ecef;
-      font-weight: bold;
-      color: #495057; 
-    }
-
-    td {
-      background-color: #fff;
     }
 
     tr:nth-child(even) {
-      background-color: #f9f9f9; 
-    }
-
-    tr:hover {
-      background-color: #f1f3f5; 
+      background-color: #f9f9f9;
     }
   }
 `;
-
-const AppBar = styled.div`
-  background-color: #188423; // Set the desired color
-  padding: 40px 50px;
-  color: white;
-  font-size: 1.5rem;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-`;
-
-
 
 const SearchBarContainer = styled.div`
   display: flex;
@@ -296,16 +258,116 @@ const SearchInput = styled.input`
   width: 100%;
 `;
 
+
+const SearchBarCont = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  background-color: #e9ecef;
+  border-radius: 10px;
+  margin-bottom: 50px;
+   margin-top: 50px; /*sa babaw nga margin*/
+  /* Always display the search bar */
+`;
+
+const SearchIn = styled.input`
+  border: none;
+  background: none;
+  outline: none;
+  margin-left: 10px;
+  width: 100%;
+`;
+
+const PrintButton = styled.button`
+  background-color: #188423; /* Match the AppBar color */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+
+  &:hover {
+    background-color: #155724; /* Darker shade for hover */
+  }
+
+  svg {
+    margin-right: 5px; /* Space between icon and text */
+  }
+`;
+
+
+const FilterContainer = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 20px;
+`;
+
+const FilterButton = styled.button`
+  display: flex;
+  align-items: center;
+  background-color: #e9ecef;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px; /* Match the padding of PrintButton */
+  cursor: pointer;
+  height: 40px; /* Set a fixed height if necessary */
+
+  &:hover {
+    background-color: #d3d3d3;
+  }
+
+  svg {
+    margin-right: 5px; /* Space between icon and text */
+  }
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* Space between buttons */
+`;
+const SidebarFooter = styled.div`
+  padding: 10px;
+  margin-top: auto; /* Pushes the footer to the bottom */
+  display: flex;
+  align-items: center;
+  justify-content: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
+`;
+
+const LogoutButton = styled(SidebarItem)`
+  margin-top: 5px; /* Add some margin */
+  background-color: #dc3545; /* Bootstrap danger color */
+  color: white;
+  align-items: center;
+  margin-left: 20px;
+  padding: 5px 15px; /* Add padding for a better button size */
+  border-radius: 5px; /* Rounded corners */
+  font-weight: bold; /* Make text bold */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transitions */
+
+  &:hover {
+    background-color: #c82333; /* Darker red on hover */
+    transform: scale(1.05); /* Slightly scale up on hover */
+  }
+`;
+
+
+
 const Contract = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [stallHolders, setStallHolders] = useState([]);
   const sidebarRef = useRef(null);
-  const [totalUsers, setTotalUsers] = useState(0);
-  const [activeUsers, setActiveUsers] = useState(0);
-  const [recentUsers, setRecentUsers] = useState([]);
   const [loggedInUser, setLoggedInUser] = useState(null);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [totalUsers, setTotalUsers] = useState(0); // State to store 
+  const [filteredStallHolders, setFilteredStallHolders] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+   const [dateFilter, setDateFilter] = useState('');
+  const [stallNoFilter, setStallNoFilter] = useState('');
   const navigate = useNavigate();
-
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -323,51 +385,155 @@ const Contract = () => {
 
   // Fetch total users and recent user data from Firestore
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(interimDb, 'users'));
-        const allUsers = querySnapshot.docs.map(doc => doc.data());
-
-        console.log('Fetched Users:', allUsers); 
-        const validUsers = allUsers.filter(user => user.email && user.firstName && user.lastName);
-        setTotalUsers(validUsers.length);
-        
-     
-        const activeUsersCount = validUsers.filter(user => user.status?.toLowerCase() === 'active').length;
-        setActiveUsers(activeUsersCount);
-
-        setRecentUsers(validUsers.slice(-5));
-
-        const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
-        if (loggedInUserData) {
-          const currentUser = allUsers.find(user => user.email === loggedInUserData.email);
-          setLoggedInUser(currentUser || loggedInUserData);
-        }
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      }
+    const fetchData = async () => {
+      const querySnapshot = await getDocs(collection(stallholderDb, 'users'));
+  
+      const data = querySnapshot.docs.map((doc) => {
+        const stallInfo = doc.data().stallInfo || {}; // Fetch stallInfo map
+        const dateOfRegistration = doc.data().dateOfRegistration
+          ? doc.data().dateOfRegistration.toDate().toLocaleDateString()
+          : '';
+  
+        return {
+          id: doc.id,
+          stallNumber: stallInfo.stallNumber || '',  
+          firstName: doc.data().firstName || '',    
+          lastName: doc.data().lastName || '',     
+          location: stallInfo.location || '',       
+          areaMeters: stallInfo.stallSize || '',   
+          billing: stallInfo.ratePerMeter || '',  
+          date: dateOfRegistration,                
+          status: doc.data().status || stallInfo.status || '',  // Check both status fields
+        };
+      });
+  
+      console.log(data); // Inspect the fetched data
+      const acceptedStallHolders = data.filter((stall) =>
+        ['Accepted', 'accepted', 'ACCEPTED'].includes(stall.status)
+      );
+  
+      setStallHolders(acceptedStallHolders); 
+      setFilteredStallHolders(acceptedStallHolders);
+      setTotalUsers(acceptedStallHolders.length);
     };
 
-    fetchUsers();
+    fetchData();
   }, []);
 
+
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // State for dropdown
   const handleLogout = () => {
    
     localStorage.removeItem('userData'); 
     navigate('/login');
   };
-
-
   const handleDropdownToggle = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-    
+
+  const handlePrint = () => {
+    const printContent = `
+      <html>
+        <head>
+          <title>Print</title>
+          <style>
+            body { font-family: 'Inter', sans-serif; }
+            table { width: 100%; border-collapse: collapse; font-size: 14px; }
+            th, td { padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; }
+            th { background-color: #e9ecef; }
+            tr:nth-child(even) { background-color: #f9f9f9; }
+            h3 { text-align: center; }
+          </style>
+        </head>
+        <body>
+          <h3>CARBON MARKET</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Stall No.</th>
+                <th>Stall Holder</th>
+                <th>Unit</th>
+                <th>Area (Meters)</th>
+                <th>Rate Per Meter</th>
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filteredStallHolders.map(stall => `
+                <tr>
+                  <td>${stall.stallNumber}</td>
+                  <td>${stall.firstName} ${stall.lastName}</td>
+                  <td>${stall.location}</td>
+                  <td>${stall.areaMeters}</td>
+                  <td>${stall.billing}</td>
+                  <td>${stall.date}</td>
+                  <td>${stall.status}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+  
+    const newWindow = window.open('', '_blank');
+    newWindow.document.write(printContent);
+    newWindow.document.close();
+    newWindow.print();
+    newWindow.close();
+  };
+
+  useEffect(() => {
+    let filteredData = stallHolders.filter(stall => 
+      stall.firstName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    // Filter by date if a date is selected
+    if (dateFilter) {
+      filteredData = filteredData.filter(stall => stall.date === dateFilter);
+    }
+
+    // Filter by stall number if a number is selected
+    if (stallNoFilter) {
+      filteredData = filteredData.filter(stall => stall.stallNumber === stallNoFilter);
+    }
+
+    setFilteredStallHolders(filteredData);
+  }, [searchTerm, stallHolders, dateFilter, stallNoFilter]);
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const handleDateFilterChange = (event) => {
+    setDateFilter(event.target.value);
+  };
+
+  const handleStallNoFilterChange = (event) => {
+    setStallNoFilter(event.target.value);
+  };
+  
+  // Moved this code outside of `handleStallNoFilterChange`
+  // Fetch the logged-in user data
+  useEffect(() => {
+    try {
+      const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
+      if (loggedInUserData) {
+        // Assuming you are fetching all users somewhere, otherwise fetch it
+        const currentUser = stallHolders.find(user => user.email === loggedInUserData.email);
+        setLoggedInUser(currentUser || loggedInUserData);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  }, [stallHolders]); 
+  
+
   return (
-
-
-    <DashboardContainer>
-        <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
+    <ContractContainer>
+     <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
         <Link to="/profile" style={{ textDecoration: 'none' }}>
         <ProfileHeader isSidebarOpen={isSidebarOpen}>
           {loggedInUser && loggedInUser.Image ? (
@@ -455,6 +621,7 @@ const Contract = () => {
       <span>Contract</span>
     </SidebarItem>
   </Link>
+
   <Link to="/ticket" style={{ textDecoration: 'none' }}>
   <SidebarItem isSidebarOpen={isSidebarOpen}>
     <FontAwesomeIcon icon={faTicketAlt} className="icon" />
@@ -462,12 +629,31 @@ const Contract = () => {
   </SidebarItem>
 </Link>
 
-  <Link to="/settings" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faCog} className="icon" />
-      <span>Settings</span>
-    </SidebarItem>
-  </Link>
+<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+    <FontAwesomeIcon icon={faUser} className="icon" />
+    <span>Manage Ambulant</span>
+  </SidebarItem>
+
+  {isDropdownOpen && (
+    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+      <Link to="/assign" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+            <FontAwesomeIcon icon={faCheck} className="icon" />
+            <span> Assign Collector</span>
+          </SidebarItem>
+        </li>
+      </Link>
+      <Link to="/addcollector" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+            <FontAwesomeIcon icon={faPlus} className="icon" />
+            <span>Add Ambulant Collector</span>
+          </SidebarItem>
+        </li>
+      </Link>
+    </ul>
+  )}
 </SidebarMenu>
 
       <SidebarFooter isSidebarOpen={isSidebarOpen}>
@@ -479,69 +665,98 @@ const Contract = () => {
       </Sidebar>
 
 
-        
 
-
-
-
-        <MainContent isSidebarOpen={isSidebarOpen}>
-        
+      <MainContent isSidebarOpen={isSidebarOpen}>
+        <AppBar>
           <ToggleButton onClick={toggleSidebar}>
             <FaBars />
           </ToggleButton>
-          
-        
-          <AppBar>
-        <div className="title">INTERIM</div>
-      </AppBar>
-         
-          <ProfileHeader>
-            <h1>Add New Unit</h1>
-          </ProfileHeader>
+          <div>LIST OF VENDORS</div>
+        </AppBar>
 
-          <StatsContainer>
+        <ToggleButton isSidebarOpen={isSidebarOpen} onClick={toggleSidebar}>
+          <FaBars />
+        </ToggleButton>
+
+        <StatsContainer>
           <StatBox bgColor="#11768C">
-          
-            <h3>Total Users</h3>
-            <p>{totalUsers}</p> {/* Display the total user count */}
+            <h3>Total Vendor</h3>
+            <p>{totalUsers}</p>
           </StatBox>
 
           <StatBox bgColor="#188423">
-            <h3>Active Users</h3>
-            <p>{activeUsers}</p> {/* Display the count of active users */}
+            <h3>Total Logins</h3>
+            <p>{totalUsers}</p>
           </StatBox>
-        </StatsContainer>
+        </StatsContainer><span>
+          
+        </span>
 
         
+       <SearchBarCont>
+          <FaSearch />
+          <SearchIn 
+            type="text" 
+            placeholder="Search Stall Holders..." 
+            value={searchTerm} // Bind the input value to searchTerm
+            onChange={handleSearchChange} // Call handleSearchChange on input change
+          />
+        </SearchBarCont>
 
-        {/* Recently Registered Users Section */}
-        {/* Recently Registered Users Section */}
-<FormContainer>
-  <h3>Recently Registered</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Email</th>
-        <th>First Name</th>
-        <th>Last Name</th>
-        <th>Phone</th>
-      </tr>
-    </thead>
-    <tbody>
-      {recentUsers.map((user, index) => (
-        <tr key={index}>
-          <td>{user.email || ''}</td>
-          <td>{user.firstName || ''}</td>
-          <td>{user.lastName || ''}</td>
-          <td>{user.contactNum || ''}</td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</FormContainer>
+        <ButtonContainer>
+        <PrintButton onClick={handlePrint}>
+              <FaPrint />
+              Print
+            </PrintButton>
+            <FilterContainer>
+              <FilterButton onClick={handleDateFilterChange}>
+                <FaFilter />
+                Filter by Date
+              </FilterButton>
+              <FilterButton onClick={handleStallNoFilterChange}>
+                <FaFilter />
+                Filter by Stall No.
+              </FilterButton>
+            </FilterContainer>
+          </ButtonContainer>
 
+        <FormContainer>
+          <h3>Stall Information</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Stall No.</th>
+                <th>Stall Holder</th>
+                <th>Unit</th>
+                <th>Area (Meters)</th>
+                <th>Rate Per Meter</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th className="actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredStallHolders.map((stall, index) => (
+                <tr key={index}>
+                  <td>{stall.stallNumber}</td>
+                  <td>{stall.firstName} {stall.lastName}</td>
+                  <td>{stall.location}</td>
+                  <td>{stall.areaMeters}</td>
+                  <td>{stall.billing}</td>
+                  <td>{stall.date}</td>
+                  <td>{stall.status}</td>
+                  <td>
+                    <button>View</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </FormContainer>
+        {/* Add the ContractForm here */}
+        <ContractForm />
       </MainContent>
-      </DashboardContainer>
+    </ContractContainer>
   );
 };
 

@@ -3,8 +3,9 @@ import { Link,  useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt,FaUserSlash, FaUser, FaUsers, FaWallet} from 'react-icons/fa';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt, faCheck} from '@fortawesome/free-solid-svg-icons';
+import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt,FaUserSlash, FaUser, FaUsers, FaWallet, FaList} from 'react-icons/fa';
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faCheck} from '@fortawesome/free-solid-svg-icons';
+import { faClipboard } from '@fortawesome/free-regular-svg-icons'; 
 import { interimDb } from '../components/firebase.config';
 import { rentmobileDb } from '../components/firebase.config';
 
@@ -29,7 +30,7 @@ const Sidebar = styled.div`
   position: fixed;
   height: 100vh;
   z-index: 100;
-   overflow-y: auto;
+  overflow-y: auto; 
 `;
 
 const SidebarMenu = styled.ul`
@@ -264,6 +265,7 @@ const FormContainer = styled.div`
 `;
 
 const AppBar = styled.div`
+  padding-top: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -478,6 +480,12 @@ const Dashboard = () => {
       <span>List of Vendors</span>
     </SidebarItem>
   </Link>
+  <Link to="/stalls" style={{ textDecoration: 'none' }}>
+  <SidebarItem isSidebarOpen={isSidebarOpen}>
+    <FontAwesomeIcon icon={faClipboard} className="icon" />
+    <span>List of Stalls</span>
+  </SidebarItem>
+</Link>
 
   <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
     <FontAwesomeIcon icon={faUser} className="icon" />

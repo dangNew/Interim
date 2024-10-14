@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Link, useNavigate } from 'react-router-dom';
 import { interimAuth, interimDb } from '../components/firebase.config';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, setPersistence, browserSessionPersistence } from 'firebase/auth';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 
 const LoginContainer = styled.div`
@@ -139,6 +139,10 @@ const Login = () => {
         return;
       }
 
+      // Set persistence
+      await setPersistence(interimAuth, browserSessionPersistence);
+
+      // Sign in
       await signInWithEmailAndPassword(interimAuth, username, password);
 
       const loggedInUserData = querySnapshot.docs[0].data();
@@ -147,6 +151,7 @@ const Login = () => {
         image: loggedInUserData.image,
       }));
 
+      console.log('Login successful, navigating to dashboard');
       navigate('/dashboard');
     } catch (error) {
       console.error('Login failed:', error);

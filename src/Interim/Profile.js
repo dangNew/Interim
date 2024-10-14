@@ -7,7 +7,6 @@ import { interimDb } from '../components/firebase.config';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import {  FaSignOutAlt, FaCamera   } from 'react-icons/fa';
 import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt} from '@fortawesome/free-solid-svg-icons';
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 
 const DashboardContainer = styled.div`
@@ -39,7 +38,6 @@ const SidebarMenu = styled.ul`
   display: flex;
   flex-direction: column;
 `;
-
 const SidebarItem = styled.li`
   display: flex;
   align-items: center;
@@ -344,7 +342,6 @@ const Dashboard = () => {
   const sidebarRef = useRef(null);
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [userData, setUserData] = useState({ firstName: '', lastName: '', email: '', position: '' });
   const navigate = useNavigate();
@@ -360,45 +357,6 @@ const Dashboard = () => {
     { name: 'Tickets', icon: faTicketAlt },
   ];
 
-  const handleImageChange = (event) => {
-    const file = event.target.files[0];
-    setNewImage(file);
-  };
-
-  const saveChanges = async () => {
-    if (newImage && loggedInUser) {
-      try {
-        setIsUploading(true);
-
-        // Firebase Storage reference
-        const storage = getStorage();
-        const storageRef = ref(storage, `profileImages/${loggedInUser.id}/${newImage.name}`);
-
-        // Upload the file to Firebase Storage
-        await uploadBytes(storageRef, newImage);
-
-        // Get the file's download URL
-        const imageUrl = await getDownloadURL(storageRef);
-
-        // Update the user's Firestore document with the new image URL
-        const userDocRef = doc(interimDb, 'users', loggedInUser.id);
-        await updateDoc(userDocRef, { Image: imageUrl });
-
-        setUserData((prevData) => ({
-          ...prevData,
-          Image: imageUrl
-        }));
-        setIsUploading(false);
-
-        alert('Image updated successfully!');
-      } catch (error) {
-        console.error('Error updating image:', error);
-        setIsUploading(false);
-      }
-    } else {
-      alert('Please select an image first.');
-    }
-  };
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -628,15 +586,17 @@ const Dashboard = () => {
       <FormContainer>
         <h3>Edit User Details</h3>
         <SmallContainer>
-        <ProfileImage src={userData.Image} alt="Profile" />
-        <CameraIcon onClick={() => document.getElementById('file-input').click()} />
-        <input
-          id="file-input"
-          type="file"
-          style={{ display: 'none' }}
-          onChange={handleImageChange}
-        />
-      </SmallContainer> <br></br>
+            <img src={newImage || userData.Image || 'defaultProfileImage.jpg'} alt="Profile" />
+            <input
+                type="file"
+                id="fileInput"
+                key={fileInputKey.current} // To reset the input after selection
+                onChange={handleFileChange}
+                style={{ display: 'none' }} // Hide the default file input
+            />
+            <FaUserCircle className="profile-icon" onClick={handleIconClick} />
+            <CameraIcon onClick={handleIconClick} />
+        </SmallContainer> <br></br>
        
         
         
@@ -685,9 +645,7 @@ const Dashboard = () => {
             {/* Add more fields as needed */}
           </div>
 
-          <SaveButton onClick={saveChanges} disabled={isUploading}>
-        {isUploading ? 'Saving...' : 'Save Changes'}
-      </SaveButton>
+          <button type="button" onClick={handleSaveChanges}>Save Changes</button>
         </form>
       </FormContainer>
        
