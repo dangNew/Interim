@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, addDoc, query, where, onSnapshot } from 'firebase/firestore';
 import { stallholderDb } from '../components/firebase.config';
 import styled from 'styled-components';
+import debounce from 'lodash.debounce'; // Importing debounce to limit API calls
 
 const FormContainer = styled.div`
   display: flex;
@@ -61,6 +62,11 @@ const SuggestionItem = styled.li`
   }
 `;
 
+const ErrorMsg = styled.p`
+  color: red;
+  font-size: 12px;
+`;
+
 const ContractForm = () => {
   const [contractData, setContractData] = useState({
     stallholderFullName: '',
@@ -71,29 +77,35 @@ const ContractForm = () => {
     terms: '',
   });
 
-  const [nameSuggestions, setNameSuggestions] = useState([]);
   const [loadingNames, setLoadingNames] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  useEffect(() => {
-    if (contractData.stallNumber) {
+  const fetchStallholderName = debounce((stallNumber) => {
+    console.log("Searching for stall number:", stallNumber); // Log the stall number
+    if (stallNumber) {
       setLoadingNames(true);
-      const q = query(collection(stallholderDb, 'users'), where('stallNumber', '==', contractData.stallNumber));
+      setErrorMessage('');
+      // Adjusting the query to access the stallInfo field
+      const q = query(
+        collection(stallholderDb, 'users'),
+        where('stallInfo.stallNumber', '==', stallNumber) // Change here
+      );
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        console.log('Query snapshot:', querySnapshot); // Log the snapshot
+        console.log("Query Snapshot:", querySnapshot); // Log the snapshot
+  
         if (!querySnapshot.empty) {
           const userData = querySnapshot.docs[0].data();
-          console.log('User Data:', userData); // Log user data
           const fullName = `${userData.firstName} ${userData.lastName}`;
           setContractData((prevData) => ({
             ...prevData,
             stallholderFullName: fullName,
           }));
         } else {
-          console.log('No user found for stall number:', contractData.stallNumber); // Log when no user found
           setContractData((prevData) => ({
             ...prevData,
             stallholderFullName: '',
           }));
+          setErrorMessage('No user found for this stall number.');
         }
         setLoadingNames(false);
       });
@@ -104,9 +116,24 @@ const ContractForm = () => {
         ...prevData,
         stallholderFullName: '',
       }));
+      setErrorMessage('');
     }
-  }, [contractData.stallNumber]);
+  }, 500);
   
+
+  useEffect(() => {
+    if (contractData.stallNumber) {
+      fetchStallholderName(contractData.stallNumber);
+    } else {
+      setContractData((prevData) => ({
+        ...prevData,
+        stallholderFullName: '',
+      }));
+      setErrorMessage('');
+    }
+
+    return () => fetchStallholderName.cancel(); // Cleanup the debounce on unmount
+  }, [contractData.stallNumber]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -116,6 +143,9 @@ const ContractForm = () => {
     }));
   };
 
+  
+
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -129,12 +159,13 @@ const ContractForm = () => {
         endDate: '',
         terms: '',
       });
-      setNameSuggestions([]);
+      setErrorMessage('');
     } catch (error) {
       console.error('Error adding contract: ', error);
     }
   };
 
+  
   return (
     <FormContainer>
       <FormSection>
@@ -156,14 +187,13 @@ const ContractForm = () => {
               name="stallholderFullName"
               placeholder="Stallholder Full Name"
               value={contractData.stallholderFullName}
-              onChange={handleChange}
-              required
               readOnly
             />
             {loadingNames && <p>Loading names...</p>}
+            {errorMessage && <ErrorMsg>{errorMessage}</ErrorMsg>}
           </div>
 
-          {/* Remaining Inputs */}
+          
           <Input
             type="text"
             name="subject"

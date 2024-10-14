@@ -651,7 +651,7 @@ const NewUnit = () => {
     </ul>
   )}
 
-  <Link to="/Addunit" style={{ textDecoration: 'none' }}>
+  <Link to="/viewunit" style={{ textDecoration: 'none' }}>
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faPlus} className="icon" />
       <span>Add New Unit</span>

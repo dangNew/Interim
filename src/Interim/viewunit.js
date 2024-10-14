@@ -140,40 +140,26 @@ const ProfileHeader = styled.div`
   }
 `;
 
-const FormContainer = styled.div`
+const Container = styled.div`
   margin-top: 2rem;
-  padding: 1.5rem; /* Slightly increased padding for a more spacious look */
+  padding: 1.5rem;
   border-radius: 20px;
-  background-color: #d4edda; /* Light green background */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Softer shadow for a modern feel */
+  background-color: #d4edda;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 
   h3 {
     margin-bottom: 1rem;
-    font-family: 'Roboto', sans-serif;
-    color: #155724; /* Dark green for the heading */
+    color: #155724;
   }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-
-    th, td {
-      padding: 20px;
-      text-align: left;
-      border-bottom: 1px solid #c3e6cb; /* Light green border */
-    }
-
-    th {
-      background-color: #c3e6cb; /* Light green background for header */
-    }
-
-    tr:nth-child(even) {
-      background-color: #f8f9fa; /* Keeping alternating row colors */
-    }
+  .unit-card {
+    padding: 1rem;
+    margin: 1rem 0;
+    border: 1px solid #c3e6cb;
+    border-radius: 10px;
+    background-color: white;
   }
 `;
-
-
 const SearchBarContainer = styled.div`
   display: flex;
   align-items: center;
@@ -226,142 +212,93 @@ const ProfileImage = styled.img`
   margin-bottom: 15px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // Subtle shadow for a polished look
 `;
-const InputField = styled.div`
-  position: relative;
-  margin-bottom: 2rem;
-
-  input {
-    width: 100%;
-    padding: 12px 10px;
-    border: 1px solid #ced4da;
-    border-radius: 5px;
-    font-size: 16px;
-    color: #495057;
-    background-color: #f8f9fa;
-    transition: all 0.2s ease;
-
-    &:focus {
-      border-color: #007bff;
-      outline: none;
-    }
-
-    &:focus + label,
-    &:not(:placeholder-shown) + label {
-      top: -8px;
-      left: 10px;
-      font-size: 12px;
-      color: #007bff;
-    }
-  }
-
-  label {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    font-size: 16px;
-    color: #6c757d;
-    pointer-events: none;
-    transition: all 0.2s ease;
-  }
-`;
-
-const SaveButton = styled.button`
-  background-color: #28a745; /* Green color */
+const AddUnitButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 2rem; /* Adjust padding for button size */
+  font-size: 1.5rem; /* Increase font size */
   color: white;
-  padding: 15px 30px; /* Increased padding for a bigger button */
+  background-color: #0047AB; /* Bootstrap primary color */
   border: none;
-  border-radius: 5px;
+  border-radius: 5px; /* More rounded corners */
   cursor: pointer;
-  font-size: 16px; /* Increased font size for better visibility */
-  font-weight: bold; /* Bold text for emphasis */
+  margin-bottom: 20px; /* Space below the button */
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3); /* Subtle shadow with blue tone */
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Added transform for a slight scale effect */
 
   &:hover {
-    background-color: #218838; /* Darker green on hover */
+    background-color: #0056b3; /* Darker shade on hover */
+    transform: translateY(-2px); /* Slightly lift the button on hover */
+  }
+
+  .plus-icon {
+    margin-right: 10px; /* Space between icon and text */
+    font-size: 1.5rem; /* Adjust icon size for better visibility */
   }
 `;
-
 
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const sidebarRef = useRef(null);
-  const [unitName, setUnitName] = useState('');
-  const [location, setLocation] = useState('');
-  const [dateRegistered, setDateRegistered] = useState(new Date().toISOString().split('T')[0]);
+  const [units, setUnits] = useState([]);
   const [loggedInUser, setLoggedInUser] = useState(null);
   const navigate = useNavigate();
   
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-
-  const handleSaveUnit = async () => {
-     if (!unitName.trim() || !location.trim() || !dateRegistered) {
-    alert('Please fill in all fields before saving.');
-    return; // Prevent saving if any field is empty
-  }
+  const fetchUnits = async () => {
     try {
-        console.log('Saving unit with data:', {
-            name: unitName,
-            location: location,
-            dateRegistered: dateRegistered,
-        });
-
-        // Use interimDb to add the document to the 'unit' collection
-        const docRef = await addDoc(collection(interimDb, 'unit'), {
-            name: unitName,
-            location: location,
-            dateRegistered: dateRegistered,
-        });
-
-        console.log('Document written with ID: ', docRef.id);
-        alert('Unit saved successfully!');
-
-        // Optionally, reset the input fields after saving
-        setUnitName('');
-        setLocation('');
-        setDateRegistered(new Date().toISOString().split('T')[0]);
-    } catch (e) {
-        console.error('Error adding document: ', e);
-        alert('Error saving unit: ' + e.message);
+      const unitsCollection = collection(interimDb, 'unit');
+      const unitsSnapshot = await getDocs(unitsCollection);
+      const unitsList = unitsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      console.log('Fetched units:', unitsList); // Add this line
+      setUnits(unitsList);
+    } catch (error) {
+      console.error('Error fetching units: ', error);
     }
-};
+  };
+  
 
-useEffect(() => {
-  const checkAndCreateCollection = async () => {
-    const unitsCollection = collection(interimDb, 'unit');
-    const unitsSnapshot = await getDocs(unitsCollection);
-
-    // If the collection doesn't exist (no documents in it), create a default document
-    if (unitsSnapshot.empty) {
-      try {
-        await addDoc(unitsCollection, {
-          name: 'Default Unit',
-          location: 'Default Location',
-          dateRegistered: new Date().toISOString().split('T')[0],
-        });
-        console.log('Default collection created with a default unit.');
-      } catch (error) {
-        console.error('Error creating default collection: ', error);
+  useEffect(() => {
+    const checkAndCreateCollection = async () => {
+      const unitsCollection = collection(interimDb, 'unit');
+      const unitsSnapshot = await getDocs(unitsCollection);
+  
+      // If the collection doesn't exist (no documents in it), create a default document
+      if (unitsSnapshot.empty) {
+        try {
+          await addDoc(unitsCollection, {
+            name: 'Default Unit',
+            location: 'Default Location',
+            dateRegistered: new Date().toISOString().split('T')[0],
+          });
+          console.log('Default collection created with a default unit.');
+        } catch (error) {
+          console.error('Error creating default collection: ', error);
+        }
       }
-    }
-  };
-
-  const fetchUserData = async () => {
-    const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
-    if (loggedInUserData) {
-      const usersCollection = collection(interimDb, 'users');
-      const userDocs = await getDocs(usersCollection);
-      const users = userDocs.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      
-      const currentUser = users.find(user => user.email === loggedInUserData.email);
-      setLoggedInUser(currentUser || loggedInUserData);
-    }
-  };
-
-  checkAndCreateCollection(); // Check and create collection on component mount
-  fetchUserData(); // Fetch user data
-}, []);
-
+      // Fetch units after checking/creating the collection
+      fetchUnits();
+    };
+  
+    const fetchUserData = async () => {
+      const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
+      if (loggedInUserData) {
+        const usersCollection = collection(interimDb, 'users');
+        const userDocs = await getDocs(usersCollection);
+        const users = userDocs.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  
+        const currentUser = users.find(user => user.email === loggedInUserData.email);
+        setLoggedInUser(currentUser || loggedInUserData);
+      }
+    };
+  
+    checkAndCreateCollection(); // Check and create collection on component mount
+    fetchUserData(); // Fetch user data
+  }, []);
+  
   const handleClickOutside = (event) => {
     
   };
@@ -459,7 +396,7 @@ useEffect(() => {
     </ul>
   )}
 
-  <Link to="/Addunit" style={{ textDecoration: 'none' }}>
+  <Link to="/viewunit" style={{ textDecoration: 'none' }}>
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faPlus} className="icon" />
       <span>Add New Unit</span>
@@ -509,48 +446,30 @@ useEffect(() => {
           </ToggleButton>
           <div>LIST OF VENDORS</div>
         </AppBar>
+        <br></br>
 
         <ToggleButton isSidebarOpen={isSidebarOpen} onClick={toggleSidebar}>
           <FaBars />
         </ToggleButton>
 
-      <FormContainer>
-        <h3>Add Unit</h3>
+         {/* Add the new button here */}
+         <AddUnitButton onClick={() => navigate('/addunit')}>
+          <FontAwesomeIcon icon={faPlus} className="plus-icon" />
+          Add New Unit
+        </AddUnitButton>
+
+        <Container>
+    <h3>Units</h3>
+    {units.map((unit) => (
+        <div key={unit.id} className="unit-card">
+        <h4>{unit.name}</h4>
+        <p>Location: {unit.location}</p>
+        <p>Date Registered: {unit.dateRegistered}</p>
+        </div>
+    ))}
+    </Container>
+
         
-        <InputField>
-          <input
-            type="text"
-            value={unitName}
-            onChange={(e) => setUnitName(e.target.value)}
-            placeholder=" " // This is necessary for floating effect
-            required
-          />
-          <label>Unit Name</label>
-        </InputField>
-
-        <InputField>
-          <input
-            type="text"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder=" " // This is necessary for floating effect
-            required
-          />
-          <label>Location</label>
-        </InputField>
-
-        <InputField>
-          <input
-            type="date"
-            value={dateRegistered}
-            onChange={(e) => setDateRegistered(e.target.value)}
-            required
-          />
-          <label>Date Registered</label>
-        </InputField>
-
-        <SaveButton onClick={handleSaveUnit}>Save Unit</SaveButton>
-      </FormContainer>
 
 
       </MainContent>

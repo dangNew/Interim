@@ -23,6 +23,8 @@ import AssignCollector from './Interim/AssignCollector';
 import AddCollector from './Interim/AddCollector';
 import NewTicket from './Interim/NewTicket';
 import ViewCollector from './Interim/ViewCollector';
+import Viewunit from './Interim/viewunit';
+
 
 function App() {
   return (
@@ -63,6 +65,8 @@ function App() {
           <Route path="/newticket"  element={<ProtectedRoute element={<NewTicket
             />} />} />
           <Route path="/View"  element={<ProtectedRoute element={<ViewCollector
+            />} />} />
+          <Route path="/viewunit"  element={<ProtectedRoute element={<Viewunit
             />} />} />
         </Routes>
       </Router>

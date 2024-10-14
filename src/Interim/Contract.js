@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { FaSignOutAlt } from 'react-icons/fa';
 import { collection, getDocs } from 'firebase/firestore';
-import { stallholderDb } from '../components/firebase.config';
+import { interimDb, stallholderDb } from '../components/firebase.config';
 import ContractForm from './ContractForm';
 
 const ContractContainer = styled.div`
@@ -327,8 +327,14 @@ const FilterButton = styled.button`
 const ButtonContainer = styled.div`
   display: flex;
   align-items: center;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  padding: 10px 15px;
+  height: 40px;
   gap: 1rem; /* Space between buttons */
 `;
+
+
 const SidebarFooter = styled.div`
   padding: 10px;
   margin-top: auto; /* Pushes the footer to the bottom */
@@ -354,27 +360,99 @@ const LogoutButton = styled(SidebarItem)`
     transform: scale(1.05); /* Slightly scale up on hover */
   }
 `;
+const DropdownContainer = styled.div`
+  position: relative;
+  display: inline-block;
+`;
+
+const DropdownButton = styled.button`
+  background-color: #007bff; /* Match the AppBar color */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+
+  &:hover {
+    background-color: #155724; /* Darker shade for hover */
+  }
+
+  svg {
+    margin-right: 5px; /* Space between icon and text */
+  }
+`;
+
+const DropdownContent = styled.div`
+  display: ${({ isOpen }) => (isOpen ? 'block' : 'none')};
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+`;
+
+const DropdownItem = styled.div`
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #ddd;
+  }
+`;
 
 
 
 const Contract = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [stallHolders, setStallHolders] = useState([]);
+  const [units, setUnits] = useState([]); // State for units
   const sidebarRef = useRef(null);
   const [loggedInUser, setLoggedInUser] = useState(null);
-  const [totalUsers, setTotalUsers] = useState(0); // State to store 
+  const [totalUsers, setTotalUsers] = useState(0);
   const [filteredStallHolders, setFilteredStallHolders] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-   const [dateFilter, setDateFilter] = useState('');
+  const [userData, setUserData] = useState(null);
+  const [selectedUnit, setSelectedUnit] = useState('Select Unit');
+  const [dateFilter, setDateFilter] = useState('');
   const [stallNoFilter, setStallNoFilter] = useState('');
   const navigate = useNavigate();
+
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
+    
   };
 
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  const handleUnitSelect = (unit) => {
+    setSelectedUnit(unit);
+    setIsDropdownOpen(false);
+  };
   const handleClickOutside = (event) => {
    
   };
+ useEffect(() => {
+    // Fetch units from Firestore
+    const fetchUnits = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(interimDb, 'unit'));
+        const unitData = querySnapshot.docs.map(doc => doc.data().name); // Adjust the field based on your Firestore structure
+        setUnits(unitData);
+      } catch (error) {
+        console.error("Error fetching units:", error);
+      }
+    };
+
+    fetchUnits();
+  }, []);
 
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
@@ -386,24 +464,25 @@ const Contract = () => {
   // Fetch total users and recent user data from Firestore
   useEffect(() => {
     const fetchData = async () => {
-      const querySnapshot = await getDocs(collection(stallholderDb, 'users'));
-  
+      const querySnapshot = await getDocs(collection(stallholderDb, 'approvedVendors'));
+    
       const data = querySnapshot.docs.map((doc) => {
-        const stallInfo = doc.data().stallInfo || {}; // Fetch stallInfo map
+        const stallInfo = doc.data().stallInfo || {};
+ // userData might be null here
         const dateOfRegistration = doc.data().dateOfRegistration
           ? doc.data().dateOfRegistration.toDate().toLocaleDateString()
           : '';
-  
+    
         return {
           id: doc.id,
-          stallNumber: stallInfo.stallNumber || '',  
-          firstName: doc.data().firstName || '',    
-          lastName: doc.data().lastName || '',     
-          location: stallInfo.location || '',       
-          areaMeters: stallInfo.stallSize || '',   
-          billing: stallInfo.ratePerMeter || '',  
-          date: dateOfRegistration,                
-          status: doc.data().status || stallInfo.status || '',  // Check both status fields
+          stallId: doc.data().stallId || '',
+          firstName: doc.data().firstName || '',
+          lastName: doc.data().lastName || '',
+          location: stallInfo.location || '',
+          areaMeters: stallInfo.stallSize || '',
+          billing: stallInfo.ratePerMeter || '',
+          date: dateOfRegistration,
+          status: doc.data().status || stallInfo.status || '', // Check both status fields
         };
       });
   
@@ -415,12 +494,27 @@ const Contract = () => {
       setStallHolders(acceptedStallHolders); 
       setFilteredStallHolders(acceptedStallHolders);
       setTotalUsers(acceptedStallHolders.length);
+      if (selectedUnit !== 'Select Unit') {
+        const filteredData = acceptedStallHolders.filter(stall => stall.location === selectedUnit);
+        setFilteredStallHolders(filteredData);
+      } else {
+        setFilteredStallHolders(acceptedStallHolders);
+      }
     };
 
     fetchData();
-  }, []);
+  }, [selectedUnit]);
 
-
+  useEffect(() => {
+    // Filter stall holders based on selected unit
+    if (selectedUnit !== 'Select Unit') {
+      const filteredData = stallHolders.filter(stall => stall.location === selectedUnit);
+      setFilteredStallHolders(filteredData);
+    } else {
+      setFilteredStallHolders(stallHolders);
+    }
+  }, [selectedUnit, stallHolders]);
+  
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // State for dropdown
   const handleLogout = () => {
    
@@ -498,6 +592,9 @@ const Contract = () => {
     // Filter by stall number if a number is selected
     if (stallNoFilter) {
       filteredData = filteredData.filter(stall => stall.stallNumber === stallNoFilter);
+    }
+    if (selectedUnit !== 'Select Unit') {
+      filteredData = filteredData.filter(stall => stall.location === selectedUnit);
     }
 
     setFilteredStallHolders(filteredData);
@@ -601,7 +698,7 @@ const Contract = () => {
     </ul>
   )}
 
-  <Link to="/Addunit" style={{ textDecoration: 'none' }}>
+  <Link to="/viewunit" style={{ textDecoration: 'none' }}>
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faPlus} className="icon" />
       <span>Add New Unit</span>
@@ -708,6 +805,18 @@ const Contract = () => {
               <FaPrint />
               Print
             </PrintButton>
+            <DropdownContainer>
+            <DropdownButton onClick={toggleDropdown}>
+              {selectedUnit}
+            </DropdownButton>
+            <DropdownContent isOpen={isDropdownOpen}>
+              {units.map((unit, index) => (
+                <DropdownItem key={index} onClick={() => handleUnitSelect(unit)}>
+                  {unit}
+                </DropdownItem>
+              ))}
+            </DropdownContent>
+          </DropdownContainer>
             <FilterContainer>
               <FilterButton onClick={handleDateFilterChange}>
                 <FaFilter />
@@ -718,6 +827,7 @@ const Contract = () => {
                 Filter by Stall No.
               </FilterButton>
             </FilterContainer>
+
           </ButtonContainer>
 
         <FormContainer>
@@ -725,7 +835,7 @@ const Contract = () => {
           <table>
             <thead>
               <tr>
-                <th>Stall No.</th>
+                <th>Stall ID.</th>
                 <th>Stall Holder</th>
                 <th>Unit</th>
                 <th>Area (Meters)</th>
@@ -737,8 +847,8 @@ const Contract = () => {
             </thead>
             <tbody>
               {filteredStallHolders.map((stall, index) => (
-                <tr key={index}>
-                  <td>{stall.stallNumber}</td>
+                <tr key={stall.id}>
+                  <td>{stall.stallId}</td>
                   <td>{stall.firstName} {stall.lastName}</td>
                   <td>{stall.location}</td>
                   <td>{stall.areaMeters}</td>

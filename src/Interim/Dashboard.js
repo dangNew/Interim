@@ -513,7 +513,7 @@ const Dashboard = () => {
     </ul>
   )}
 
-  <Link to="/Addunit" style={{ textDecoration: 'none' }}>
+  <Link to="/viewunit" style={{ textDecoration: 'none' }}>
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faPlus} className="icon" />
       <span>Add New Unit</span>
@@ -596,9 +596,7 @@ const Dashboard = () => {
         <div className="title">INTERIM</div>
       </AppBar>
          
-          <ProfileHeader>
-            <h1>Add New Unit</h1>
-          </ProfileHeader>
+          <br></br>
 
           <StatsContainer>
       <StatBox bgColor="#11768C">
