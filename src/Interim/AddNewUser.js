@@ -3,7 +3,7 @@ import { Link, useNavigate} from 'react-router-dom';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import styled from 'styled-components';
-import { faBars, faList, faPlus, faIdBadge, faMagnifyingGlass, faHouseChimney, faUsers, faTriangleExclamation, faEye, faCircleUser, faPlusCircle, faStore, faTicketAlt, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { faBars, faList, faPlus, faIdBadge, faMagnifyingGlass, faHouseChimney, faUsers, faTriangleExclamation, faEye, faCircleUser, faPlusCircle, faStore, faTicketAlt, faCheck, faClipboard } from '@fortawesome/free-solid-svg-icons';
 import { FaSignOutAlt } from 'react-icons/fa';
 import { FaSearch, FaUserCircle, FaBars } from 'react-icons/fa';
 import { collection, addDoc, setDoc, doc, getDocs} from 'firebase/firestore';
@@ -12,7 +12,9 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { interimStorage as storage } from '../components/firebase.config';
 import { interimDb, interimAuth } from '../components/firebase.config';
+import { serverTimestamp } from "firebase/firestore";
 library.add(faList, faPlus, faUser, faIdBadge, faMagnifyingGlass, faHouseChimney, faUsers, faTriangleExclamation, faEye, faCircleUser, faBars, FaSignOutAlt);
+
 
 const AddUser = styled.div`
   display: flex;
@@ -544,7 +546,8 @@ const NewUnit = () => {
         await setDoc(doc(interimDb, 'users', user.uid), {
           ...userWithoutPassword, 
           Image: imageUrl,        
-          status: userData.status || 'Active'
+          status: userData.status || 'Active',
+          createdAt: serverTimestamp() 
         });
     
         alert('User added successfully!');
@@ -624,6 +627,12 @@ const NewUnit = () => {
       <span>List of Vendors</span>
     </SidebarItem>
   </Link>
+  <Link to="/stalls" style={{ textDecoration: 'none' }}>
+  <SidebarItem isSidebarOpen={isSidebarOpen}>
+    <FontAwesomeIcon icon={faClipboard} className="icon" />
+    <span>List of Stalls</span>
+  </SidebarItem>
+</Link>
 
   <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
     <FontAwesomeIcon icon={faUser} className="icon" />
@@ -694,6 +703,14 @@ const NewUnit = () => {
           </SidebarItem>
         </li>
       </Link>
+      <Link to="/View" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+          <FontAwesomeIcon icon={faSearch} className="icon" />
+            <span> View Collector</span>
+          </SidebarItem>
+        </li>
+      </Link>
       <Link to="/addcollector" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
@@ -705,7 +722,6 @@ const NewUnit = () => {
     </ul>
   )}
 </SidebarMenu>
-
       <SidebarFooter isSidebarOpen={isSidebarOpen}>
           <LogoutButton isSidebarOpen={isSidebarOpen} onClick={handleLogout}>
             <span><FaSignOutAlt /></span>

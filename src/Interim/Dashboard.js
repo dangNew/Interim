@@ -10,6 +10,8 @@ import { interimDb } from '../components/firebase.config';
 import { rentmobileDb } from '../components/firebase.config';
 
 import { collection, getDocs } from 'firebase/firestore';
+import LoginAnalytics from './LoginAnalytics';
+
 
 const DashboardContainer = styled.div`
   display: flex;
@@ -556,7 +558,7 @@ const Dashboard = () => {
           </SidebarItem>
         </li>
       </Link>
-      <Link to="/assign" style={{ textDecoration: 'none' }}>
+      <Link to="/View" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
           <FontAwesomeIcon icon={faSearch} className="icon" />
@@ -597,6 +599,7 @@ const Dashboard = () => {
       </AppBar>
          
           <br></br>
+          <LoginAnalytics /> 
 
           <StatsContainer>
       <StatBox bgColor="#11768C">

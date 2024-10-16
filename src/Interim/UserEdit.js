@@ -4,9 +4,8 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { FaBars, FaSearch, FaUserCircle } from 'react-icons/fa';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircleUser } from '@fortawesome/free-solid-svg-icons';
 import { FaSignOutAlt } from 'react-icons/fa';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt, faCheck} from '@fortawesome/free-solid-svg-icons';
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faCheck, faClipboard} from '@fortawesome/free-solid-svg-icons';
 import { interimDb } from '../components/firebase.config';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore'; // Import Firestore functions
 
@@ -678,6 +677,12 @@ const Dashboard = () => {
       <span>List of Vendors</span>
     </SidebarItem>
   </Link>
+  <Link to="/stalls" style={{ textDecoration: 'none' }}>
+  <SidebarItem isSidebarOpen={isSidebarOpen}>
+    <FontAwesomeIcon icon={faClipboard} className="icon" />
+    <span>List of Stalls</span>
+  </SidebarItem>
+</Link>
 
   <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
     <FontAwesomeIcon icon={faUser} className="icon" />
@@ -745,6 +750,14 @@ const Dashboard = () => {
           <SidebarItem isSidebarOpen={isSidebarOpen}>
             <FontAwesomeIcon icon={faCheck} className="icon" />
             <span> Assign Collector</span>
+          </SidebarItem>
+        </li>
+      </Link>
+      <Link to="/View" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+          <FontAwesomeIcon icon={faSearch} className="icon" />
+            <span> View Collector</span>
           </SidebarItem>
         </li>
       </Link>

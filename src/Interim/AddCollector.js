@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt, faCheck, faClipboard } from '@fortawesome/free-solid-svg-icons';
 import { initializeApp } from 'firebase/app';
 import { rentmobileDb, rentmobileAuth } from '../components/firebase.config';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
@@ -543,6 +543,12 @@ const Dashboard = () => {
       <span>List of Vendors</span>
     </SidebarItem>
   </Link>
+  <Link to="/stalls" style={{ textDecoration: 'none' }}>
+  <SidebarItem isSidebarOpen={isSidebarOpen}>
+    <FontAwesomeIcon icon={faClipboard} className="icon" />
+    <span>List of Stalls</span>
+  </SidebarItem>
+</Link>
 
   <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
     <FontAwesomeIcon icon={faUser} className="icon" />
@@ -610,6 +616,14 @@ const Dashboard = () => {
           <SidebarItem isSidebarOpen={isSidebarOpen}>
             <FontAwesomeIcon icon={faCheck} className="icon" />
             <span> Assign Collector</span>
+          </SidebarItem>
+        </li>
+      </Link>
+      <Link to="/View" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+          <FontAwesomeIcon icon={faSearch} className="icon" />
+            <span> View Collector</span>
           </SidebarItem>
         </li>
       </Link>

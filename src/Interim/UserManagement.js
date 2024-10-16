@@ -5,7 +5,7 @@ import { FaBars, FaEye, FaPen, FaTrash, FaSearch, FaUserCircle, FaUsers,FaUser, 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { FaSignOutAlt } from 'react-icons/fa';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt, faCheck} from '@fortawesome/free-solid-svg-icons';
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faCheck, faClipboard} from '@fortawesome/free-solid-svg-icons';
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { interimDb } from '../components/firebase.config'; // Import the correct firestore instance
 
@@ -150,10 +150,6 @@ const AppBar = styled.div`
   font-weight: bold; /* Apply bold weight */
 `;
 
-const DashboardTitle = styled.h2`
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-`;
 
 const StatsContainer = styled.div`
   margin-top: 25px;
@@ -347,46 +343,6 @@ const FormContainer = styled.div`
         color: #0056b3; /* Darken on hover */
       }
     }
-  }
-`;
-
-const ToggleSwitch = styled.label`
-  display: inline-flex;
-  align-items: center;
-  cursor: pointer;
-
-  input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-
-  .slider {
-    position: relative;
-    width: 34px;
-    height: 20px;
-    background-color: #ccc;
-    border-radius: 50px;
-    transition: background-color 0.3s;
-  }
-
-  .slider:before {
-    content: "";
-    position: absolute;
-    height: 16px;
-    width: 16px;
-    border-radius: 50%;
-    background-color: white;
-    transition: transform 0.3s;
-    transform: translateX(2px);
-  }
-
-  input:checked + .slider {
-    background-color: #4caf50;
-  }
-
-  input:checked + .slider:before {
-    transform: translateX(14px);
   }
 `;
 
@@ -653,6 +609,12 @@ const handleLogout = () => {
       <span>List of Vendors</span>
     </SidebarItem>
   </Link>
+  <Link to="/stalls" style={{ textDecoration: 'none' }}>
+  <SidebarItem isSidebarOpen={isSidebarOpen}>
+    <FontAwesomeIcon icon={faClipboard} className="icon" />
+    <span>List of Stalls</span>
+  </SidebarItem>
+</Link>
 
   <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
     <FontAwesomeIcon icon={faUser} className="icon" />
@@ -720,6 +682,14 @@ const handleLogout = () => {
           <SidebarItem isSidebarOpen={isSidebarOpen}>
             <FontAwesomeIcon icon={faCheck} className="icon" />
             <span> Assign Collector</span>
+          </SidebarItem>
+        </li>
+      </Link>
+      <Link to="/View" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+          <FontAwesomeIcon icon={faSearch} className="icon" />
+            <span> View Collector</span>
           </SidebarItem>
         </li>
       </Link>

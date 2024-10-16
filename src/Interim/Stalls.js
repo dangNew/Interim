@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link,  useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt,} from 'react-icons/fa';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt, faCheck} from '@fortawesome/free-solid-svg-icons';
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract,  faTicketAlt, faCheck, faClipboard} from '@fortawesome/free-solid-svg-icons';
 
 
 const DashboardContainer = styled.div`
@@ -235,110 +234,114 @@ const Dashboard = () => {
   </SearchBarContainer>
 
   <SidebarMenu>
-    <Link to="/dashboard" style={{ textDecoration: 'none' }}>
-      <SidebarItem isSidebarOpen={isSidebarOpen}>
-        <FontAwesomeIcon icon={faHome} className="icon" />
-        <span>Dashboard</span>
-      </SidebarItem>
-    </Link>
-
-    <Link to="/list" style={{ textDecoration: 'none' }}>
-      <SidebarItem isSidebarOpen={isSidebarOpen}>
-        <FontAwesomeIcon icon={faShoppingCart} className="icon" />
-        <span>List of Vendors</span>
-      </SidebarItem>
-    </Link>
-
-    <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-      <FontAwesomeIcon icon={faUser} className="icon" />
-      <span>User Management</span>
+  <Link to="/dashboard" style={{ textDecoration: 'none' }}>
+    <SidebarItem isSidebarOpen={isSidebarOpen}>
+      <FontAwesomeIcon icon={faHome} className="icon" />
+      <span>Dashboard</span>
     </SidebarItem>
-
-    {isDropdownOpen && (
-      <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-        <Link to="/usermanagement" style={{ textDecoration: 'none' }}>
-          <li>
-            <SidebarItem isSidebarOpen={isSidebarOpen}>
-              <FontAwesomeIcon icon={faSearch} className="icon" />
-              <span>View Users</span>
-            </SidebarItem>
-          </li>
-        </Link>
-        <Link to="/newuser" style={{ textDecoration: 'none' }}>
-          <li>
-            <SidebarItem isSidebarOpen={isSidebarOpen}>
-              <FontAwesomeIcon icon={faPlus} className="icon" />
-              <span>Add User</span>
-            </SidebarItem>
-          </li>
-        </Link>
-      </ul>
-    )}
-
-    <Link to="/viewunit" style={{ textDecoration: 'none' }}>
-      <SidebarItem isSidebarOpen={isSidebarOpen}>
-        <FontAwesomeIcon icon={faPlus} className="icon" />
-        <span>Add New Unit</span>
-      </SidebarItem>
-    </Link>
-
-    <Link to="/manage-roles" style={{ textDecoration: 'none' }}>
-      <SidebarItem isSidebarOpen={isSidebarOpen}>
-        <FontAwesomeIcon icon={faUsers} className="icon" />
-        <span>Manage Roles</span>
-      </SidebarItem>
-    </Link>
-
-    <Link to="/contract" style={{ textDecoration: 'none' }}>
-      <SidebarItem isSidebarOpen={isSidebarOpen}>
-        <FontAwesomeIcon icon={faFileContract} className="icon" />
-        <span>Contract</span>
-      </SidebarItem>
-    </Link>
-
-    <Link to="/ticket" style={{ textDecoration: 'none' }}>
-      <SidebarItem isSidebarOpen={isSidebarOpen}>
-        <FontAwesomeIcon icon={faTicketAlt} className="icon" />
-        <span>Manage Ticket</span>
-      </SidebarItem>
-    </Link>
-
-    {/* Manage Ambulant Section */}
-    <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-      <FontAwesomeIcon icon={faUser} className="icon" />
-      <span>Manage Ambulant</span>
+  </Link>
+  
+  <Link to="/list" style={{ textDecoration: 'none' }}>
+    <SidebarItem isSidebarOpen={isSidebarOpen}>
+      <FontAwesomeIcon icon={faShoppingCart} className="icon" />
+      <span>List of Vendors</span>
     </SidebarItem>
+  </Link>
+  <Link to="/stalls" style={{ textDecoration: 'none' }}>
+  <SidebarItem isSidebarOpen={isSidebarOpen}>
+    <FontAwesomeIcon icon={faClipboard} className="icon" />
+    <span>List of Stalls</span>
+  </SidebarItem>
+</Link>
 
-    {isDropdownOpen && (
-      <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-        <Link to="/assign" style={{ textDecoration: 'none' }}>
-          <li>
-            <SidebarItem isSidebarOpen={isSidebarOpen}>
-              <FontAwesomeIcon icon={faCheck} className="icon" />
-              <span>Assign Collector</span>
-            </SidebarItem>
-          </li>
-        </Link>
-        <Link to="/viewcollector" style={{ textDecoration: 'none' }}>
-          <li>
-            <SidebarItem isSidebarOpen={isSidebarOpen}>
-              <FontAwesomeIcon icon={faCheck} className="icon" />
-              <span>View Collector</span>
-            </SidebarItem>
-          </li>
-        </Link>
+  <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+    <FontAwesomeIcon icon={faUser} className="icon" />
+    <span>User Management</span>
+  </SidebarItem>
 
-        <Link to="/addcollector" style={{ textDecoration: 'none' }}>
-          <li>
-            <SidebarItem isSidebarOpen={isSidebarOpen}>
-              <FontAwesomeIcon icon={faPlus} className="icon" />
-              <span>Add Ambulant Collector</span>
-            </SidebarItem>
-          </li>
-        </Link>
-      </ul>
-    )}
-  </SidebarMenu>
+  {isDropdownOpen && (
+    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+      <Link to="/usermanagement" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+            <FontAwesomeIcon icon={faSearch} className="icon" />
+            <span>View Users</span>
+          </SidebarItem>
+        </li>
+      </Link>
+      <Link to="/newuser" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+            <FontAwesomeIcon icon={faPlus} className="icon" />
+            <span>Add User</span>
+          </SidebarItem>
+        </li>
+      </Link>
+    </ul>
+  )}
+
+  <Link to="/viewunit" style={{ textDecoration: 'none' }}>
+    <SidebarItem isSidebarOpen={isSidebarOpen}>
+      <FontAwesomeIcon icon={faPlus} className="icon" />
+      <span>Add New Unit</span>
+    </SidebarItem>
+  </Link>
+
+  <Link to="/manage-roles" style={{ textDecoration: 'none' }}>
+    <SidebarItem isSidebarOpen={isSidebarOpen}>
+      <FontAwesomeIcon icon={faUsers} className="icon" />
+      <span>Manage Roles</span>
+    </SidebarItem>
+  </Link>
+
+  <Link to="/contract" style={{ textDecoration: 'none' }}>
+    <SidebarItem isSidebarOpen={isSidebarOpen}>
+      <FontAwesomeIcon icon={faFileContract} className="icon" />
+      <span>Contract</span>
+    </SidebarItem>
+  </Link>
+
+  <Link to="/ticket" style={{ textDecoration: 'none' }}>
+  <SidebarItem isSidebarOpen={isSidebarOpen}>
+    <FontAwesomeIcon icon={faTicketAlt} className="icon" />
+    <span>Manage Ticket</span>
+  </SidebarItem>
+</Link>
+
+<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+    <FontAwesomeIcon icon={faUser} className="icon" />
+    <span>Manage Ambulant</span>
+  </SidebarItem>
+
+  {isDropdownOpen && (
+    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+      <Link to="/assign" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+            <FontAwesomeIcon icon={faCheck} className="icon" />
+            <span> Assign Collector</span>
+          </SidebarItem>
+        </li>
+      </Link>
+      <Link to="/View" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+          <FontAwesomeIcon icon={faSearch} className="icon" />
+            <span> View Collector</span>
+          </SidebarItem>
+        </li>
+      </Link>
+      <Link to="/addcollector" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+            <FontAwesomeIcon icon={faPlus} className="icon" />
+            <span>Add Ambulant Collector</span>
+          </SidebarItem>
+        </li>
+      </Link>
+    </ul>
+  )}
+</SidebarMenu>
 
       <SidebarFooter isSidebarOpen={isSidebarOpen}>
           <LogoutButton isSidebarOpen={isSidebarOpen} onClick={handleLogout}>
