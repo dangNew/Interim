@@ -279,7 +279,110 @@ const SaveButton = styled.button`
     background-color: #218838; /* Darker green on hover */
   }
 `;
+const ModalContainer = styled.div`
+  display: ${({ isVisible }) => (isVisible ? 'flex' : 'none')};
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.6); /* Darker background for focus */
+  z-index: 999; /* Ensure it appears above other content */
+`;
 
+
+const ModalContent = styled.div`
+  background-color: white;
+  padding: 2.5rem;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); /* Softer shadow */
+  width: 400px;
+  max-width: 90%;
+`;
+
+const ModalMessage = styled.h3`
+  font-family: 'Inter', sans-serif;
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 1.5rem;
+`;
+
+const ModalButtons = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+`;
+
+
+const OkButton = styled.button`
+  background-color: #28a745;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+
+  &:hover {
+    background-color: #218838;
+  }
+`;
+
+const ErrorModalMessage = styled.h3`
+  margin-bottom: 1rem;
+  font-family: 'Roboto', sans-serif;
+  color: #721c24;
+`;
+
+const ErrorButton = styled.button`
+  background-color: #dc3545;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+
+  &:hover {
+    background-color: #c82333;
+  }
+`;
+const CancelButton = styled.button`
+  background-color: #dc3545;
+  color: white;
+  padding: 10px 25px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #c82333;
+  }
+`;
+
+const ConfirmButton = styled.button`
+  background-color: #28a745;
+  color: white;
+  padding: 10px 25px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #218838;
+  }
+`;
 
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -287,7 +390,10 @@ const Dashboard = () => {
   const [unitName, setUnitName] = useState('');
   const [location, setLocation] = useState('');
   const [dateRegistered, setDateRegistered] = useState(new Date().toISOString().split('T')[0]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState(null);
+  const [isErrorModalVisible, setIsErrorModalVisible] = useState(false); 
+  const [isDuplicateModalVisible, setIsDuplicateModalVisible] = useState(false);
   const navigate = useNavigate();
   
   const toggleSidebar = () => {
@@ -295,56 +401,56 @@ const Dashboard = () => {
   };
 
   const handleSaveUnit = async () => {
-     if (!unitName.trim() || !location.trim() || !dateRegistered) {
-    alert('Please fill in all fields before saving.');
-    return; // Prevent saving if any field is empty
-  }
-    try {
-        console.log('Saving unit with data:', {
-            name: unitName,
-            location: location,
-            dateRegistered: dateRegistered,
-        });
+    if (!unitName.trim() || !location.trim() || !dateRegistered) {
+   alert('Please fill in all fields before saving.');
+   return; // Prevent saving if any field is empty
+ }
+   try {
+       console.log('Saving unit with data:', {
+           name: unitName,
+           location: location,
+           dateRegistered: dateRegistered,
+       });
 
-        // Use interimDb to add the document to the 'unit' collection
-        const docRef = await addDoc(collection(interimDb, 'unit'), {
-            name: unitName,
-            location: location,
-            dateRegistered: dateRegistered,
-        });
+       // Use interimDb to add the document to the 'unit' collection
+       const docRef = await addDoc(collection(interimDb, 'unit'), {
+           name: unitName,
+           location: location,
+           dateRegistered: dateRegistered,
+       });
 
-        console.log('Document written with ID: ', docRef.id);
-        alert('Unit saved successfully!');
+       console.log('Document written with ID: ', docRef.id);
+       alert('Unit saved successfully!');
 
-        // Optionally, reset the input fields after saving
-        setUnitName('');
-        setLocation('');
-        setDateRegistered(new Date().toISOString().split('T')[0]);
-    } catch (e) {
-        console.error('Error adding document: ', e);
-        alert('Error saving unit: ' + e.message);
-    }
+       // Optionally, reset the input fields after saving
+       setUnitName('');
+       setLocation('');
+       setDateRegistered(new Date().toISOString().split('T')[0]);
+   } catch (e) {
+       console.error('Error adding document: ', e);
+       alert('Error saving unit: ' + e.message);
+   }
 };
 
 useEffect(() => {
-  const checkAndCreateCollection = async () => {
-    const unitsCollection = collection(interimDb, 'unit');
-    const unitsSnapshot = await getDocs(unitsCollection);
+ const checkAndCreateCollection = async () => {
+   const unitsCollection = collection(interimDb, 'unit');
+   const unitsSnapshot = await getDocs(unitsCollection);
 
-    // If the collection doesn't exist (no documents in it), create a default document
-    if (unitsSnapshot.empty) {
-      try {
-        await addDoc(unitsCollection, {
-          name: 'Default Unit',
-          location: 'Default Location',
-          dateRegistered: new Date().toISOString().split('T')[0],
-        });
-        console.log('Default collection created with a default unit.');
-      } catch (error) {
-        console.error('Error creating default collection: ', error);
-      }
-    }
-  };
+   // If the collection doesn't exist (no documents in it), create a default document
+   if (unitsSnapshot.empty) {
+     try {
+       await addDoc(unitsCollection, {
+         name: 'Default Unit',
+         location: 'Default Location',
+         dateRegistered: new Date().toISOString().split('T')[0],
+       });
+       console.log('Default collection created with a default unit.');
+     } catch (error) {
+       console.error('Error creating default collection: ', error);
+     }
+   }
+ };
 
   const fetchUserData = async () => {
     const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
@@ -584,6 +690,30 @@ useEffect(() => {
         </InputField>
 
         <SaveButton onClick={handleSaveUnit}>Save Unit</SaveButton>
+
+          {/* Success Modal */}
+      <ModalContainer isVisible={isModalVisible}>
+        <ModalContent>
+          <ModalMessage>Unit added successfully!</ModalMessage>
+          <OkButton onClick={() => setIsModalVisible(false)}>OK</OkButton>
+        </ModalContent>
+      </ModalContainer>
+
+      <ModalContainer isVisible={isErrorModalVisible}>
+        <ModalContent>
+          <ErrorModalMessage>Error adding document. Please try again.</ErrorModalMessage>
+          <ErrorButton onClick={() => setIsErrorModalVisible(false)}>OK</ErrorButton>
+        </ModalContent>
+      </ModalContainer>
+
+      {/* Duplicate Unit Name Modal */}
+      <ModalContainer isVisible={isDuplicateModalVisible}>
+        <ModalContent>
+          <ModalMessage>The unit name already exists. Please use a different name.</ModalMessage>
+          <OkButton onClick={() => setIsDuplicateModalVisible(false)}>OK</OkButton>
+        </ModalContent>
+      </ModalContainer>
+      
       </FormContainer>
 
 

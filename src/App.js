@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './Interim/AuthContext'; // Ensure the path is correct
 import ProtectedRoute from './Interim/ProtectedRoute'; // Ensure the path is correct
 
-import ListOfStallholders from './Collector/ListOfStallholders';
+
 import ViewPayment from './Collector/ViewPayment';
 import SignUp from './Interim/Signup'; 
 import Login from './Interim/Login';
@@ -24,6 +24,9 @@ import AddCollector from './Interim/AddCollector';
 import NewTicket from './Interim/NewTicket';
 import ViewCollector from './Interim/ViewCollector';
 import Viewunit from './Interim/viewunit';
+import Sidenav from './Collector/sidenav';
+import ListOfStallholders from './Collector/ListOfStallholders';
+
 
 
 function App() {
@@ -35,7 +38,7 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
 
           {/* Protected Routes */}
-          <Route path="/stallholders" element={<ProtectedRoute><ListOfStallholders /></ProtectedRoute>} />
+         
           <Route path="/view-payment/:id" element={<ProtectedRoute><ViewPayment /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} />} />
           <Route path="/list" element={<ProtectedRoute element={<ListOfVendors
@@ -68,6 +71,9 @@ function App() {
             />} />} />
           <Route path="/viewunit"  element={<ProtectedRoute element={<Viewunit
             />} />} />
+            <Route path="/sidenav" element={<Sidenav />} />
+            <Route path="/list-of-stallholders" element={<ListOfStallholders />} />
+
         </Routes>
       </Router>
     </AuthProvider>
