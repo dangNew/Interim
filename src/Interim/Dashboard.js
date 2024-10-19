@@ -3,15 +3,23 @@ import { Link,  useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+<<<<<<< HEAD
 import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt,FaUserSlash, FaUser, FaUsers, FaWallet, FaList} from 'react-icons/fa';
 import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faCheck} from '@fortawesome/free-solid-svg-icons';
 import { faClipboard } from '@fortawesome/free-regular-svg-icons'; 
+=======
+import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt,FaUserSlash, FaUser, FaUsers, FaWallet} from 'react-icons/fa';
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt, faCheck} from '@fortawesome/free-solid-svg-icons';
+>>>>>>> a8f5076 (main)
 import { interimDb } from '../components/firebase.config';
 import { rentmobileDb } from '../components/firebase.config';
 
 import { collection, getDocs } from 'firebase/firestore';
+<<<<<<< HEAD
 import LoginAnalytics from './LoginAnalytics';
 
+=======
+>>>>>>> a8f5076 (main)
 
 const DashboardContainer = styled.div`
   display: flex;
@@ -32,7 +40,11 @@ const Sidebar = styled.div`
   position: fixed;
   height: 100vh;
   z-index: 100;
+<<<<<<< HEAD
   overflow-y: auto; 
+=======
+   overflow-y: auto;
+>>>>>>> a8f5076 (main)
 `;
 
 const SidebarMenu = styled.ul`
@@ -267,7 +279,10 @@ const FormContainer = styled.div`
 `;
 
 const AppBar = styled.div`
+<<<<<<< HEAD
   padding-top: 0;
+=======
+>>>>>>> a8f5076 (main)
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -482,12 +497,15 @@ const Dashboard = () => {
       <span>List of Vendors</span>
     </SidebarItem>
   </Link>
+<<<<<<< HEAD
   <Link to="/stalls" style={{ textDecoration: 'none' }}>
   <SidebarItem isSidebarOpen={isSidebarOpen}>
     <FontAwesomeIcon icon={faClipboard} className="icon" />
     <span>List of Stalls</span>
   </SidebarItem>
 </Link>
+=======
+>>>>>>> a8f5076 (main)
 
   <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
     <FontAwesomeIcon icon={faUser} className="icon" />
@@ -515,7 +533,11 @@ const Dashboard = () => {
     </ul>
   )}
 
+<<<<<<< HEAD
   <Link to="/viewunit" style={{ textDecoration: 'none' }}>
+=======
+  <Link to="/Addunit" style={{ textDecoration: 'none' }}>
+>>>>>>> a8f5076 (main)
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faPlus} className="icon" />
       <span>Add New Unit</span>
@@ -558,7 +580,11 @@ const Dashboard = () => {
           </SidebarItem>
         </li>
       </Link>
+<<<<<<< HEAD
       <Link to="/View" style={{ textDecoration: 'none' }}>
+=======
+      <Link to="/assign" style={{ textDecoration: 'none' }}>
+>>>>>>> a8f5076 (main)
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
           <FontAwesomeIcon icon={faSearch} className="icon" />
@@ -598,8 +624,14 @@ const Dashboard = () => {
         <div className="title">INTERIM</div>
       </AppBar>
          
+<<<<<<< HEAD
           <br></br>
           <LoginAnalytics /> 
+=======
+          <ProfileHeader>
+            <h1>Add New Unit</h1>
+          </ProfileHeader>
+>>>>>>> a8f5076 (main)
 
           <StatsContainer>
       <StatBox bgColor="#11768C">

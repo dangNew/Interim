@@ -3,7 +3,11 @@ import { Link,  useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt, FaEdit } from 'react-icons/fa';
+<<<<<<< HEAD
 import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faCheck, faClipboard} from '@fortawesome/free-solid-svg-icons';
+=======
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt, faCheck} from '@fortawesome/free-solid-svg-icons';
+>>>>>>> a8f5076 (main)
 import { rentmobileDb } from '../components/firebase.config';
 import { interimDb } from '../components/firebase.config';
 import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
@@ -278,6 +282,7 @@ const Dashboard = () => {
   const [stallholders, setStallholders] = useState([]);
   const [zoneAssignments, setZoneAssignments] = useState([]);
   const [collectors, setCollectors] = useState([]);
+<<<<<<< HEAD
   const [collectorZones, setCollectorZones] = useState({}); 
   const [selectedRows, setSelectedRows] = useState(new Set()); 
   const navigate = useNavigate();
@@ -304,6 +309,12 @@ const Dashboard = () => {
     }
   };
 
+=======
+  const [collectorZones, setCollectorZones] = useState({}); // To hold the assigned zones for collectors
+  const [availableZones, setAvailableZones] = useState(['Zone A', 'Zone B']);
+  const navigate = useNavigate();
+
+>>>>>>> a8f5076 (main)
   const fetchStallholders = async () => {
     const stallholderCollection = collection(rentmobileDb, 'users');
     const stallholderSnapshot = await getDocs(stallholderCollection);
@@ -369,6 +380,7 @@ const Dashboard = () => {
   }, []);
 
   
+<<<<<<< HEAD
   const handleZoneChange = (holderId, selectedZone) => {
     // Update the stallholders state to reflect the new zone selection
     setStallholders((prevStallholders) => 
@@ -379,6 +391,16 @@ const Dashboard = () => {
     
     console.log(`Holder ID: ${holderId}, Selected Zone: ${selectedZone}`);
   };
+=======
+  const handleZoneChange = (id, newZone) => {
+    setZoneAssignments(prevAssignments =>
+      prevAssignments.map(assignment =>
+        assignment.id === id ? { ...assignment, zone: newZone } : assignment
+      )
+    );
+  };
+
+>>>>>>> a8f5076 (main)
   const handleCollectorZoneChange = (collectorId, newZone) => {
     setCollectorZones(prevZones => ({
       ...prevZones,
@@ -514,12 +536,15 @@ const handleEdit = (stallholderId) => {
       <span>List of Vendors</span>
     </SidebarItem>
   </Link>
+<<<<<<< HEAD
   <Link to="/stalls" style={{ textDecoration: 'none' }}>
   <SidebarItem isSidebarOpen={isSidebarOpen}>
     <FontAwesomeIcon icon={faClipboard} className="icon" />
     <span>List of Stalls</span>
   </SidebarItem>
 </Link>
+=======
+>>>>>>> a8f5076 (main)
 
   <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
     <FontAwesomeIcon icon={faUser} className="icon" />
@@ -547,7 +572,11 @@ const handleEdit = (stallholderId) => {
     </ul>
   )}
 
+<<<<<<< HEAD
   <Link to="/viewunit" style={{ textDecoration: 'none' }}>
+=======
+  <Link to="/Addunit" style={{ textDecoration: 'none' }}>
+>>>>>>> a8f5076 (main)
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faPlus} className="icon" />
       <span>Add New Unit</span>
@@ -590,6 +619,7 @@ const handleEdit = (stallholderId) => {
           </SidebarItem>
         </li>
       </Link>
+<<<<<<< HEAD
       <Link to="/View" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
@@ -598,6 +628,8 @@ const handleEdit = (stallholderId) => {
           </SidebarItem>
         </li>
       </Link>
+=======
+>>>>>>> a8f5076 (main)
       <Link to="/addcollector" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
@@ -641,6 +673,7 @@ const handleEdit = (stallholderId) => {
 
         <button onClick={rotateAssignments}>Rotate Assignments</button>
         <FormContainer>
+<<<<<<< HEAD
   <h3>Zone Assignments</h3>
   <table>
     <thead>
@@ -693,6 +726,71 @@ const handleEdit = (stallholderId) => {
 
 
     <FormContainer>
+=======
+  <h3>Assign Stallholders to Zones</h3>
+  <Table>
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>Current Zone</th>
+        <th>Action</th>
+        <th>Assigned Collector</th>
+        <th>Collector Name</th>
+        <th>Collector Number</th>
+      </tr>
+    </thead>
+    <tbody>
+      {stallholders.map(stallholder => {
+        const assignedCollector = collectors.find(collector => collector.id === stallholder.collectorId);
+        return (
+          <tr key={stallholder.id}>
+            <td>{stallholder.email}</td>
+            <td>{stallholder.assignedZone || 'No Zone Assigned'}</td>
+            <td>
+              {/* Display Next Zone as text, the same as Current Zone */}
+              <span>{stallholder.assignedZone || 'No Zone Assigned'}</span>
+              {/* Add Edit Icon */}
+              <FaEdit 
+                style={{ cursor: 'pointer', marginLeft: '10px', color: '#007bff' }} 
+                onClick={() => handleEdit(stallholder.id)} // Replace with your edit handler
+              />
+            </td>
+            <td>
+              <div>
+                {collectors.map(collector => (
+                  <button
+                    key={collector.id}
+                    onClick={() => handleAssignCollector(stallholder.id, collector.id)}
+                    style={{
+                      margin: '2px',
+                      padding: '5px',
+                      cursor: 'pointer',
+                      backgroundColor: collector.id === stallholder.collectorId ? '#007bff' : '#e9ecef',
+                      color: collector.id === stallholder.collectorId ? 'white' : 'black',
+                      border: 'none',
+                      borderRadius: '5px'
+                    }}
+                  >
+                    {collector.firstName} {collector.lastName}
+                  </button>
+                ))}
+              </div>
+            </td>
+            <td>{assignedCollector ? assignedCollector.firstName : 'N/A'}</td>
+            <td>{assignedCollector ? assignedCollector.lastName : 'N/A'}</td>
+            <td>{assignedCollector ? assignedCollector.collector : 'N/A'}</td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </Table>
+
+  <button onClick={handleSaveAssignments}>Save Assignments</button>
+</FormContainer>
+
+
+<FormContainer>
+>>>>>>> a8f5076 (main)
   <h3>List of Collectors</h3>
   <Table>
     <thead>
@@ -707,9 +805,13 @@ const handleEdit = (stallholderId) => {
     <tbody>
       {collectors.map(collector => (
         <tr key={collector.id}>
+<<<<<<< HEAD
           <td>
             {collector.firstName && collector.lastName ? `${collector.firstName} ${collector.lastName}` : 'N/A'}
           </td>
+=======
+          <td>{collector.firstName && collector.lastName ? `${collector.firstName} ${collector.lastName}` : 'N/A'}</td>
+>>>>>>> a8f5076 (main)
           <td>{collector.firstName || 'N/A'}</td>
           <td>{collector.lastName || 'N/A'}</td>
           <td>{collector.collector || 'N/A'}</td>
@@ -722,8 +824,11 @@ const handleEdit = (stallholderId) => {
               <option value="Zone A">Zone A</option>
               <option value="Zone B">Zone B</option>
               {/* Add more zones as needed */}
+<<<<<<< HEAD
               <option value="Zone C">Zone C</option>
               <option value="Zone D">Zone D</option>
+=======
+>>>>>>> a8f5076 (main)
             </select>
           </td>
         </tr>

@@ -4,7 +4,11 @@ import styled from 'styled-components';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
+<<<<<<< HEAD
 import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt, faCheck, faClipboard } from '@fortawesome/free-solid-svg-icons';
+=======
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt, faCheck } from '@fortawesome/free-solid-svg-icons';
+>>>>>>> a8f5076 (main)
 import { initializeApp } from 'firebase/app';
 import { rentmobileDb, rentmobileAuth } from '../components/firebase.config';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
@@ -543,12 +547,15 @@ const Dashboard = () => {
       <span>List of Vendors</span>
     </SidebarItem>
   </Link>
+<<<<<<< HEAD
   <Link to="/stalls" style={{ textDecoration: 'none' }}>
   <SidebarItem isSidebarOpen={isSidebarOpen}>
     <FontAwesomeIcon icon={faClipboard} className="icon" />
     <span>List of Stalls</span>
   </SidebarItem>
 </Link>
+=======
+>>>>>>> a8f5076 (main)
 
   <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
     <FontAwesomeIcon icon={faUser} className="icon" />
@@ -576,7 +583,11 @@ const Dashboard = () => {
     </ul>
   )}
 
+<<<<<<< HEAD
   <Link to="/viewunit" style={{ textDecoration: 'none' }}>
+=======
+  <Link to="/Addunit" style={{ textDecoration: 'none' }}>
+>>>>>>> a8f5076 (main)
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faPlus} className="icon" />
       <span>Add New Unit</span>
@@ -619,6 +630,7 @@ const Dashboard = () => {
           </SidebarItem>
         </li>
       </Link>
+<<<<<<< HEAD
       <Link to="/View" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
@@ -627,6 +639,8 @@ const Dashboard = () => {
           </SidebarItem>
         </li>
       </Link>
+=======
+>>>>>>> a8f5076 (main)
       <Link to="/addcollector" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>

@@ -3,8 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
+<<<<<<< HEAD
 import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faClipboard, faCheck} from '@fortawesome/free-solid-svg-icons';
 import { collection, getDocs, addDoc } from 'firebase/firestore';
+=======
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt } from '@fortawesome/free-solid-svg-icons';
+import { collection, getDocs } from 'firebase/firestore';
+import { stallholderDb } from '../components/firebase.config';
+>>>>>>> a8f5076 (main)
 import { interimDb } from '../components/firebase.config'; // Import the correct firestore instance
 
 const DashboardContainer = styled.div`
@@ -140,6 +146,7 @@ const ProfileHeader = styled.div`
   }
 `;
 
+<<<<<<< HEAD
 const FormContainer = styled.div`
   margin-top: 2rem;
   padding: 1.5rem; /* Slightly increased padding for a more spacious look */
@@ -151,6 +158,73 @@ const FormContainer = styled.div`
     margin-bottom: 1rem;
     font-family: 'Roboto', sans-serif;
     color: #155724; /* Dark green for the heading */
+=======
+
+
+
+const StatsContainer = styled.div`
+  display: flex;
+  gap: 2rem;
+  margin-top: 20px; /* Added margin to avoid overlapping with AppBar */
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+  }
+`;
+
+const StatBox = styled.div`
+  background-color: ${({ bgColor }) => bgColor || '#f4f4f4'};
+  padding: 3rem;
+  border-radius: 12px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: white;
+  }
+
+  p {
+    font-size: 2rem;
+    margin: 0;
+    font-weight: bold;
+    color: white;
+  }
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+
+    h3 {
+      font-size: 1rem;
+    }
+
+    p {
+      font-size: 1.6rem;
+    }
+  }
+`;
+
+const FormContainer = styled.div`
+  margin-top: 2rem;
+  padding: 1rem;
+  border-radius: 20px;
+  background-color: #f8f9fa;
+  box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
+
+  h3 {
+    margin-bottom: 1rem;
+>>>>>>> a8f5076 (main)
   }
 
   table {
@@ -160,6 +234,7 @@ const FormContainer = styled.div`
     th, td {
       padding: 20px;
       text-align: left;
+<<<<<<< HEAD
       border-bottom: 1px solid #c3e6cb; /* Light green border */
     }
 
@@ -169,11 +244,25 @@ const FormContainer = styled.div`
 
     tr:nth-child(even) {
       background-color: #f8f9fa; /* Keeping alternating row colors */
+=======
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    th {
+      background-color: #e9ecef;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+>>>>>>> a8f5076 (main)
     }
   }
 `;
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> a8f5076 (main)
 const SearchBarContainer = styled.div`
   display: flex;
   align-items: center;
@@ -226,6 +315,7 @@ const ProfileImage = styled.img`
   margin-bottom: 15px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // Subtle shadow for a polished look
 `;
+<<<<<<< HEAD
 const InputField = styled.div`
   position: relative;
   margin-bottom: 2rem;
@@ -279,10 +369,14 @@ const SaveButton = styled.button`
     background-color: #218838; /* Darker green on hover */
   }
 `;
+=======
+
+>>>>>>> a8f5076 (main)
 
 
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+<<<<<<< HEAD
   const sidebarRef = useRef(null);
   const [unitName, setUnitName] = useState('');
   const [location, setLocation] = useState('');
@@ -290,10 +384,21 @@ const Dashboard = () => {
   const [loggedInUser, setLoggedInUser] = useState(null);
   const navigate = useNavigate();
   
+=======
+  const [stallHolders, setStallHolders] = useState([]);
+  const sidebarRef = useRef(null);
+  const [totalUsers, setTotalUsers] = useState(0); // State to store 
+  const [filteredStallHolders, setFilteredStallHolders] = useState([]);
+  const [loggedInUser, setLoggedInUser] = useState(null);
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+
+>>>>>>> a8f5076 (main)
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+<<<<<<< HEAD
   const handleSaveUnit = async () => {
      if (!unitName.trim() || !location.trim() || !dateRegistered) {
     alert('Please fill in all fields before saving.');
@@ -361,6 +466,23 @@ useEffect(() => {
   checkAndCreateCollection(); // Check and create collection on component mount
   fetchUserData(); // Fetch user data
 }, []);
+=======
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
+      if (loggedInUserData) {
+        const usersCollection = collection(interimDb, 'users');
+        const userDocs = await getDocs(usersCollection);
+        const users = userDocs.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        const currentUser = users.find(user => user.email === loggedInUserData.email);
+        setLoggedInUser(currentUser || loggedInUserData);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+>>>>>>> a8f5076 (main)
 
   const handleClickOutside = (event) => {
     
@@ -373,7 +495,38 @@ useEffect(() => {
     };
   }, []);
 
+<<<<<<< HEAD
   
+=======
+  // Fetch total users and recent user data from Firestore
+  useEffect(() => {
+    const fetchData = async () => {
+        const querySnapshot = await getDocs(collection(stallholderDb, 'users'));
+
+      const data = querySnapshot.docs.map((doc) => {
+        const stallInfo = doc.data().stallInfo || {}; // Fetch stallInfo map
+        const dateOfRegistration = doc.data().dateOfRegistration ? doc.data().dateOfRegistration.toDate().toLocaleDateString() : '';
+
+        return {
+          id: doc.id, // Document ID
+          stallNumber: stallInfo.stallNumber || '',  // Retrieve stall number from stallInfo
+          firstName: doc.data().firstName || '',      // Retrieve first name
+          lastName: doc.data().lastName || '',        // Retrieve last name
+          location: stallInfo.location || '',         // Retrieve location from stallInfo
+          areaMeters: stallInfo.stallSize || '',      // Retrieve area (size) from stallInfo
+          billing: stallInfo.ratePerMeter || '',      // Retrieve rate per meter from stallInfo
+          date: dateOfRegistration,               // Retrieve date of registration
+          status: stallInfo.status || '',             // Retrieve status from stallInfo
+        };
+      });
+      setStallHolders(data); // Set the stall holders state with fetched data
+      setFilteredStallHolders(data);
+      setTotalUsers(data.length); // Update total users count
+    };
+
+    fetchData();
+  }, []);
+>>>>>>> a8f5076 (main)
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // State for dropdown
 
@@ -432,12 +585,15 @@ useEffect(() => {
       <span>List of Vendors</span>
     </SidebarItem>
   </Link>
+<<<<<<< HEAD
   <Link to="/stalls" style={{ textDecoration: 'none' }}>
   <SidebarItem isSidebarOpen={isSidebarOpen}>
     <FontAwesomeIcon icon={faClipboard} className="icon" />
     <span>List of Stalls</span>
   </SidebarItem>
 </Link>
+=======
+>>>>>>> a8f5076 (main)
 
   <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
     <FontAwesomeIcon icon={faUser} className="icon" />
@@ -465,7 +621,11 @@ useEffect(() => {
     </ul>
   )}
 
+<<<<<<< HEAD
   <Link to="/viewunit" style={{ textDecoration: 'none' }}>
+=======
+  <Link to="/Addunit" style={{ textDecoration: 'none' }}>
+>>>>>>> a8f5076 (main)
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faPlus} className="icon" />
       <span>Add New Unit</span>
@@ -485,7 +645,10 @@ useEffect(() => {
       <span>Contract</span>
     </SidebarItem>
   </Link>
+<<<<<<< HEAD
 
+=======
+>>>>>>> a8f5076 (main)
   <Link to="/ticket" style={{ textDecoration: 'none' }}>
   <SidebarItem isSidebarOpen={isSidebarOpen}>
     <FontAwesomeIcon icon={faTicketAlt} className="icon" />
@@ -493,6 +656,7 @@ useEffect(() => {
   </SidebarItem>
 </Link>
 
+<<<<<<< HEAD
 <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
     <FontAwesomeIcon icon={faUser} className="icon" />
     <span>Manage Ambulant</span>
@@ -526,6 +690,14 @@ useEffect(() => {
       </Link>
     </ul>
   )}
+=======
+  <Link to="/settings" style={{ textDecoration: 'none' }}>
+    <SidebarItem isSidebarOpen={isSidebarOpen}>
+      <FontAwesomeIcon icon={faCog} className="icon" />
+      <span>Settings</span>
+    </SidebarItem>
+  </Link>
+>>>>>>> a8f5076 (main)
 </SidebarMenu>
 
       <SidebarFooter isSidebarOpen={isSidebarOpen}>
@@ -548,6 +720,7 @@ useEffect(() => {
           <FaBars />
         </ToggleButton>
 
+<<<<<<< HEAD
       <FormContainer>
         <h3>Add Unit</h3>
         
@@ -587,6 +760,55 @@ useEffect(() => {
       </FormContainer>
 
 
+=======
+        <StatsContainer>
+          <StatBox bgColor="#11768C">
+            <h3>Total Vendor</h3>
+            <p>{totalUsers}</p>
+          </StatBox>
+
+          <StatBox bgColor="#188423">
+            <h3>Total Logins</h3>
+            <p>{totalUsers}</p>
+          </StatBox>
+        </StatsContainer>
+
+      
+
+        <FormContainer>
+          <h3>Stall Information</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Stall No.</th>
+                <th>Stall Holder</th>
+                <th>Unit</th>
+                <th>Area (Meters)</th>
+                <th>Rate Per Meter</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th className="actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredStallHolders.map((stall, index) => (
+                <tr key={index}>
+                  <td>{stall.stallNumber}</td>
+                  <td>{stall.firstName} {stall.lastName}</td>
+                  <td>{stall.location}</td>
+                  <td>{stall.areaMeters}</td>
+                  <td>{stall.billing}</td>
+                  <td>{stall.date}</td>
+                  <td>{stall.status}</td>
+                  <td>
+                    <button>View</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </FormContainer>
+>>>>>>> a8f5076 (main)
       </MainContent>
     </DashboardContainer>
   );

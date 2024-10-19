@@ -3,7 +3,11 @@ import { Link, useNavigate} from 'react-router-dom';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import styled from 'styled-components';
+<<<<<<< HEAD
 import { faBars, faList, faPlus, faIdBadge, faMagnifyingGlass, faHouseChimney, faUsers, faTriangleExclamation, faEye, faCircleUser, faPlusCircle, faStore, faTicketAlt, faCheck, faClipboard } from '@fortawesome/free-solid-svg-icons';
+=======
+import { faBars, faList, faPlus, faIdBadge, faMagnifyingGlass, faHouseChimney, faUsers, faTriangleExclamation, faEye, faCircleUser, faPlusCircle, faStore, faTicketAlt, faCheck } from '@fortawesome/free-solid-svg-icons';
+>>>>>>> a8f5076 (main)
 import { FaSignOutAlt } from 'react-icons/fa';
 import { FaSearch, FaUserCircle, FaBars } from 'react-icons/fa';
 import { collection, addDoc, setDoc, doc, getDocs} from 'firebase/firestore';
@@ -12,10 +16,15 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { interimStorage as storage } from '../components/firebase.config';
 import { interimDb, interimAuth } from '../components/firebase.config';
+<<<<<<< HEAD
 import { serverTimestamp } from "firebase/firestore";
 library.add(faList, faPlus, faUser, faIdBadge, faMagnifyingGlass, faHouseChimney, faUsers, faTriangleExclamation, faEye, faCircleUser, faBars, FaSignOutAlt);
 
 
+=======
+library.add(faList, faPlus, faUser, faIdBadge, faMagnifyingGlass, faHouseChimney, faUsers, faTriangleExclamation, faEye, faCircleUser, faBars, FaSignOutAlt);
+
+>>>>>>> a8f5076 (main)
 const AddUser = styled.div`
   display: flex;
   height: 100vh;
@@ -546,8 +555,12 @@ const NewUnit = () => {
         await setDoc(doc(interimDb, 'users', user.uid), {
           ...userWithoutPassword, 
           Image: imageUrl,        
+<<<<<<< HEAD
           status: userData.status || 'Active',
           createdAt: serverTimestamp() 
+=======
+          status: userData.status || 'Active'
+>>>>>>> a8f5076 (main)
         });
     
         alert('User added successfully!');
@@ -627,12 +640,15 @@ const NewUnit = () => {
       <span>List of Vendors</span>
     </SidebarItem>
   </Link>
+<<<<<<< HEAD
   <Link to="/stalls" style={{ textDecoration: 'none' }}>
   <SidebarItem isSidebarOpen={isSidebarOpen}>
     <FontAwesomeIcon icon={faClipboard} className="icon" />
     <span>List of Stalls</span>
   </SidebarItem>
 </Link>
+=======
+>>>>>>> a8f5076 (main)
 
   <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
     <FontAwesomeIcon icon={faUser} className="icon" />
@@ -660,7 +676,11 @@ const NewUnit = () => {
     </ul>
   )}
 
+<<<<<<< HEAD
   <Link to="/viewunit" style={{ textDecoration: 'none' }}>
+=======
+  <Link to="/Addunit" style={{ textDecoration: 'none' }}>
+>>>>>>> a8f5076 (main)
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faPlus} className="icon" />
       <span>Add New Unit</span>
@@ -703,6 +723,7 @@ const NewUnit = () => {
           </SidebarItem>
         </li>
       </Link>
+<<<<<<< HEAD
       <Link to="/View" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
@@ -711,6 +732,8 @@ const NewUnit = () => {
           </SidebarItem>
         </li>
       </Link>
+=======
+>>>>>>> a8f5076 (main)
       <Link to="/addcollector" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
@@ -722,6 +745,10 @@ const NewUnit = () => {
     </ul>
   )}
 </SidebarMenu>
+<<<<<<< HEAD
+=======
+
+>>>>>>> a8f5076 (main)
       <SidebarFooter isSidebarOpen={isSidebarOpen}>
           <LogoutButton isSidebarOpen={isSidebarOpen} onClick={handleLogout}>
             <span><FaSignOutAlt /></span>

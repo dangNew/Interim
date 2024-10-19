@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+<<<<<<< HEAD
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { FaBars, FaSearch, FaUserCircle, FaFilter, FaPrint } from 'react-icons/fa';
@@ -11,6 +12,19 @@ import ContractForm from './ContractForm';
 
 const ContractContainer = styled.div`
   display: flex; 
+=======
+import { Link,  useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt } from '@fortawesome/free-solid-svg-icons';
+import { interimDb } from '../components/firebase.config';
+import { collection, getDocs } from 'firebase/firestore';
+
+const DashboardContainer = styled.div`
+  display: flex;
+>>>>>>> a8f5076 (main)
   height: 100vh;
 `;
 
@@ -27,8 +41,12 @@ const Sidebar = styled.div`
   position: fixed;
   height: 100vh;
   z-index: 100;
+<<<<<<< HEAD
   overflow: auto;
   max-height: 100vh;
+=======
+  overflow: hidden;
+>>>>>>> a8f5076 (main)
 `;
 
 const SidebarMenu = styled.ul`
@@ -71,6 +89,35 @@ const SidebarItem = styled.li`
 `;
 
 
+<<<<<<< HEAD
+=======
+const SidebarFooter = styled.div`
+  padding: 10px;
+  margin-top: auto; /* Pushes the footer to the bottom */
+  display: flex;
+  align-items: center;
+  justify-content: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
+`;
+
+const LogoutButton = styled(SidebarItem)`
+  margin-top: 5px; /* Add some margin */
+  background-color: #dc3545; /* Bootstrap danger color */
+  color: white;
+  align-items: center;
+  margin-left: 20px;
+  padding: 5px 15px; /* Add padding for a better button size */
+  border-radius: 5px; /* Rounded corners */
+  font-weight: bold; /* Make text bold */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transitions */
+
+  &:hover {
+    background-color: #c82333; /* Darker red on hover */
+    transform: scale(1.05); /* Slightly scale up on hover */
+  }
+`;
+
+>>>>>>> a8f5076 (main)
 const ToggleButton = styled.div`
   display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'none' : 'block')};
   position: absolute;
@@ -83,13 +130,18 @@ const ToggleButton = styled.div`
 `;
 
 const MainContent = styled.div`
+<<<<<<< HEAD
   margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')};
+=======
+  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '70px')};
+>>>>>>> a8f5076 (main)
   padding-left: 40px;
   background-color: #fff;
   padding: 2rem;
   width: 100%;
   transition: margin-left 0.3s ease;
   overflow-y: auto;
+<<<<<<< HEAD
   flex: 1;
 `;
 
@@ -108,6 +160,10 @@ const AppBar = styled.div`
 
 
 
+=======
+`;
+
+>>>>>>> a8f5076 (main)
 const ProfileHeader = styled.div`
   display: flex;
   align-items: center;
@@ -156,7 +212,10 @@ const ProfileImage = styled.img`
 const StatsContainer = styled.div`
   display: flex;
   gap: 2rem;
+<<<<<<< HEAD
   margin-top: 50px; /* Added margin to avoid overlapping with AppBar */
+=======
+>>>>>>> a8f5076 (main)
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -166,8 +225,14 @@ const StatsContainer = styled.div`
 
 const StatBox = styled.div`
   background-color: ${({ bgColor }) => bgColor || '#f4f4f4'};
+<<<<<<< HEAD
   padding: 3rem;
   border-radius: 12px;
+=======
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid #ddd;  /* ADD THIS */
+>>>>>>> a8f5076 (main)
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -209,36 +274,94 @@ const StatBox = styled.div`
 const FormContainer = styled.div`
   margin-top: 2rem;
   padding: 1rem;
+<<<<<<< HEAD
   border-radius: 20px;
   background-color: #f8f9fa;
   border: 1px solid #ddd;
+=======
+  border: 1px solid #ddd;  /* ADD THIS */
+  border-radius: 15px;
+  background-color: #f8f9fa;
+>>>>>>> a8f5076 (main)
   box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
 
   h3 {
     margin-bottom: 1rem;
+<<<<<<< HEAD
+=======
+    font-size: 16px; /* Adjusted for headings */
+>>>>>>> a8f5076 (main)
   }
 
   table {
     width: 100%;
     border-collapse: collapse;
+<<<<<<< HEAD
     font-size: 14px;
 
     th, td {
       padding: 15px;
       text-align: left;
       border-bottom: 2px solid #dee2e6;
+=======
+    font-size: 14px; /* ADD THIS */
+    border: 1px solid #ddd;  /* ADD THIS */
+
+    th, td {
+      padding: 15px; 
+      text-align: left;
+      border-bottom: 2px solid #dee2e6;
+      transition: background-color 0.2s ease;
+>>>>>>> a8f5076 (main)
     }
 
     th {
       background-color: #e9ecef;
+<<<<<<< HEAD
     }
 
     tr:nth-child(even) {
       background-color: #f9f9f9;
+=======
+      font-weight: bold;
+      color: #495057; 
+    }
+
+    td {
+      background-color: #fff;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9; 
+    }
+
+    tr:hover {
+      background-color: #f1f3f5; 
+>>>>>>> a8f5076 (main)
     }
   }
 `;
 
+<<<<<<< HEAD
+=======
+const AppBar = styled.div`
+  background-color: #188423; // Set the desired color
+  padding: 40px 50px;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+`;
+
+
+
+>>>>>>> a8f5076 (main)
 const SearchBarContainer = styled.div`
   display: flex;
   align-items: center;
@@ -258,6 +381,7 @@ const SearchInput = styled.input`
   width: 100%;
 `;
 
+<<<<<<< HEAD
 
 const SearchBarCont = styled.div`
   display: flex;
@@ -421,10 +545,21 @@ const Contract = () => {
   const [selectedUnit, setSelectedUnit] = useState('Select Unit');
   const [dateFilter, setDateFilter] = useState('');
   const [stallNoFilter, setStallNoFilter] = useState('');
+=======
+const Contract = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const sidebarRef = useRef(null);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [activeUsers, setActiveUsers] = useState(0);
+  const [recentUsers, setRecentUsers] = useState([]);
+  const [loggedInUser, setLoggedInUser] = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+>>>>>>> a8f5076 (main)
   const navigate = useNavigate();
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
+<<<<<<< HEAD
     
   };
 
@@ -453,6 +588,13 @@ const Contract = () => {
 
     fetchUnits();
   }, []);
+=======
+  };
+
+  const handleClickOutside = (event) => {
+   
+  };
+>>>>>>> a8f5076 (main)
 
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
@@ -463,6 +605,7 @@ const Contract = () => {
 
   // Fetch total users and recent user data from Firestore
   useEffect(() => {
+<<<<<<< HEAD
     const fetchData = async () => {
       const querySnapshot = await getDocs(collection(stallholderDb, 'approvedVendors'));
     
@@ -516,15 +659,51 @@ const Contract = () => {
   }, [selectedUnit, stallHolders]);
   
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // State for dropdown
+=======
+    const fetchUsers = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(interimDb, 'users'));
+        const allUsers = querySnapshot.docs.map(doc => doc.data());
+
+        console.log('Fetched Users:', allUsers); 
+        const validUsers = allUsers.filter(user => user.email && user.firstName && user.lastName);
+        setTotalUsers(validUsers.length);
+        
+     
+        const activeUsersCount = validUsers.filter(user => user.status?.toLowerCase() === 'active').length;
+        setActiveUsers(activeUsersCount);
+
+        setRecentUsers(validUsers.slice(-5));
+
+        const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
+        if (loggedInUserData) {
+          const currentUser = allUsers.find(user => user.email === loggedInUserData.email);
+          setLoggedInUser(currentUser || loggedInUserData);
+        }
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+>>>>>>> a8f5076 (main)
   const handleLogout = () => {
    
     localStorage.removeItem('userData'); 
     navigate('/login');
   };
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> a8f5076 (main)
   const handleDropdownToggle = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
+<<<<<<< HEAD
 
   const handlePrint = () => {
     const printContent = `
@@ -631,6 +810,14 @@ const Contract = () => {
   return (
     <ContractContainer>
      <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
+=======
+    
+  return (
+
+
+    <DashboardContainer>
+        <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
+>>>>>>> a8f5076 (main)
         <Link to="/profile" style={{ textDecoration: 'none' }}>
         <ProfileHeader isSidebarOpen={isSidebarOpen}>
           {loggedInUser && loggedInUser.Image ? (
@@ -671,12 +858,15 @@ const Contract = () => {
       <span>List of Vendors</span>
     </SidebarItem>
   </Link>
+<<<<<<< HEAD
   <Link to="/stalls" style={{ textDecoration: 'none' }}>
   <SidebarItem isSidebarOpen={isSidebarOpen}>
     <FontAwesomeIcon icon={faClipboard} className="icon" />
     <span>List of Stalls</span>
   </SidebarItem>
 </Link>
+=======
+>>>>>>> a8f5076 (main)
 
   <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
     <FontAwesomeIcon icon={faUser} className="icon" />
@@ -704,7 +894,11 @@ const Contract = () => {
     </ul>
   )}
 
+<<<<<<< HEAD
   <Link to="/viewunit" style={{ textDecoration: 'none' }}>
+=======
+  <Link to="/Addunit" style={{ textDecoration: 'none' }}>
+>>>>>>> a8f5076 (main)
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faPlus} className="icon" />
       <span>Add New Unit</span>
@@ -724,7 +918,10 @@ const Contract = () => {
       <span>Contract</span>
     </SidebarItem>
   </Link>
+<<<<<<< HEAD
 
+=======
+>>>>>>> a8f5076 (main)
   <Link to="/ticket" style={{ textDecoration: 'none' }}>
   <SidebarItem isSidebarOpen={isSidebarOpen}>
     <FontAwesomeIcon icon={faTicketAlt} className="icon" />
@@ -732,6 +929,7 @@ const Contract = () => {
   </SidebarItem>
 </Link>
 
+<<<<<<< HEAD
 <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
     <FontAwesomeIcon icon={faUser} className="icon" />
     <span>Manage Ambulant</span>
@@ -765,6 +963,14 @@ const Contract = () => {
       </Link>
     </ul>
   )}
+=======
+  <Link to="/settings" style={{ textDecoration: 'none' }}>
+    <SidebarItem isSidebarOpen={isSidebarOpen}>
+      <FontAwesomeIcon icon={faCog} className="icon" />
+      <span>Settings</span>
+    </SidebarItem>
+  </Link>
+>>>>>>> a8f5076 (main)
 </SidebarMenu>
 
       <SidebarFooter isSidebarOpen={isSidebarOpen}>
@@ -776,6 +982,7 @@ const Contract = () => {
       </Sidebar>
 
 
+<<<<<<< HEAD
 
       <MainContent isSidebarOpen={isSidebarOpen}>
         <AppBar>
@@ -885,3 +1092,72 @@ const Contract = () => {
 };
 
 export default Contract;
+=======
+        
+
+
+
+
+        <MainContent isSidebarOpen={isSidebarOpen}>
+        
+          <ToggleButton onClick={toggleSidebar}>
+            <FaBars />
+          </ToggleButton>
+          
+        
+          <AppBar>
+        <div className="title">INTERIM</div>
+      </AppBar>
+         
+          <ProfileHeader>
+            <h1>Add New Unit</h1>
+          </ProfileHeader>
+
+          <StatsContainer>
+          <StatBox bgColor="#11768C">
+          
+            <h3>Total Users</h3>
+            <p>{totalUsers}</p> {/* Display the total user count */}
+          </StatBox>
+
+          <StatBox bgColor="#188423">
+            <h3>Active Users</h3>
+            <p>{activeUsers}</p> {/* Display the count of active users */}
+          </StatBox>
+        </StatsContainer>
+
+        
+
+        {/* Recently Registered Users Section */}
+        {/* Recently Registered Users Section */}
+<FormContainer>
+  <h3>Recently Registered</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Phone</th>
+      </tr>
+    </thead>
+    <tbody>
+      {recentUsers.map((user, index) => (
+        <tr key={index}>
+          <td>{user.email || ''}</td>
+          <td>{user.firstName || ''}</td>
+          <td>{user.lastName || ''}</td>
+          <td>{user.contactNum || ''}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</FormContainer>
+
+      </MainContent>
+      </DashboardContainer>
+  );
+};
+
+export default Contract;
+>>>>>>> a8f5076 (main)

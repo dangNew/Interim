@@ -3,7 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { FaBars, FaSearch, FaUserCircle, FaFilter, FaPrint } from 'react-icons/fa';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+<<<<<<< HEAD
 import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faCheck, faClipboard} from '@fortawesome/free-solid-svg-icons';
+=======
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt, faCheck } from '@fortawesome/free-solid-svg-icons';
+>>>>>>> a8f5076 (main)
 import { FaSignOutAlt } from 'react-icons/fa';
 import { collection, getDocs } from 'firebase/firestore';
 import { stallholderDb } from '../components/firebase.config';
@@ -27,8 +31,12 @@ const Sidebar = styled.div`
   position: fixed;
   height: 100vh;
   z-index: 100;
+<<<<<<< HEAD
   overflow: auto;
   max-height: 100vh;
+=======
+  overflow: hidden;
+>>>>>>> a8f5076 (main)
 `;
 
 const SidebarMenu = styled.ul`
@@ -574,12 +582,15 @@ const Dashboard = () => {
       <span>List of Vendors</span>
     </SidebarItem>
   </Link>
+<<<<<<< HEAD
   <Link to="/stalls" style={{ textDecoration: 'none' }}>
   <SidebarItem isSidebarOpen={isSidebarOpen}>
     <FontAwesomeIcon icon={faClipboard} className="icon" />
     <span>List of Stalls</span>
   </SidebarItem>
 </Link>
+=======
+>>>>>>> a8f5076 (main)
 
   <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
     <FontAwesomeIcon icon={faUser} className="icon" />
@@ -607,7 +618,11 @@ const Dashboard = () => {
     </ul>
   )}
 
+<<<<<<< HEAD
   <Link to="/viewunit" style={{ textDecoration: 'none' }}>
+=======
+  <Link to="/Addunit" style={{ textDecoration: 'none' }}>
+>>>>>>> a8f5076 (main)
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faPlus} className="icon" />
       <span>Add New Unit</span>
@@ -650,6 +665,7 @@ const Dashboard = () => {
           </SidebarItem>
         </li>
       </Link>
+<<<<<<< HEAD
       <Link to="/View" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
@@ -658,6 +674,8 @@ const Dashboard = () => {
           </SidebarItem>
         </li>
       </Link>
+=======
+>>>>>>> a8f5076 (main)
       <Link to="/addcollector" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
@@ -669,6 +687,10 @@ const Dashboard = () => {
     </ul>
   )}
 </SidebarMenu>
+<<<<<<< HEAD
+=======
+
+>>>>>>> a8f5076 (main)
       <SidebarFooter isSidebarOpen={isSidebarOpen}>
           <LogoutButton isSidebarOpen={isSidebarOpen} onClick={handleLogout}>
             <span><FaSignOutAlt /></span>
