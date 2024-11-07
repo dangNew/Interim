@@ -3,9 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faClipboard, faCheck} from '@fortawesome/free-solid-svg-icons';
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faClipboard, faCheck, faPlusCircle, faCogs} from '@fortawesome/free-solid-svg-icons';
 import { collection, getDocs, addDoc } from 'firebase/firestore';
-import { interimDb } from '../components/firebase.config'; // Import the correct firestore instance
+import { interimDb, rentmobileDb } from '../components/firebase.config'; // Import the correct firestore instance
 
 const DashboardContainer = styled.div`
   display: flex;
@@ -25,7 +25,7 @@ const Sidebar = styled.div`
   position: fixed;
   height: 100vh;
   z-index: 100;
-  overflow: hidden;
+  overflow: auto;
 `;
 
 const SidebarMenu = styled.ul`
@@ -142,33 +142,50 @@ const ProfileHeader = styled.div`
 
 const FormContainer = styled.div`
   margin-top: 2rem;
-  padding: 1.5rem; /* Slightly increased padding for a more spacious look */
-  border-radius: 20px;
-  background-color: #d4edda; /* Light green background */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Softer shadow for a modern feel */
+  padding: 3rem; /* Spacious feel */
+  border-radius: 12px; /* Softer border radius */
+  background-color: #ffffff; /* White background */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Soft shadow */
+  border: 1px solid #e0e0e0; /* Subtle border */
+  max-width: 600px; /* Max width */
+  margin-left: auto; /* Center align */
+  margin-right: auto; /* Center align */
+  font-family: 'Roboto', sans-serif; /* Consistent font */
 
   h3 {
-    margin-bottom: 1rem;
-    font-family: 'Roboto', sans-serif;
-    color: #155724; /* Dark green for the heading */
+    margin-bottom: 2rem; /* Increased margin */
+    color: #343a40; /* Dark gray for the heading */
+    font-size: 26px; /* Larger heading */
+    font-weight: 700; /* Bold weight */
+    text-align: center; /* Centered heading */
+    border-bottom: 2px solid #e0e0e0; /* Underline */
+    padding-bottom: 1rem; /* Space below heading */
   }
 
   table {
     width: 100%;
     border-collapse: collapse;
 
-    th, td {
-      padding: 20px;
+    th,
+    td {
+      padding: 15px; /* Standardized padding */
       text-align: left;
-      border-bottom: 1px solid #c3e6cb; /* Light green border */
+      border-bottom: 1px solid #e0e0e0; /* Subtle border */
     }
 
     th {
-      background-color: #c3e6cb; /* Light green background for header */
+      background-color: #f8f9fa; /* Light gray header */
+      font-weight: 700; /* Bold headers */
+      color: #495057; /* Darker text */
     }
 
     tr:nth-child(even) {
-      background-color: #f8f9fa; /* Keeping alternating row colors */
+      background-color: #f9f9f9; /* Alternating row colors */
+    }
+
+    tr:hover {
+      background-color: #e9ecef; /* Highlight row on hover */
+      transition: background-color 0.3s ease; /* Smooth transition */
     }
   }
 `;
@@ -228,40 +245,34 @@ const ProfileImage = styled.img`
 `;
 const InputField = styled.div`
   position: relative;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 
-  input {
+  input, select {
     width: 100%;
-    padding: 12px 10px;
+    padding: 0.75rem;
     border: 1px solid #ced4da;
-    border-radius: 5px;
+    border-radius: 4px;
     font-size: 16px;
+    font-family: 'Roboto', sans-serif;
     color: #495057;
-    background-color: #f8f9fa;
-    transition: all 0.2s ease;
+    transition: border-color 0.3s ease;
 
     &:focus {
-      border-color: #007bff;
+      border-color: #188423; /* Focus color */
       outline: none;
-    }
-
-    &:focus + label,
-    &:not(:placeholder-shown) + label {
-      top: -8px;
-      left: 10px;
-      font-size: 12px;
-      color: #007bff;
     }
   }
 
   label {
     position: absolute;
-    top: 12px;
+    top: -10px;
     left: 12px;
-    font-size: 16px;
+    background-color: #ffffff;
     color: #6c757d;
-    pointer-events: none;
-    transition: all 0.2s ease;
+    font-size: 14px;
+    padding: 0 5px;
+    transition: all 0.3s ease;
+    font-family: 'Roboto', sans-serif;
   }
 `;
 
@@ -307,7 +318,7 @@ const Dashboard = () => {
         });
 
         // Use interimDb to add the document to the 'unit' collection
-        const docRef = await addDoc(collection(interimDb, 'unit'), {
+        const docRef = await addDoc(collection(rentmobileDb, 'unit'), {
             name: unitName,
             location: location,
             dateRegistered: dateRegistered,
@@ -328,7 +339,7 @@ const Dashboard = () => {
 
 useEffect(() => {
   const checkAndCreateCollection = async () => {
-    const unitsCollection = collection(interimDb, 'unit');
+    const unitsCollection = collection(rentmobileDb, 'unit');
     const unitsSnapshot = await getDocs(unitsCollection);
 
     // If the collection doesn't exist (no documents in it), create a default document
@@ -432,7 +443,7 @@ useEffect(() => {
       <span>List of Vendors</span>
     </SidebarItem>
   </Link>
-  <Link to="/stalls" style={{ textDecoration: 'none' }}>
+  <Link to="/listofstalls" style={{ textDecoration: 'none' }}>
   <SidebarItem isSidebarOpen={isSidebarOpen}>
     <FontAwesomeIcon icon={faClipboard} className="icon" />
     <span>List of Stalls</span>
@@ -475,7 +486,7 @@ useEffect(() => {
   <Link to="/manage-roles" style={{ textDecoration: 'none' }}>
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faUsers} className="icon" />
-      <span>Manage Roles</span>
+      <span>Manage Appraisal</span>
     </SidebarItem>
   </Link>
 
@@ -492,27 +503,52 @@ useEffect(() => {
     <span>Manage Ticket</span>
   </SidebarItem>
 </Link>
-
 <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faUser} className="icon" />
-    <span>Manage Ambulant</span>
+    <FontAwesomeIcon icon={faCogs} className="icon" />
+    <span>Manage Zone</span>
   </SidebarItem>
 
   {isDropdownOpen && (
     <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/assign" style={{ textDecoration: 'none' }}>
+      <Link to="/addzone" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faCheck} className="icon" />
-            <span> Assign Collector</span>
+            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+            <span> Add Zone</span>
           </SidebarItem>
         </li>
       </Link>
-      <Link to="/View" style={{ textDecoration: 'none' }}>
+      <Link to="/viewzone" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
           <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span> View Collector</span>
+            <span> View Zone</span>
+          </SidebarItem>
+        </li>
+      </Link>
+    
+    </ul>
+  )}
+<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+    <FontAwesomeIcon icon={faUser} className="icon" />
+    <span>Manage Space</span>
+  </SidebarItem>
+
+  {isDropdownOpen && (
+    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+      <Link to="/addspace" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+            <span> Add Space</span>
+          </SidebarItem>
+        </li>
+      </Link>
+      <Link to="/viewspace" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+          <FontAwesomeIcon icon={faSearch} className="icon" />
+            <span> View Space</span>
           </SidebarItem>
         </li>
       </Link>

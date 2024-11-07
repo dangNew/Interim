@@ -70,7 +70,7 @@ const ErrorMsg = styled.p`
 const ContractForm = () => {
   const [contractData, setContractData] = useState({
     stallholderFullName: '',
-    stallNumber: '',
+    stallId: '', 
     subject: '',
     startDate: '',
     endDate: '',
@@ -80,19 +80,19 @@ const ContractForm = () => {
   const [loadingNames, setLoadingNames] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const fetchStallholderName = debounce((stallNumber) => {
-    console.log("Searching for stall number:", stallNumber); // Log the stall number
-    if (stallNumber) {
+  const fetchStallholderName = debounce((stallId) => {
+    console.log("Searching for stall ID:", stallId); // Log the stall ID
+    if (stallId) {
       setLoadingNames(true);
       setErrorMessage('');
-      // Adjusting the query to access the stallInfo field
+      // Adjusting the query to access the stallId field
       const q = query(
         collection(stallholderDb, 'users'),
-        where('stallInfo.stallNumber', '==', stallNumber) // Change here
+        where('stallInfo.stallId', '==', stallId) // Change here to stallId
       );
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
         console.log("Query Snapshot:", querySnapshot); // Log the snapshot
-  
+
         if (!querySnapshot.empty) {
           const userData = querySnapshot.docs[0].data();
           const fullName = `${userData.firstName} ${userData.lastName}`;
@@ -105,11 +105,11 @@ const ContractForm = () => {
             ...prevData,
             stallholderFullName: '',
           }));
-          setErrorMessage('No user found for this stall number.');
+          setErrorMessage('No user found for this stall ID.');
         }
         setLoadingNames(false);
       });
-  
+
       return () => unsubscribe();
     } else {
       setContractData((prevData) => ({
@@ -119,11 +119,10 @@ const ContractForm = () => {
       setErrorMessage('');
     }
   }, 500);
-  
 
   useEffect(() => {
-    if (contractData.stallNumber) {
-      fetchStallholderName(contractData.stallNumber);
+    if (contractData.stallId) { // Change here to stallId
+      fetchStallholderName(contractData.stallId); // Change here to stallId
     } else {
       setContractData((prevData) => ({
         ...prevData,
@@ -133,7 +132,7 @@ const ContractForm = () => {
     }
 
     return () => fetchStallholderName.cancel(); // Cleanup the debounce on unmount
-  }, [contractData.stallNumber]);
+  }, [contractData.stallId]); // Change here to stallId
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -143,9 +142,6 @@ const ContractForm = () => {
     }));
   };
 
-  
-
-  
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -153,7 +149,7 @@ const ContractForm = () => {
       alert('Contract added successfully!');
       setContractData({
         stallholderFullName: '',
-        stallNumber: '',
+        stallId: '', // Change here to stallId
         subject: '',
         startDate: '',
         endDate: '',
@@ -165,19 +161,20 @@ const ContractForm = () => {
     }
   };
 
-  
   return (
+  
+  
     <FormContainer>
       <FormSection>
         <h3>Add New Contract</h3>
         <form onSubmit={handleSubmit}>
           <div style={{ position: 'relative' }}>
-            {/* Stall Number Input */}
+            {/* Stall ID Input */}
             <Input
               type="text"
-              name="stallNumber"
-              placeholder="Stall Number"
-              value={contractData.stallNumber}
+              name="stallId" // Change here to stallId
+              placeholder="Stall ID" // Change here to Stall ID
+              value={contractData.stallId} // Change here to stallId
               onChange={handleChange}
               required
             />
@@ -193,7 +190,6 @@ const ContractForm = () => {
             {errorMessage && <ErrorMsg>{errorMessage}</ErrorMsg>}
           </div>
 
-          
           <Input
             type="text"
             name="subject"

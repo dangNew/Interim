@@ -7,7 +7,7 @@ import { faBars, faList, faPlus, faIdBadge, faMagnifyingGlass, faHouseChimney, f
 import { FaSignOutAlt } from 'react-icons/fa';
 import { FaSearch, FaUserCircle, FaBars } from 'react-icons/fa';
 import { collection, addDoc, setDoc, doc, getDocs} from 'firebase/firestore';
-import { faHome, faShoppingCart, faUser, faSearch, faFileContract, faCog } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faShoppingCart, faUser, faSearch, faFileContract, faCogs} from '@fortawesome/free-solid-svg-icons';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { interimStorage as storage } from '../components/firebase.config';
@@ -34,7 +34,7 @@ const Sidebar = styled.div`
   position: fixed;
   height: 100vh;
   z-index: 100;
-  overflow: hidden;
+  overflow: auto;
 `;
 
 const SidebarMenu = styled.ul`
@@ -151,16 +151,17 @@ const Divider = styled.hr`
 `;
 const FormContainer = styled.form`
   display: grid;
-  grid-template-columns: 2fr 1fr;
   gap: 1.5rem;
   background: #fff;
   border: 2px solid #ddd;
-  padding: 60px;
-  border-radius: 10px;
-  max-width: 100%;
+  padding: 1rem;
+  border-radius: 20px;
+  max-width: 98%;
   width: 100%;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   align-self: center;
+  margin-top: 20px;
+
 
   label {
     font-size: 20px;
@@ -171,7 +172,7 @@ const FormContainer = styled.form`
     padding: 0.5rem;
     border-radius: 4px;
     border: 1px solid #ddd;
-    width: 100%;
+    width:90%;
   }
 
   .section-title {
@@ -394,6 +395,7 @@ const NewUnit = () => {
   const [imagePreviewUrl, setImagePreviewUrl] = useState(null); 
   const sidebarRef = useRef(null);
   const [isPositionActive, setIsPositionActive] = useState(false); // State for Toggle Switch
+  const [contactNumWarning, setContactNumWarning] = useState('');
   const [loggedInUser, setLoggedInUser] = useState(null);
   const navigate = useNavigate();
   const [userData, setUserData] = useState({
@@ -491,11 +493,31 @@ const NewUnit = () => {
   
     const handleChange = (e) => {
       const { id, value } = e.target;
-      setUserData(prevState => ({
-        ...prevState,
-        [id]: value
-      }));
+    
+      if (id === 'contactNum') {
+        // Only allow digits and limit to 11 characters
+        const numericValue = value.replace(/\D/g, ''); // Remove any non-numeric characters
+        if (numericValue.length <= 11) {
+          setUserData(prevState => ({
+            ...prevState,
+            [id]: numericValue
+          }));
+          
+          // Set warning if contactNum is not exactly 11 digits
+          if (numericValue.length !== 11 && numericValue.length > 0) {
+            setContactNumWarning('Contact number must be exactly 11 digits.');
+          } else {
+            setContactNumWarning(''); // Clear warning if length is valid
+          }
+        }
+      } else {
+        setUserData(prevState => ({
+          ...prevState,
+          [id]: value
+        }));
+      }
     };
+    
   
     const handleFileChange = (e) => {
       const file = e.target.files[0];
@@ -627,7 +649,7 @@ const NewUnit = () => {
       <span>List of Vendors</span>
     </SidebarItem>
   </Link>
-  <Link to="/stalls" style={{ textDecoration: 'none' }}>
+  <Link to="/listofstalls" style={{ textDecoration: 'none' }}>
   <SidebarItem isSidebarOpen={isSidebarOpen}>
     <FontAwesomeIcon icon={faClipboard} className="icon" />
     <span>List of Stalls</span>
@@ -670,7 +692,7 @@ const NewUnit = () => {
   <Link to="/manage-roles" style={{ textDecoration: 'none' }}>
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faUsers} className="icon" />
-      <span>Manage Roles</span>
+      <span>Manage Appraisal</span>
     </SidebarItem>
   </Link>
 
@@ -687,27 +709,53 @@ const NewUnit = () => {
     <span>Manage Ticket</span>
   </SidebarItem>
 </Link>
-
 <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faUser} className="icon" />
-    <span>Manage Ambulant</span>
+    <FontAwesomeIcon icon={faCogs} className="icon" />
+    <span>Manage Zone</span>
   </SidebarItem>
 
   {isDropdownOpen && (
     <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/assign" style={{ textDecoration: 'none' }}>
+      <Link to="/addzone" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faCheck} className="icon" />
-            <span> Assign Collector</span>
+            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+            <span> Add Zone</span>
           </SidebarItem>
         </li>
       </Link>
-      <Link to="/View" style={{ textDecoration: 'none' }}>
+      <Link to="/viewzone" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
           <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span> View Collector</span>
+            <span> View Zone</span>
+          </SidebarItem>
+        </li>
+      </Link>
+    
+    </ul>
+  )}
+
+<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+    <FontAwesomeIcon icon={faUser} className="icon" />
+    <span>Manage Space</span>
+  </SidebarItem>
+
+  {isDropdownOpen && (
+    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+      <Link to="/addspace" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+            <span> Add Space</span>
+          </SidebarItem>
+        </li>
+      </Link>
+      <Link to="/viewspace" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+          <FontAwesomeIcon icon={faSearch} className="icon" />
+            <span> View Space</span>
           </SidebarItem>
         </li>
       </Link>
@@ -757,8 +805,16 @@ const NewUnit = () => {
               <input id="lastName" type="text" value={userData.lastName} onChange={handleChange} placeholder="Enter Last Name" />
             </div>
             <div className="form-section">
-              <label htmlFor="contactNum">Contact Number</label>
-              <input id="contactNum" type="text" value={userData.contactNum} onChange={handleChange} placeholder="Enter Contact Number" />
+            <label htmlFor="contactNum">Contact Number</label>
+  <input
+    type="text"
+    id="contactNum"
+    value={userData.contactNum}
+    onChange={handleChange}
+    placeholder="Enter 11-digit contact number"
+  />
+  {contactNumWarning && <p style={{ color: 'red' }}>{contactNumWarning}</p>}
+  {/* Other form elements */}
             </div>
             <span></span>
             <div className="section-title">Login Details</div>

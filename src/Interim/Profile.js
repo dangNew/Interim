@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { interimDb } from '../components/firebase.config';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import {  FaSignOutAlt, FaCamera   } from 'react-icons/fa';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt, faClipboard, faCheck} from '@fortawesome/free-solid-svg-icons';
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt, faClipboard, faCheck, faPlusCircle, faCogs} from '@fortawesome/free-solid-svg-icons';
 
 
 const DashboardContainer = styled.div`
@@ -27,7 +27,7 @@ const Sidebar = styled.div`
   position: fixed;
   height: 100vh;
   z-index: 100;
-  overflow: hidden;
+  overflow: auto;
 `;
 
 const SidebarMenu = styled.ul`
@@ -497,7 +497,7 @@ const Dashboard = () => {
       <span>List of Vendors</span>
     </SidebarItem>
   </Link>
-  <Link to="/stalls" style={{ textDecoration: 'none' }}>
+  <Link to="/listofstalls" style={{ textDecoration: 'none' }}>
   <SidebarItem isSidebarOpen={isSidebarOpen}>
     <FontAwesomeIcon icon={faClipboard} className="icon" />
     <span>List of Stalls</span>
@@ -540,7 +540,7 @@ const Dashboard = () => {
   <Link to="/manage-roles" style={{ textDecoration: 'none' }}>
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faUsers} className="icon" />
-      <span>Manage Roles</span>
+      <span>Manage Appraisal</span>
     </SidebarItem>
   </Link>
 
@@ -557,27 +557,52 @@ const Dashboard = () => {
     <span>Manage Ticket</span>
   </SidebarItem>
 </Link>
-
 <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faUser} className="icon" />
-    <span>Manage Ambulant</span>
+    <FontAwesomeIcon icon={faCogs} className="icon" />
+    <span>Manage Zone</span>
   </SidebarItem>
 
   {isDropdownOpen && (
     <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/assign" style={{ textDecoration: 'none' }}>
+      <Link to="/addzone" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faCheck} className="icon" />
-            <span> Assign Collector</span>
+            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+            <span> Add Zone</span>
           </SidebarItem>
         </li>
       </Link>
-      <Link to="/View" style={{ textDecoration: 'none' }}>
+      <Link to="/viewzone" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
           <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span> View Collector</span>
+            <span> View Zone</span>
+          </SidebarItem>
+        </li>
+      </Link>
+    
+    </ul>
+  )}
+<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+    <FontAwesomeIcon icon={faUser} className="icon" />
+    <span>Manage Space</span>
+  </SidebarItem>
+
+  {isDropdownOpen && (
+    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+      <Link to="/addspace" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+            <span> Add Space</span>
+          </SidebarItem>
+        </li>
+      </Link>
+      <Link to="/viewspace" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+          <FontAwesomeIcon icon={faSearch} className="icon" />
+            <span> View Space</span>
           </SidebarItem>
         </li>
       </Link>

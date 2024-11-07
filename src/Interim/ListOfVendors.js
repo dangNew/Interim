@@ -3,11 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { FaBars, FaSearch, FaUserCircle, FaFilter, FaPrint } from 'react-icons/fa';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faCheck, faClipboard} from '@fortawesome/free-solid-svg-icons';
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faCheck, faClipboard, faPlusCircle, faEye, faCogs} from '@fortawesome/free-solid-svg-icons';
 import { FaSignOutAlt } from 'react-icons/fa';
 import { collection, getDocs } from 'firebase/firestore';
 import { stallholderDb } from '../components/firebase.config';
+import { interimDb } from '../components/firebase.config';
 
+const ROWS_PER_PAGE = 10;
 
 const DashboardContainer = styled.div`
   display: flex;
@@ -231,11 +233,39 @@ const FormContainer = styled.div`
 
     th {
       background-color: #e9ecef;
+      color: #333;
+      font-weight: bold;
     }
 
     tr:nth-child(even) {
-      background-color: #f9f9f9;
+      background-color: #f2f2f2;
     }
+
+    tr:nth-child(odd) {
+      background-color: #ffffff;
+    }
+
+    tr:hover {
+      background-color: #f1f3f5; /* Highlight row on hover */
+    }
+  }
+
+  .view-btn {
+    padding: 8px 12px;
+    font-size: 14px;
+    border: none;
+    color: #ffffff;
+    background-color: #007bff; /* Blue */
+    cursor: pointer;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.3s ease;
+  }
+
+  .view-btn:hover {
+    background-color: #0056b3;
   }
 `;
 
@@ -262,12 +292,25 @@ const SearchInput = styled.input`
 const SearchBarCont = styled.div`
   display: flex;
   align-items: center;
-  padding: 20px;
-  background-color: #e9ecef;
-  border-radius: 10px;
-  margin-bottom: 50px;
-   margin-top: 50px; /*sa babaw nga margin*/
-  /* Always display the search bar */
+  padding: 12px 20px;
+  padding-left: 100px; /* Add more padding on the left */
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #ced4da;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+  margin: 30px 0; /* Remove auto centering */
+  transition: box-shadow 0.3s;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+`;
+
+const SearchIcon = styled(FaSearch)`
+  color: #6c757d;
+  font-size: 1.2em;
 `;
 
 const SearchIn = styled.input`
@@ -276,14 +319,29 @@ const SearchIn = styled.input`
   outline: none;
   margin-left: 10px;
   width: 100%;
-`;
+  font-size: 1em;
+  color: #495057;
 
+  ::placeholder {
+    color: #adb5bd;
+  }
+
+  &:focus {
+    color: #212529;
+  }
+`;
+const TopBarContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  
+`;
 const PrintButton = styled.button`
   background-color: #188423; /* Match the AppBar color */
   color: white;
   border: none;
   border-radius: 5px;
-  padding: 10px 15px;
+  padding: 12px 20px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -311,16 +369,16 @@ const FilterButton = styled.button`
   background-color: #e9ecef;
   border: none;
   border-radius: 5px;
-  padding: 10px 15px; /* Match the padding of PrintButton */
+  padding: 12px 20px;
   cursor: pointer;
-  height: 40px; /* Set a fixed height if necessary */
+  height: 35px;
 
   &:hover {
     background-color: #d3d3d3;
   }
 
   svg {
-    margin-right: 5px; /* Space between icon and text */
+    margin-right: 2px;
   }
 `;
 
@@ -354,7 +412,106 @@ const LogoutButton = styled(SidebarItem)`
     transform: scale(1.05); /* Slightly scale up on hover */
   }
 `;
+const PaginationContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px; /* Spacing between buttons */
+  margin-top: 20px;
+`;
 
+const PageButton = styled.button`
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 1.1rem; /* Larger font */
+  min-width: 50px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    background-color: #0056b3;
+    transform: scale(1.05); /* Slightly enlarges on hover */
+  }
+
+  &:disabled {
+    background-color: #c3c3c3;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 600px) {
+    padding: 10px 14px;
+    font-size: 1rem;
+  }
+`;
+
+const CurrentPageIndicator = styled.span`
+  margin: 0 8px;
+  font-size: 1.2rem;
+  color: #333;
+`;
+
+const DropdownContainer = styled.div`
+  position: relative;
+  display: inline-block;
+`;
+
+const DropdownButton = styled.button`
+  background-color: #007bff; /* Match the AppBar color */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+
+  &:hover {
+    background-color: #155724; /* Darker shade for hover */
+  }
+
+  svg {
+    margin-right: 5px; /* Space between icon and text */
+  }
+`;
+
+const DropdownContent = styled.div`
+  display: ${({ isOpen }) => (isOpen ? 'block' : 'none')};
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+`;
+
+const DropdownItem = styled.div`
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #ddd;
+  }
+`;
+const ViewButton = styled.button`
+  background-color: #28a745; /* Green color */
+  color: white;
+  border: none;
+  padding: 8px 16px; /* Increased padding for a larger button */
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem; /* Increased font size for better readability */
+
+  &:hover {
+    background-color: #218838; /* Darker green on hover */
+  }
+`;
 
 
 const Dashboard = () => {
@@ -365,17 +522,60 @@ const Dashboard = () => {
   const [totalUsers, setTotalUsers] = useState(0); // State to store 
   const [filteredStallHolders, setFilteredStallHolders] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-   const [dateFilter, setDateFilter] = useState('');
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const [stallNoFilter, setStallNoFilter] = useState('');
+  const [units, setUnits] = useState([]);
+  const [selectedUnit, setSelectedUnit] = useState('Select Unit');
   const navigate = useNavigate();
+  
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+  const handleView = (stallHolder) => {
+    navigate(`/view-stallholder/${stallHolder.id}`);
+  };
+  const handleUnitSelect = (unit) => {
+    setSelectedUnit(unit);
+    setIsDropdownOpen(false);
+    setFilteredStallHolders(unit === 'All' ? stallHolders : stallHolders.filter(stall => stall.location === unit));
+  };
+  
+  useEffect(() => {
+    const fetchUnits = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(interimDb, 'unit'));
+        const unitData = querySnapshot.docs.map(doc => doc.data().name); 
+        setUnits(['All', ...unitData]); // Add "All" as the first option
+      } catch (error) {
+        console.error("Error fetching units:", error);
+      }
+    };
+  
+    fetchUnits();
+  }, []);
+  
 
-  const handleClickOutside = (event) => {
-   
+  const totalPages = Math.ceil(filteredStallHolders.length / itemsPerPage);
+
+  const currentStallHolders = filteredStallHolders.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
 
+  const handlePrevPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+  
+  const handleClickOutside = (event) => {
+    // Handle clicks outside of dropdown, if necessary
+  };
+  
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
@@ -387,51 +587,58 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       const querySnapshot = await getDocs(collection(stallholderDb, 'users'));
-  
+
       const data = querySnapshot.docs.map((doc) => {
-        const stallInfo = doc.data().stallInfo || {}; // Fetch stallInfo map
+        const stallInfo = doc.data().stallInfo || {};
         const dateOfRegistration = doc.data().dateOfRegistration
           ? doc.data().dateOfRegistration.toDate().toLocaleDateString()
           : '';
-  
+
         return {
           id: doc.id,
-          stallNumber: stallInfo.stallNumber || '',  
-          firstName: doc.data().firstName || '',    
-          lastName: doc.data().lastName || '',     
-          location: stallInfo.location || '',       
-          areaMeters: stallInfo.stallSize || '',   
-          billing: stallInfo.ratePerMeter || '',  
-          date: dateOfRegistration,                
-          status: doc.data().status || stallInfo.status || '',  // Check both status fields
+          stallNumber: stallInfo.stallNumber || '',
+          firstName: doc.data().firstName || '',
+          lastName: doc.data().lastName || '',
+          location: stallInfo.location || '',
+          areaMeters: stallInfo.stallSize || '',
+          billing: stallInfo.ratePerMeter || '',
+          date: dateOfRegistration,
         };
       });
-  
-      console.log(data); // Inspect the fetched data
-      const acceptedStallHolders = data.filter((stall) =>
-        ['Accepted', 'accepted', 'ACCEPTED'].includes(stall.status)
-      );
-  
-      setStallHolders(acceptedStallHolders); 
-      setFilteredStallHolders(acceptedStallHolders);
-      setTotalUsers(acceptedStallHolders.length);
+
+      console.log(data);
+      setStallHolders(data);
+      setTotalUsers(data.length);
+
+      let filteredData = data;
+
+      if (selectedUnit !== 'Select Unit') {
+        filteredData = filteredData.filter(stall => stall.location === selectedUnit);
+      }
+
+      setFilteredStallHolders(filteredData);
     };
 
     fetchData();
-  }, []);
-
+  }, [selectedUnit]);
+  
+  useEffect(() => {
+    if (selectedUnit === 'All') {
+      setFilteredStallHolders(stallHolders); // Show all stallholders when "All" is selected
+    } else if (selectedUnit !== 'Select Unit') {
+      setFilteredStallHolders(stallHolders.filter(stall => stall.location === selectedUnit));
+    }
+  }, [selectedUnit, stallHolders]);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // State for dropdown
   const handleLogout = () => {
-   
     localStorage.removeItem('userData'); 
     navigate('/login');
   };
   const handleDropdownToggle = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
-
-
+  
   const handlePrint = () => {
     const printContent = `
       <html>
@@ -457,7 +664,6 @@ const Dashboard = () => {
                 <th>Area (Meters)</th>
                 <th>Rate Per Meter</th>
                 <th>Date</th>
-                <th>Status</th>
               </tr>
             </thead>
             <tbody>
@@ -469,7 +675,6 @@ const Dashboard = () => {
                   <td>${stall.areaMeters}</td>
                   <td>${stall.billing}</td>
                   <td>${stall.date}</td>
-                  <td>${stall.status}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -490,38 +695,26 @@ const Dashboard = () => {
       stall.firstName.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Filter by date if a date is selected
-    if (dateFilter) {
-      filteredData = filteredData.filter(stall => stall.date === dateFilter);
-    }
 
-    // Filter by stall number if a number is selected
     if (stallNoFilter) {
       filteredData = filteredData.filter(stall => stall.stallNumber === stallNoFilter);
     }
+    if (selectedUnit !== 'Select Unit') {
+      filteredData = filteredData.filter(stall => stall.location === selectedUnit);
+    }
 
     setFilteredStallHolders(filteredData);
-  }, [searchTerm, stallHolders, dateFilter, stallNoFilter]);
+  }, [searchTerm, stallHolders,  stallNoFilter]);
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
 
-  const handleDateFilterChange = (event) => {
-    setDateFilter(event.target.value);
-  };
 
-  const handleStallNoFilterChange = (event) => {
-    setStallNoFilter(event.target.value);
-  };
-  
-  // Moved this code outside of `handleStallNoFilterChange`
-  // Fetch the logged-in user data
   useEffect(() => {
     try {
       const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
       if (loggedInUserData) {
-        // Assuming you are fetching all users somewhere, otherwise fetch it
         const currentUser = stallHolders.find(user => user.email === loggedInUserData.email);
         setLoggedInUser(currentUser || loggedInUserData);
       }
@@ -553,8 +746,7 @@ const Dashboard = () => {
           </span>
         </ProfileHeader>
       </Link>
-
-
+      
         <SearchBarContainer isSidebarOpen={isSidebarOpen}>
           <FaSearch />
           <SearchInput type="text" placeholder="Search..." />
@@ -574,7 +766,7 @@ const Dashboard = () => {
       <span>List of Vendors</span>
     </SidebarItem>
   </Link>
-  <Link to="/stalls" style={{ textDecoration: 'none' }}>
+  <Link to="/listofstalls" style={{ textDecoration: 'none' }}>
   <SidebarItem isSidebarOpen={isSidebarOpen}>
     <FontAwesomeIcon icon={faClipboard} className="icon" />
     <span>List of Stalls</span>
@@ -617,7 +809,7 @@ const Dashboard = () => {
   <Link to="/manage-roles" style={{ textDecoration: 'none' }}>
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faUsers} className="icon" />
-      <span>Manage Roles</span>
+      <span>Manage Appraisal</span>
     </SidebarItem>
   </Link>
 
@@ -634,27 +826,52 @@ const Dashboard = () => {
     <span>Manage Ticket</span>
   </SidebarItem>
 </Link>
-
 <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faUser} className="icon" />
-    <span>Manage Ambulant</span>
+    <FontAwesomeIcon icon={faCogs} className="icon" />
+    <span>Manage Zone</span>
   </SidebarItem>
 
   {isDropdownOpen && (
     <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/assign" style={{ textDecoration: 'none' }}>
+      <Link to="/addzone" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faCheck} className="icon" />
-            <span> Assign Collector</span>
+            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+            <span> Add Zone</span>
           </SidebarItem>
         </li>
       </Link>
-      <Link to="/View" style={{ textDecoration: 'none' }}>
+      <Link to="/viewzone" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
           <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span> View Collector</span>
+            <span> View Zone</span>
+          </SidebarItem>
+        </li>
+      </Link>
+    
+    </ul>
+  )}
+<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+    <FontAwesomeIcon icon={faUser} className="icon" />
+    <span>Manage Space</span>
+  </SidebarItem>
+
+  {isDropdownOpen && (
+    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+      <Link to="/addspace" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+            <span> Add Space</span>
+          </SidebarItem>
+        </li>
+      </Link>
+      <Link to="/viewspace" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+          <FontAwesomeIcon icon={faSearch} className="icon" />
+            <span> View Space</span>
           </SidebarItem>
         </li>
       </Link>
@@ -705,36 +922,39 @@ const Dashboard = () => {
           
         </span>
 
-        
-       <SearchBarCont>
-          <FaSearch />
-          <SearchIn 
-            type="text" 
-            placeholder="Search Stall Holders..." 
-            value={searchTerm} // Bind the input value to searchTerm
-            onChange={handleSearchChange} // Call handleSearchChange on input change
-          />
-        </SearchBarCont>
+        <TopBarContainer>
+        <SearchBarCont>
+      <SearchIcon />
+      <SearchIn
+        type="text"
+        placeholder="Search Stall Holders..."
+        value={searchTerm}
+        onChange={handleSearchChange}
+      />
+    </SearchBarCont>
 
         <ButtonContainer>
         <PrintButton onClick={handlePrint}>
               <FaPrint />
               Print
             </PrintButton>
-            <FilterContainer>
-              <FilterButton onClick={handleDateFilterChange}>
-                <FaFilter />
-                Filter by Date
-              </FilterButton>
-              <FilterButton onClick={handleStallNoFilterChange}>
-                <FaFilter />
-                Filter by Stall No.
-              </FilterButton>
-            </FilterContainer>
+            <DropdownContainer>
+  <DropdownButton onClick={toggleDropdown}>
+    {selectedUnit}
+  </DropdownButton>
+  <DropdownContent isOpen={isDropdownOpen}>
+    {units.map((unit, index) => (
+      <DropdownItem key={index} onClick={() => handleUnitSelect(unit)}>
+        {unit}
+      </DropdownItem>
+    ))}
+  </DropdownContent>
+</DropdownContainer>
+            
           </ButtonContainer>
-
+          </TopBarContainer>
         <FormContainer>
-          <h3>Stall Information</h3>
+          
           <table>
             <thead>
               <tr>
@@ -744,7 +964,7 @@ const Dashboard = () => {
                 <th>Area (Meters)</th>
                 <th>Rate Per Meter</th>
                 <th>Date</th>
-                <th>Status</th>
+               
                 <th className="actions">Actions</th>
               </tr>
             </thead>
@@ -757,15 +977,29 @@ const Dashboard = () => {
                   <td>{stall.areaMeters}</td>
                   <td>{stall.billing}</td>
                   <td>{stall.date}</td>
-                  <td>{stall.status}</td>
-                  <td>
-                    <button>View</button>
-                  </td>
+                  
+                   <td>
+            <button className="view-btn" onClick={() => handleView(stall)}>
+              <FontAwesomeIcon icon={faEye} /> View
+            </button>
+          </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </FormContainer>
+        <PaginationContainer>
+        <PageButton onClick={handlePrevPage} disabled={currentPage === 1}>
+          Prev
+        </PageButton>
+        <CurrentPageIndicator>
+          Page {currentPage} of {totalPages}
+        </CurrentPageIndicator>
+        <PageButton onClick={handleNextPage} disabled={currentPage === totalPages}>
+          Next
+        </PageButton>
+      </PaginationContainer>
+
       </MainContent>
     </DashboardContainer>
   );

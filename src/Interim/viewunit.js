@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faClipboard, faCheck } from '@fortawesome/free-solid-svg-icons';
-import { collection, getDocs, addDoc } from 'firebase/firestore';
+import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt,FaTrash,FaEdit, FaEye  } from 'react-icons/fa';
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faClipboard, faCheck,faPlusCircle, faCogs } from '@fortawesome/free-solid-svg-icons';
+import { collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
 import { interimDb } from '../components/firebase.config'; // Import the correct firestore instance
 
 const DashboardContainer = styled.div`
@@ -25,7 +25,7 @@ const Sidebar = styled.div`
   position: fixed;
   height: 100vh;
   z-index: 100;
-  overflow: hidden;
+  overflow: auto;
 `;
 
 const SidebarMenu = styled.ul`
@@ -144,20 +144,11 @@ const Container = styled.div`
   margin-top: 2rem;
   padding: 1.5rem;
   border-radius: 20px;
-  background-color: #d4edda;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 
   h3 {
     margin-bottom: 1rem;
-    color: #155724;
-  }
-
-  .unit-card {
-    padding: 1rem;
-    margin: 1rem 0;
-    border: 1px solid #c3e6cb;
-    border-radius: 10px;
-    background-color: white;
+    color: #333333; 
   }
 `;
 const SearchBarContainer = styled.div`
@@ -216,15 +207,15 @@ const AddUnitButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem 2rem; /* Adjust padding for button size */
-  font-size: 1.5rem; /* Increase font size */
+  padding: 0.8rem 1.6rem; /* Adjust padding for better proportions */
+  font-size: 1.2rem; /* Moderate font size */
   color: white;
-  background-color: #0047AB; /* Bootstrap primary color */
+  background-color: #0047ab; /* Bootstrap primary color */
   border: none;
   border-radius: 5px; /* More rounded corners */
   cursor: pointer;
   margin-bottom: 20px; /* Space below the button */
-  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3); /* Subtle shadow with blue tone */
+  box-shadow: 0 4px 12px rgba(0, 71, 171, 0.3); /* Subtle shadow with blue tone */
   transition: background-color 0.3s ease, transform 0.2s ease; /* Added transform for a slight scale effect */
 
   &:hover {
@@ -233,11 +224,57 @@ const AddUnitButton = styled.button`
   }
 
   .plus-icon {
-    margin-right: 10px; /* Space between icon and text */
+    margin-right: 0.5rem; /* Space between icon and text */
     font-size: 1.5rem; /* Adjust icon size for better visibility */
   }
 `;
+const ActionButtonContainer = styled.div`
+  display: flex;
+  justify-content: flex-end;
+`;
 
+const ActionButton = styled.button`
+  background: none;
+  border: none;
+  margin-left: 10px;
+  cursor: pointer;
+  transition: color 0.2s ease; /* Smooth transition for color change */
+
+  &:hover {
+    color: #007bff; /* Change color on hover */
+  }
+
+  .icon {
+    font-size: 1.5rem; /* Larger icon size for visibility */
+  }
+`;
+
+const UnitCard = styled.div`
+  border: 1px solid #e0e0e0; /* Light border for card separation */
+  border-radius: 8px; /* Rounded corners */
+  padding: 20px; /* Inner padding for content */
+  margin-bottom: 15px; /* Space between cards */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  display: flex; /* Flexbox for layout */
+  justify-content: space-between; /* Space between elements */
+  align-items: center; /* Center alignment of items */
+`;
+
+const AddButton = styled.button`
+  background-color: #008000;
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #218838;
+  }
+`;
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const sidebarRef = useRef(null);
@@ -260,6 +297,26 @@ const Dashboard = () => {
     }
   };
   
+  const deleteUnit = async (id) => {
+    try {
+      await deleteDoc(doc(interimDb, 'unit', id));
+      fetchUnits(); // Refresh the list after deletion
+    } catch (error) {
+      console.error('Error deleting unit: ', error);
+    }
+  };
+  const handleDeleteUnit = (unitId) => {
+    // Your logic to delete a unit goes here
+    console.log(`Deleting unit with ID: ${unitId}`);
+    // Example: call your Firestore function to delete the unit
+};
+
+const handleViewUnit = (unitId) => {
+    // Your logic to view a unit goes here
+    console.log(`Viewing unit with ID: ${unitId}`);
+    // Example: redirect or open a modal to display unit details
+};
+
 
   useEffect(() => {
     const checkAndCreateCollection = async () => {
@@ -369,7 +426,7 @@ const Dashboard = () => {
       <span>List of Vendors</span>
     </SidebarItem>
   </Link>
-  <Link to="/stalls" style={{ textDecoration: 'none' }}>
+  <Link to="/listofstalls" style={{ textDecoration: 'none' }}>
   <SidebarItem isSidebarOpen={isSidebarOpen}>
     <FontAwesomeIcon icon={faClipboard} className="icon" />
     <span>List of Stalls</span>
@@ -412,7 +469,7 @@ const Dashboard = () => {
   <Link to="/manage-roles" style={{ textDecoration: 'none' }}>
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faUsers} className="icon" />
-      <span>Manage Roles</span>
+      <span>Manage Appraisal</span>
     </SidebarItem>
   </Link>
 
@@ -429,27 +486,52 @@ const Dashboard = () => {
     <span>Manage Ticket</span>
   </SidebarItem>
 </Link>
-
 <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faUser} className="icon" />
-    <span>Manage Ambulant</span>
+    <FontAwesomeIcon icon={faCogs} className="icon" />
+    <span>Manage Zone</span>
   </SidebarItem>
 
   {isDropdownOpen && (
     <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/assign" style={{ textDecoration: 'none' }}>
+      <Link to="/addzone" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faCheck} className="icon" />
-            <span> Assign Collector</span>
+            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+            <span> Add Zone</span>
           </SidebarItem>
         </li>
       </Link>
-      <Link to="/View" style={{ textDecoration: 'none' }}>
+      <Link to="/viewzone" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
           <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span> View Collector</span>
+            <span> View Zone</span>
+          </SidebarItem>
+        </li>
+      </Link>
+    
+    </ul>
+  )}
+<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+    <FontAwesomeIcon icon={faUser} className="icon" />
+    <span>Manage Space</span>
+  </SidebarItem>
+
+  {isDropdownOpen && (
+    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+      <Link to="/addspace" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+            <span> Add Space</span>
+          </SidebarItem>
+        </li>
+      </Link>
+      <Link to="/viewspace" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+          <FontAwesomeIcon icon={faSearch} className="icon" />
+            <span> View Space</span>
           </SidebarItem>
         </li>
       </Link>
@@ -486,25 +568,35 @@ const Dashboard = () => {
           <FaBars />
         </ToggleButton>
 
-         {/* Add the new button here */}
-         <AddUnitButton onClick={() => navigate('/addunit')}>
-          <FontAwesomeIcon icon={faPlus} className="plus-icon" />
-          Add New Unit
-        </AddUnitButton>
+         
 
         <Container>
-    <h3>Units</h3>
-    {units.map((unit) => (
-        <div key={unit.id} className="unit-card">
-        <h4>{unit.name}</h4>
-        <p>Location: {unit.location}</p>
-        <p>Date Registered: {unit.dateRegistered}</p>
-        </div>
-    ))}
-    </Container>
-
-        
-
+          {/* Add New Space Button */}
+          <AddButton onClick={() => navigate('/addunit')}>
+            <FontAwesomeIcon icon={faPlus} style={{ marginRight: '0.5rem' }} />
+            Add New Space
+          </AddButton>
+        <h3>Units</h3>
+        {units.map(unit => (
+          <UnitCard key={unit.id}>
+            <div>
+              <p style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>Name: {unit.name}</p>
+              <p>Location: {unit.location}</p>
+            </div>
+            <ActionButtonContainer>
+              <ActionButton onClick={() => navigate(`/view-unit/${unit.id}`)}>
+                <FaEye className="icon" />
+              </ActionButton>
+              <ActionButton onClick={() => navigate(`/edit-unit/${unit.id}`)}>
+                <FaEdit className="icon" />
+              </ActionButton>
+              <ActionButton onClick={() => deleteUnit(unit.id)}>
+                <FaTrash className="icon" />
+              </ActionButton>
+            </ActionButtonContainer>
+          </UnitCard>
+        ))}
+      </Container>
 
       </MainContent>
     </DashboardContainer>

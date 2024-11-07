@@ -19,12 +19,22 @@ import UserEdit from './Interim/UserEdit';
 import ContractManagement from './Interim/Contract';
 import Ticket from './Interim/Ticket';
 import TicketEdit from './Interim/TicketEdit';
-import AssignCollector from './Interim/AssignCollector';
+import AddSpace from './Interim/AddSpace';
 import AddCollector from './Interim/AddCollector';
 import NewTicket from './Interim/NewTicket';
-import ViewCollector from './Interim/ViewCollector';
+import ViewCollector from './Interim/ViewCollector'; //delete nya
 import Viewunit from './Interim/viewunit';
-
+import ViewUser from './Interim/ViewUser';
+import ViewStallholder from './Interim/ViewStallholder'; 
+import EditUnit from './Interim/EditUnit'; 
+import AddZone from './Interim/AddZone'; 
+import ListOfStalls from './Interim/ListOfStalls'; 
+import ViewSpace from './Interim/ViewSpace'; 
+import EditSpace from './Interim/EditSpace'; 
+import AssignCollector from './Interim/AssignCollector'; 
+import ManageAppraise from './Interim/ManageAppraise'; 
+import Stallholders from './Collector/Stallholders';
+import CollectorDash from './Collector/CollectorDash';
 
 function App() {
   return (
@@ -35,12 +45,12 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
 
           {/* Protected Routes */}
-          <Route path="/stallholders" element={<ProtectedRoute><ListOfStallholders /></ProtectedRoute>} />
+       
           <Route path="/view-payment/:id" element={<ProtectedRoute><ViewPayment /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} />} />
           <Route path="/list" element={<ProtectedRoute element={<ListOfVendors
             />} />} />
-          <Route path="/Addunit" element={<ProtectedRoute element={<AddUnit
+          <Route path="/addunit" element={<ProtectedRoute element={<AddUnit
             />} />} />
           <Route path="/userManagement" element={<ProtectedRoute element={<UserManagement
             />} />} />
@@ -58,16 +68,27 @@ function App() {
             />} />} />
           <Route path="/ticketEdit/:id"  element={<ProtectedRoute element={<TicketEdit
             />} />} />
-          <Route path="/assign"  element={<ProtectedRoute element={<AssignCollector
+          <Route path="/addspace"  element={<ProtectedRoute element={<AddSpace
             />} />} />
           <Route path="/addcollector" element={<ProtectedRoute element={<AddCollector
             />} />} />
           <Route path="/newticket"  element={<ProtectedRoute element={<NewTicket
             />} />} />
           <Route path="/View"  element={<ProtectedRoute element={<ViewCollector
-            />} />} />
-          <Route path="/viewunit"  element={<ProtectedRoute element={<Viewunit
-            />} />} />
+            />} />} /> /*delete sad later */
+          <Route path="/viewunit" element={<ProtectedRoute element={<Viewunit />} />} />
+            <Route path="/viewuser/:userId" element={<ViewUser />} />
+          <Route path="/view-stallholder/:id" element={<ViewStallholder />} />
+          <Route path="/edit-unit/:id" element={<EditUnit />} />
+          <Route path="/addzone" element={<AddZone />} />
+          <Route path="/listofstalls" element={<ListOfStalls />} />
+          <Route path="/viewspace" element={<ViewSpace />} />
+          <Route path="/editspace/:id" element={<EditSpace />} />
+          <Route path="/assigncollector" element={<AssignCollector />} />
+          <Route path="/appraise" element={<ManageAppraise />} />
+          <Route path="/stallholders" element={<Stallholders />} />
+          <Route path="/collectdash" element={<CollectorDash />} />
+
         </Routes>
       </Router>
     </AuthProvider>

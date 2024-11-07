@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'; // Import usePa
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt, FaCalendarAlt  } from 'react-icons/fa';
-import { faHome, faShoppingCart, faUser, faUsers, faPlus, faFileContract, faTicketAlt,faSearch, faClipboard, faCheck} from '@fortawesome/free-solid-svg-icons';
+import { faHome, faShoppingCart, faUser, faUsers, faPlus, faFileContract, faTicketAlt,faSearch, faClipboard, faCheck,faPlusCircle, faCogs} from '@fortawesome/free-solid-svg-icons';
 import { rentmobileDb } from '../components/firebase.config';
 import { collection, getDoc, doc, updateDoc, getDocs } from 'firebase/firestore';
 import DatePicker from 'react-datepicker';
@@ -20,15 +20,15 @@ const Sidebar = styled.div`
   background-color: #f8f9fa;
   padding: 10px;
   display: flex;
-  border: 1px solid #ddd;  /* ADD THIS */
   flex-direction: column;
+  border: 1px solid #ddd;  /* ADD THIS */
   justify-content: space-between;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   transition: width 0.3s ease;
   position: fixed;
   height: 100vh;
   z-index: 100;
-  overflow: hidden;
+  overflow: auto;
 `;
 
 const SidebarMenu = styled.ul`
@@ -109,13 +109,14 @@ const ToggleButton = styled.div`
 `;
 
 const MainContent = styled.div`
-  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '70px')};
+  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')};
   padding-left: 40px;
   background-color: #fff;
   padding: 2rem;
   width: 100%;
   transition: margin-left 0.3s ease;
   overflow-y: auto;
+  flex: 1;
 `;
 
 const ProfileHeader = styled.div`
@@ -402,9 +403,8 @@ const Dashboard = () => {
         if (ticketSnapshot.exists()) {
           const ticketData = ticketSnapshot.data();
           setTicket(ticketData);
-          setTicketName(ticketData.name);
-          setRate(ticketData.rate);
-          // Check if dateIssued is a valid Firestore timestamp
+          setTicketName(ticketData.fee_name);  // Correct field name
+          setRate(ticketData.fee_rate);        // Correct field name
           if (ticketData.dateIssued && ticketData.dateIssued.seconds) {
             setDateIssued(new Date(ticketData.dateIssued.seconds * 1000));
           }
@@ -417,7 +417,7 @@ const Dashboard = () => {
     };
   
     fetchTicket();
-  }, [id]); // Fetch ticket on component mount or when the ID changes
+  }, [id]);
 
   // Fetch user data
   useEffect(() => {
@@ -437,35 +437,23 @@ const Dashboard = () => {
   }, []); // Ensure hooks are called unconditionally
 
   const handleSaveChanges = async (event) => {
-    event.preventDefault(); // Prevent default form submission behavior
+    event.preventDefault();
   
-    // Validate that fields are not empty
     if (!ticketName || !rate) {
       alert('Please fill in all required fields.');
-      return; // Exit the function if fields are empty
+      return;
     }
   
     try {
       const ticketDocRef = doc(rentmobileDb, 'rate', id);
-  
-      // Format dateIssued to yyyy/MM/dd
-      const formattedDateIssued = dateIssued ? 
-        (() => {
-          // Ensure dateIssued is a valid timestamp
-          const timestamp = Number(dateIssued); // Convert dateIssued to a number
-          if (isNaN(timestamp)) {
-            console.error("Invalid dateIssued:", dateIssued);
-            return null; // or set a default value
-          }
-  
-          const date = new Date(timestamp); // Convert from seconds to milliseconds
-          return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
-        })() : null;
+      const formattedDateIssued = dateIssued
+        ? `${dateIssued.getFullYear()}/${String(dateIssued.getMonth() + 1).padStart(2, '0')}/${String(dateIssued.getDate()).padStart(2, '0')}`
+        : null;
   
       await updateDoc(ticketDocRef, {
-        name: ticketName,
-        rate: Number(rate), // Ensure rate is stored as a number
-        dateIssued: formattedDateIssued, // Store formatted date as a string
+        fee_name: ticketName,  // Update with correct field
+        fee_rate: Number(rate), // Ensure rate is stored as a number
+        dateIssued: formattedDateIssued,
       });
   
       setIsModalOpen(true);
@@ -534,7 +522,7 @@ const Dashboard = () => {
       <span>List of Vendors</span>
     </SidebarItem>
   </Link>
-  <Link to="/stalls" style={{ textDecoration: 'none' }}>
+  <Link to="/listofstalls" style={{ textDecoration: 'none' }}>
   <SidebarItem isSidebarOpen={isSidebarOpen}>
     <FontAwesomeIcon icon={faClipboard} className="icon" />
     <span>List of Stalls</span>
@@ -577,10 +565,9 @@ const Dashboard = () => {
   <Link to="/manage-roles" style={{ textDecoration: 'none' }}>
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faUsers} className="icon" />
-      <span>Manage Roles</span>
+      <span>Manage Appraisal</span>
     </SidebarItem>
   </Link>
-
   <Link to="/contract" style={{ textDecoration: 'none' }}>
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faFileContract} className="icon" />
@@ -594,27 +581,52 @@ const Dashboard = () => {
     <span>Manage Ticket</span>
   </SidebarItem>
 </Link>
-
 <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faUser} className="icon" />
-    <span>Manage Ambulant</span>
+    <FontAwesomeIcon icon={faCogs} className="icon" />
+    <span>Manage Zone</span>
   </SidebarItem>
 
   {isDropdownOpen && (
     <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/assign" style={{ textDecoration: 'none' }}>
+      <Link to="/addzone" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faCheck} className="icon" />
-            <span> Assign Collector</span>
+            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+            <span> Add Zone</span>
           </SidebarItem>
         </li>
       </Link>
-      <Link to="/View" style={{ textDecoration: 'none' }}>
+      <Link to="/viewzone" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
           <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span> View Collector</span>
+            <span> View Zone</span>
+          </SidebarItem>
+        </li>
+      </Link>
+    
+    </ul>
+  )}
+<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+    <FontAwesomeIcon icon={faUser} className="icon" />
+    <span>Manage Space</span>
+  </SidebarItem>
+
+  {isDropdownOpen && (
+    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+      <Link to="/addspace" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+            <span> Add Space</span>
+          </SidebarItem>
+        </li>
+      </Link>
+      <Link to="/viewspace" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+          <FontAwesomeIcon icon={faSearch} className="icon" />
+            <span> View Space</span>
           </SidebarItem>
         </li>
       </Link>
@@ -658,7 +670,7 @@ const Dashboard = () => {
     <div>
       <label htmlFor="ticketName">Ticket Name:</label>
       <input
-        id="ticketName"
+        id="fee_name"
         type="text"
         value={ticketName}
         onChange={(e) => setTicketName(e.target.value)}
@@ -669,7 +681,7 @@ const Dashboard = () => {
     <div>
       <label htmlFor="rate">Rate:</label>
       <input
-        id="rate"
+        id="fee_rate"
         type="number"
         value={rate}
         onChange={(e) => setRate(e.target.value)}

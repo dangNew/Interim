@@ -1,11 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link,  useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt,FaUsers, FaWallet, FaEye,FaPen, FaTrash } from 'react-icons/fa';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faCheck, faClipboard,faPlusCircle, faCogs} from '@fortawesome/free-solid-svg-icons';
+import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt,FaUserSlash, FaUser, FaUsers, FaWallet, FaList} from 'react-icons/fa';
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faCheck, faPlusCircle, faCogs} from '@fortawesome/free-solid-svg-icons';
+import { faClipboard } from '@fortawesome/free-regular-svg-icons'; 
+import { interimDb } from '../components/firebase.config';
 import { rentmobileDb } from '../components/firebase.config';
+
 import { collection, getDocs } from 'firebase/firestore';
+
+
 
 const DashboardContainer = styled.div`
   display: flex;
@@ -26,7 +32,7 @@ const Sidebar = styled.div`
   position: fixed;
   height: 100vh;
   z-index: 100;
-   overflow-y: auto;
+  overflow-y: auto; 
 `;
 
 const SidebarMenu = styled.ul`
@@ -257,25 +263,11 @@ const FormContainer = styled.div`
     tr:hover {
       background-color: #f1f3f5; 
     }
-
- .actions {
-      display: flex;
-      gap: 15px; /* Space between the icons */
-    }
-
-    .icon {
-      font-size: 24px; /* Increase icon size */
-      color: black;
-      cursor: pointer;
-      transition: color 0.2s ease;
-
-      &:hover {
-        color: #0056b3; /* Darken on hover */
-      }
-    }
   }
 `;
+
 const AppBar = styled.div`
+  padding-top: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -309,46 +301,68 @@ const SearchInput = styled.input`
   width: 100%;
 `;
 
+const CollectorTableContainer = styled(FormContainer)`
+  margin-top: 2rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+`;
+
+const CollectorTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  th, td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 2px solid #dee2e6;
+    transition: background-color 0.2s ease;
+  }
+
+  th {
+    background-color: #e9ecef;
+    font-weight: bold;
+    color: #495057;
+  }
+
+  td {
+    background-color: #fff;
+  }
+
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  tr:hover {
+    background-color: #f1f3f5;
+  }
+`;
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const sidebarRef = useRef(null);
   const [totalUsers, setTotalUsers] = useState(0);
-  const [totalCollectors] = useState(0);
+  const [activeUsers, setActiveUsers] = useState(0);
+  const [inactiveUsers, setInactiveUsers] = useState(0);
+  const [totalCollectors, setTotalCollectors] = useState(0);
   const [collectorsData, setCollectorsData] = useState([]);
+  const [recentUsers, setRecentUsers] = useState([]);
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
 
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const handleClickOutside = (event) => {
-   
-  };
-  useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
   useEffect(() => {
     const fetchCollectors = async () => {
       try {
         const querySnapshot = await getDocs(collection(rentmobileDb, 'ambulant_collector'));
-        const allCollectors = querySnapshot.docs.map(doc => doc.data());
-        
-        // Filter only those with necessary fields and combine firstName + lastName
-        const validCollectors = allCollectors.map(collector => ({
-          email: collector.email,
-          collector: collector.collector,
-          fullName: `${collector.firstName} ${collector.lastName}`,
-          location: collector.location,
-          status: collector.status,
-        }));
+        const collectorsCount = querySnapshot.size; 
+        console.log('Number of collectors fetched:', collectorsCount); 
 
-        setCollectorsData(validCollectors);
+        setTotalCollectors(collectorsCount);
+        
+        // Set the collectors data in the state
+        const collectorsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        console.log('Fetched Collectors Data:', collectorsData);
+        setCollectorsData(collectorsData); 
       } catch (error) {
         console.error('Error fetching collectors:', error);
       }
@@ -356,11 +370,28 @@ const Dashboard = () => {
 
     fetchCollectors();
   }, []);
+    
+  
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const handleClickOutside = (event) => {
+   
+  };
+  
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const querySnapshot = await getDocs(collection(rentmobileDb, 'ambulant_collector'));
+        const querySnapshot = await getDocs(collection(interimDb, 'users'));
         const allUsers = querySnapshot.docs.map(doc => doc.data());
 
         console.log('Fetched Users:', allUsers); 
@@ -368,6 +399,17 @@ const Dashboard = () => {
         setTotalUsers(validUsers.length);
         
      
+        const activeUsersCount = validUsers.filter(user => user.status?.toLowerCase() === 'active').length;
+        setActiveUsers(activeUsersCount);
+
+        const inactiveUsersCount = validUsers.filter(user => user.status?.toLowerCase() === 'inactive').length;
+        setInactiveUsers(inactiveUsersCount);
+
+       
+
+        setRecentUsers(validUsers.slice(-5));
+
+        
 
         const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
         if (loggedInUserData) {
@@ -392,20 +434,11 @@ const Dashboard = () => {
   const handleDropdownToggle = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
-  const handleEditClick = (collectorId) => {
-    // Your edit logic here, for example:
-    console.log("Edit clicked for collector:", collectorId);
-    // You can navigate to an edit page or open a modal, depending on your requirements
-  };
+
   
-  const handleDeleteClick = (collectorId) => {
-    // Your delete logic here, for example:
-    console.log("Delete clicked for collector:", collectorId);
-    // You can trigger a delete action with Firestore or a confirmation modal
-  };
-  
- 
+    
   return (
+
 
     <DashboardContainer>
         <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
@@ -443,7 +476,7 @@ const Dashboard = () => {
     </SidebarItem>
   </Link>
   
-  <Link to="/list" style={{ textDecoration: 'none' }}>
+  <Link to="/stallholders" style={{ textDecoration: 'none' }}>
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faShoppingCart} className="icon" />
       <span>List of Vendors</span>
@@ -456,118 +489,7 @@ const Dashboard = () => {
   </SidebarItem>
 </Link>
 
-  <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faUser} className="icon" />
-    <span>User Management</span>
-  </SidebarItem>
-
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/usermanagement" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span>View Users</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/newuser" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlus} className="icon" />
-            <span>Add User</span>
-          </SidebarItem>
-        </li>
-      </Link>
-    </ul>
-  )}
-
-  <Link to="/viewunit" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faPlus} className="icon" />
-      <span>Add New Unit</span>
-    </SidebarItem>
-  </Link>
-
-  <Link to="/manage-roles" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faUsers} className="icon" />
-      <span>Manage Appraisal</span>
-    </SidebarItem>
-  </Link>
-
-  <Link to="/contract" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faFileContract} className="icon" />
-      <span>Contract</span>
-    </SidebarItem>
-  </Link>
-
-  <Link to="/ticket" style={{ textDecoration: 'none' }}>
-  <SidebarItem isSidebarOpen={isSidebarOpen}>
-    <FontAwesomeIcon icon={faTicketAlt} className="icon" />
-    <span>Manage Ticket</span>
-  </SidebarItem>
-</Link>
-<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faCogs} className="icon" />
-    <span>Manage Zone</span>
-  </SidebarItem>
-
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/addzone" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
-            <span> Add Zone</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/viewzone" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-          <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span> View Zone</span>
-          </SidebarItem>
-        </li>
-      </Link>
-    
-    </ul>
-  )}
-<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faUser} className="icon" />
-    <span>Manage Space</span>
-  </SidebarItem>
-
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/addspace" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
-            <span> Add Space</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/viewspace" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-          <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span> View Space</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/addcollector" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlus} className="icon" />
-            <span>Add Ambulant Collector</span>
-          </SidebarItem>
-        </li>
-      </Link>
-    </ul>
-  )}
+  
 </SidebarMenu>
 
       <SidebarFooter isSidebarOpen={isSidebarOpen}>
@@ -590,13 +512,10 @@ const Dashboard = () => {
         <div className="title">INTERIM</div>
       </AppBar>
          
-          <ProfileHeader>
-            <h1>Add New Unit</h1>
-          </ProfileHeader>
-
+         
           <StatsContainer>
       <StatBox bgColor="#11768C">
-        <h3>Total Users</h3>
+        <h3>Total Collected Today</h3>
         <p>{totalUsers}</p> {/* Display the total user count */}
         <div className="icon-container">
           <FaUsers className="fading-icon" style={{ 
@@ -606,7 +525,30 @@ const Dashboard = () => {
           }} />
         </div>
       </StatBox>
+    
+      <StatBox bgColor="#11768C">
+        <h3>Total Pending Payments</h3>
+        <p>{activeUsers}</p> {/* Display the total user count */}
+        <div className="icon-container">
+          <FaUser className="fading-icon" style={{ 
+            fontSize: '30px', 
+            opacity: 0.5, 
+            animation: 'fade 2s infinite alternate' 
+          }} />
+        </div>
+      </StatBox>
 
+      <StatBox bgColor="#11768C">
+  <h3>Number of Vendors Paid</h3> 
+  <p>{inactiveUsers}</p> {/* Display the total user count */} 
+  <div className="icon-container">
+    <FaUserSlash className="fading-icon" style={{ 
+      fontSize: '30px', 
+      opacity: 0.5, 
+      animation: 'fade 2s infinite alternate' 
+    }} />
+  </div>
+</StatBox>
 <StatBox bgColor="#007bff">
   <h3>Total Collectors</h3>
   <p>{totalCollectors}</p>
@@ -622,38 +564,64 @@ const Dashboard = () => {
 </StatsContainer>
         
 
+        {/* Recently Registered Users Section */}
+        {/* Recently Registered Users Section */}
 <FormContainer>
-  <h3>Collectors Data</h3>
+  <h3>Recently Registered</h3>
   <table>
     <thead>
       <tr>
         <th>Email</th>
-        <th>Collector No.</th>
-        <th>Full Name</th>
-        <th>Location</th>
-        <th>Status</th>
-        <th>Actions</th> {/* New column for actions */}
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Phone</th>
       </tr>
     </thead>
     <tbody>
-      {collectorsData.map((collector, index) => (
+      {recentUsers.map((user, index) => (
         <tr key={index}>
-          <td>{collector.email}</td>
-          <td>{collector.collector}</td>
-          <td>{collector.fullName}</td>
-          <td>{collector.location}</td>
-          <td>{collector.status}</td>
-          <td className="actions"> {/* Adding actions column */}
-            <FaEye className="icon" title="View" />
-            <FaPen className="icon" title="Edit" onClick={() => handleEditClick(collector.id)} />
-            <FaTrash className="icon" title="Delete" onClick={() => handleDeleteClick(collector)} />
-          </td>
+          <td>{user.email || ''}</td>
+          <td>{user.firstName || ''}</td>
+          <td>{user.lastName || ''}</td>
+          <td>{user.contactNum || ''}</td>
         </tr>
       ))}
     </tbody>
   </table>
 </FormContainer>
-
+<CollectorTableContainer>
+  <h3>Collector Users</h3>
+  <CollectorTable>
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>Name</th>
+        <th>Address</th>
+        <th>Collector</th>
+        <th>Location</th>
+        <th>Contact Number</th>
+      </tr>
+    </thead>
+    <tbody>
+      {collectorsData.length > 0 ? (
+        collectorsData.map((collector) => (
+          <tr key={collector.id}> {/* Ensure you have a unique identifier for each collector */}
+            <td>{collector.email}</td> {/* Make sure to display email if required */}
+            <td>{collector.firstName + ' ' + collector.lastName}</td> {/* Concatenate firstName and lastName */}
+            <td>{collector.address}</td>
+            <td>{collector.collector}</td>
+            <td>{collector.location}</td>
+            <td>{collector.contactNum}</td>
+          </tr>
+        ))
+      ) : (
+        <tr>
+          <td colSpan="6">No collectors found.</td> {/* Adjusted colSpan to match the number of columns */}
+        </tr>
+      )}
+    </tbody>
+  </CollectorTable>
+</CollectorTableContainer>
       </MainContent>
       </DashboardContainer>
   );

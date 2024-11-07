@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate  } from 'react-router-dom';
 import styled from 'styled-components';
-import { FaBars, FaEye, FaPen, FaTrash, FaSearch, FaUserCircle, FaUsers,FaUser, FaUserSlash  } from 'react-icons/fa';
+import { FaBars, FaEye, FaPen, FaTrash, FaSearch, FaUserCircle, FaUsers,FaUser, FaUserSlash, FaChevronDown } from 'react-icons/fa';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { FaSignOutAlt } from 'react-icons/fa';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faCheck, faClipboard} from '@fortawesome/free-solid-svg-icons';
+import { FaSignOutAlt, FaCaretDown } from 'react-icons/fa';
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faCheck, faClipboard, faPlusCircle, faCogs} from '@fortawesome/free-solid-svg-icons';
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { interimDb } from '../components/firebase.config'; // Import the correct firestore instance
 
@@ -29,7 +29,7 @@ const Sidebar = styled.div`
   position: fixed;
   height: 100vh;
   z-index: 100;
-  overflow: hidden;
+  overflow: auto;
 `;
 
 const SidebarMenu = styled.ul`
@@ -256,45 +256,8 @@ const ModalButton = styled.button`
   }
 `;
 
-const DropdownButton = styled.button`
-  margin-top: 2rem;
-  display: flex; /* Flexbox for aligning items */
-  align-items: center; /* Center items vertically */
-  padding: 10px;
-  background-color: #007bff;
-  color: white;
-  border: 1rem;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
 
-  &:hover {
-    background-color: #0056b3;
-  }
 
-  span {
-    margin-left: 10px; /* Space between icon and text */
-  }
-`;
-const DropdownMenu = styled.ul`
-  position: absolute;
-  background-color: white;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  border-radius: 5px;
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-  z-index: 200;
-
-  li {
-    padding: 10px;
-    cursor: pointer;
-
-    &:hover {
-      background-color: #f1f1f1;
-    }
-  }
-`;
 
 
 const FormContainer = styled.div`
@@ -324,28 +287,82 @@ const FormContainer = styled.div`
       background-color: #e9ecef;
     }
 
+    // Striped rows
     tr:nth-child(even) {
-      background-color: #f9f9f9;
+      background-color: #f2f2f2; // Light gray for even rows
+    }
+
+    tr:nth-child(odd) {
+      background-color: #ffffff; // White for odd rows
     }
 
     .actions {
       display: flex;
-      gap: 15px; /* Space between the icons */
+      gap: 5px; /* Space between the buttons */
     }
 
-    .icon {
-      font-size: 24px; /* Increase icon size */
-      color: black;
+    .action-button {
+      display: flex;
+      align-items: center;
+      border: none;
+      background: none;
       cursor: pointer;
       transition: color 0.2s ease;
 
       &:hover {
         color: #0056b3; /* Darken on hover */
       }
+
+      .icon {
+        font-size: 24px; /* Increase icon size */
+        color: black;
+      }
     }
   }
 `;
+const ActionButton = styled.button`
+  display: flex;
+  align-items: center;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 5px;
+  cursor: pointer;
+  gap: 1px; 
+  font-size: 12px;
+  transition: background-color 0.2s ease;
 
+  &.view {
+    background-color: #007bff; /* Blue */
+    color: white;
+
+    &:hover {
+      background-color: #0056b3; /* Darker blue */
+    }
+  }
+
+  &.edit {
+    background-color: #28a745; /* Green */
+    color: white;
+
+    &:hover {
+      background-color: #218838; /* Darker green */
+    }
+  }
+
+  &.delete {
+    background-color: #dc3545; /* Red */
+    color: white;
+
+    &:hover {
+      background-color: #c82333; /* Darker red */
+    }
+  }
+
+  .icon {
+    margin-right: 5px; /* Space between icon and text */
+    font-size: 16px;
+  }
+`;
 const SearchBarContainer = styled.div`
   display: flex;
   align-items: center;
@@ -390,12 +407,91 @@ const LogoutButton = styled(SidebarItem)`
     transform: scale(1.05); /* Slightly scale up on hover */
   }
 `;
+const ControlsContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Space between the dropdown and search bar */
+  margin-bottom: 16px;
+`;
+const DropdownMenu = styled.ul`
+  position: absolute;
+  background-color: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  z-index: 200;
 
+  li {
+    padding: 10px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #f1f1f1;
+    }
+  }
+`;
+const DropdownButton = styled.button`
+  margin-top: 1rem;
+  display: flex; /* Flexbox for aligning items */
+  align-items: center; /* Center items vertically */
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 
+
+  &:hover {
+    background-color: #0056b3;
+  }
+
+  span {
+    margin-left: 10px; /* Space between icon and text */
+  }
+`;
+
+const SearchContainer = styled.div`
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  width: 400px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 0 10px;
+  background-color: #f9f9f9; /* Light background for contrast */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for professional look */
+`;
+
+const StyledSearchBar = styled.input`
+  flex: 1;
+  padding: 10px;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 16px;
+  color: #333;
+  
+  &::placeholder {
+    color: #aaa;
+  }
+`;
+
+const IconWrapper = styled.div`
+  color: #888;
+  margin-right: 8px;
+  font-size: 16px;
+`;
 
 const UserManagement = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const sidebarRef = useRef(null);
   const [users, setUserData] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredUsers, setFilteredUsers] = useState([]);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -439,10 +535,6 @@ const handleRoleSelect = (role) => {
   setIsRoleDropdownOpen(false); // Close the dropdown after selection
 };
 
-// Modify filteredUsers to include all users when selectedRole is null
-const filteredUsers = selectedRole
-  ? users.filter(user => user.position === selectedRole)
-  : users; // Show all users if selectedRole is null
 
 
 const handleLogout = () => {
@@ -478,6 +570,10 @@ const handleLogout = () => {
   const handleEditClick = (userId) => {
     navigate(`/edit/${userId}`); // Navigate to a specific edit page for the user
   };
+   const handleViewClick = (userId) => {
+    navigate(`/viewuser/${userId}`);
+  };
+
 
   const handleDeleteClick = (user) => {
     setUserToDelete(user); // Set the user to delete
@@ -508,11 +604,10 @@ const handleLogout = () => {
           id: doc.id,
           ...doc.data()
         }));
-        
         setUserData(userList);
+        setFilteredUsers(userList); // Initialize filtered users with all users
       } catch (error) {
         console.error('Error fetching user data:', error);
-        handleShowModal('error', 'Failed to fetch user data');
       }
     };
 
@@ -520,6 +615,24 @@ const handleLogout = () => {
   }, []);
 
 
+useEffect(() => {
+    let filtered = users;
+    if (selectedRole) {
+      filtered = filtered.filter(user => user.position === selectedRole);
+    }
+    if (searchQuery) {
+      const lowerQuery = searchQuery.toLowerCase();
+      filtered = filtered.filter(user =>
+        `${user.firstName} ${user.lastName}`.toLowerCase().includes(lowerQuery)
+      );
+    }
+    setFilteredUsers(filtered);
+  }, [users, selectedRole, searchQuery]);
+
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -609,7 +722,7 @@ const handleLogout = () => {
       <span>List of Vendors</span>
     </SidebarItem>
   </Link>
-  <Link to="/stalls" style={{ textDecoration: 'none' }}>
+  <Link to="/listofstalls" style={{ textDecoration: 'none' }}>
   <SidebarItem isSidebarOpen={isSidebarOpen}>
     <FontAwesomeIcon icon={faClipboard} className="icon" />
     <span>List of Stalls</span>
@@ -649,10 +762,10 @@ const handleLogout = () => {
     </SidebarItem>
   </Link>
 
-  <Link to="/manage-roles" style={{ textDecoration: 'none' }}>
+   <Link to="/manage-roles" style={{ textDecoration: 'none' }}>
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faUsers} className="icon" />
-      <span>Manage Roles</span>
+      <span>Manage Appraisal</span>
     </SidebarItem>
   </Link>
 
@@ -669,27 +782,52 @@ const handleLogout = () => {
     <span>Manage Ticket</span>
   </SidebarItem>
 </Link>
-
 <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faUser} className="icon" />
-    <span>Manage Ambulant</span>
+    <FontAwesomeIcon icon={faCogs} className="icon" />
+    <span>Manage Zone</span>
   </SidebarItem>
 
   {isDropdownOpen && (
     <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/assign" style={{ textDecoration: 'none' }}>
+      <Link to="/addzone" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faCheck} className="icon" />
-            <span> Assign Collector</span>
+            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+            <span> Add Zone</span>
           </SidebarItem>
         </li>
       </Link>
-      <Link to="/View" style={{ textDecoration: 'none' }}>
+      <Link to="/viewzone" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
           <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span> View Collector</span>
+            <span> View Zone</span>
+          </SidebarItem>
+        </li>
+      </Link>
+    
+    </ul>
+  )}
+<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+    <FontAwesomeIcon icon={faUser} className="icon" />
+    <span>Manage Space</span>
+  </SidebarItem>
+
+  {isDropdownOpen && (
+    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+      <Link to="/addspace" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+            <span> Add Space</span>
+          </SidebarItem>
+        </li>
+      </Link>
+      <Link to="/viewspace" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+          <FontAwesomeIcon icon={faSearch} className="icon" />
+            <span> View Space</span>
           </SidebarItem>
         </li>
       </Link>
@@ -769,28 +907,48 @@ const handleLogout = () => {
 
         </StatsContainer>
 
-        <DropdownButton onClick={handleRoleDropdownToggle}>
-        <span>{selectedRole || 'Select Role'}</span>
-      </DropdownButton>
-      {isRoleDropdownOpen && (
-        <DropdownMenu>
-          <li onClick={() => handleRoleSelect('All Users')}>All Users</li>
-          <li onClick={() => handleRoleSelect('Collector')}>Collector</li>
-          <li onClick={() => handleRoleSelect('CTO')}>CTO</li>
-          <li onClick={() => handleRoleSelect('OIC')}>OIC</li>
-          <li onClick={() => handleRoleSelect('Interim')}>Interim</li>
-        </DropdownMenu>
-      )}
+        
 
       <FormContainer>
+      <ControlsContainer>
+  <DropdownButton onClick={handleRoleDropdownToggle}>
+    <FaUser style={{ marginRight: '8px' }} /> {/* User icon */}
+    <span>{selectedRole || 'Select Role'}</span>
+    <FaCaretDown style={{ marginLeft: '8px' }} /> {/* Dropdown arrow */}
+  </DropdownButton>
+
+  {isRoleDropdownOpen && (
+    <DropdownMenu>
+      <li onClick={() => handleRoleSelect('All Users')}>All Users</li>
+      <li onClick={() => handleRoleSelect('Collector')}>Collector</li>
+      <li onClick={() => handleRoleSelect('CTO')}>CTO</li>
+      <li onClick={() => handleRoleSelect('OIC')}>OIC</li>
+      <li onClick={() => handleRoleSelect('Interim')}>Interim</li>
+    </DropdownMenu>
+  )}
+
+<SearchContainer>
+  <IconWrapper>
+    <FaSearch />
+  </IconWrapper>
+  <StyledSearchBar
+    type="text"
+    placeholder="Search by name..."
+    value={searchQuery}
+    onChange={handleSearchChange}
+  />
+  </SearchContainer>
+</ControlsContainer>
+
         <table>
           <thead>
             <tr>
+             <th>Email</th>
               <th>Full Name</th>
               <th>Position</th>
               <th>Unit</th>
               <th>Status</th>
-              <th>Email</th>
+             
               <th>Actions</th>
             </tr>
           </thead>
@@ -804,18 +962,25 @@ const handleLogout = () => {
                 .filter(user => user.firstName && user.lastName)
                 .map((user, index) => (
                   <tr key={index}>
+                    <td>{user.email}</td>
                     <td>{user.firstName} {user.lastName}</td>
                     <td>{user.position}</td>
                     <td>{user.location}</td>
                     <td>{user.status}</td>
-                    <td>{user.email}</td>
+                  
                     <td>
-                      <div className="actions">
-                        <FaEye className="icon" title="View" />
-                        <FaPen className="icon" title="Edit" onClick={() => handleEditClick(user.id)} />
-                        <FaTrash className="icon" title="Delete" onClick={() => handleDeleteClick(user)} />
-                      </div>
-                    </td>
+                  <div className="actions">
+                    <ActionButton className="view" onClick={() => handleViewClick(user.id)}>
+                      <FaEye className="icon" /> View
+                    </ActionButton>
+                    <ActionButton className="edit" onClick={() => handleEditClick(user.id)}>
+                      <FaPen className="icon" /> Edit
+                    </ActionButton>
+                    <ActionButton className="delete" onClick={() => handleDeleteClick(user)}>
+                      <FaTrash className="icon" /> Delete
+                    </ActionButton>
+                  </div>
+                </td>
                   </tr>
                 ))
             )}

@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { FaBars, FaSearch, FaUserCircle, FaFilter, FaPrint } from 'react-icons/fa';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt, faCheck, faClipboard,faPlusCircle, faCogs} from '@fortawesome/free-solid-svg-icons';
-import { FaSignOutAlt } from 'react-icons/fa';
-import { collection, getDocs } from 'firebase/firestore';
-import { stallholderDb } from '../components/firebase.config';
+import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt, FaPencilAlt, FaTrash } from 'react-icons/fa';
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faClipboard, faCheck, faPlusCircle, faCogs} from '@fortawesome/free-solid-svg-icons';
+import { deleteDoc, doc, collection,getDocs } from 'firebase/firestore';
+import { rentmobileDb } from '../components/firebase.config'; 
+import { interimDb } from '../components/firebase.config'; 
 
 
 const DashboardContainer = styled.div`
@@ -19,8 +19,8 @@ const Sidebar = styled.div`
   background-color: #f8f9fa;
   padding: 10px;
   display: flex;
-  border: 1px solid #ddd;  /* ADD THIS */
   flex-direction: column;
+  border: 1px solid #ddd;  /* ADD THIS */
   justify-content: space-between;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   transition: width 0.3s ease;
@@ -28,7 +28,6 @@ const Sidebar = styled.div`
   height: 100vh;
   z-index: 100;
   overflow: auto;
-  max-height: 100vh;
 `;
 
 const SidebarMenu = styled.ul`
@@ -143,49 +142,56 @@ const ProfileHeader = styled.div`
   }
 `;
 
-
-const ProfileImage = styled.img`
-  border-radius: 50%;
-  width: 60px; /* Adjusted for better visibility */
-  height: 60px;
-  margin-bottom: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // Subtle shadow for a polished look
-`;
-
-
-
 const FormContainer = styled.div`
   margin-top: 2rem;
-  padding: 1rem;
-  border-radius: 20px;
-  background-color: #f8f9fa;
-  border: 1px solid #ddd;
-  box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
+  padding: 3rem; /* Spacious feel */
+  border-radius: 12px; /* Softer border radius */
+  background-color: #ffffff; /* White background */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Soft shadow */
+  border: 1px solid #e0e0e0; /* Subtle border */
+  max-width: 600px; /* Max width */
+  margin-left: auto; /* Center align */
+  margin-right: auto; /* Center align */
+  font-family: 'Roboto', sans-serif; /* Consistent font */
 
   h3 {
-    margin-bottom: 1rem;
+    margin-bottom: 2rem; /* Increased margin */
+    color: #343a40; /* Dark gray for the heading */
+    font-size: 26px; /* Larger heading */
+    font-weight: 700; /* Bold weight */
+    text-align: center; /* Centered heading */
+    border-bottom: 2px solid #e0e0e0; /* Underline */
+    padding-bottom: 1rem; /* Space below heading */
   }
 
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px;
 
-    th, td {
-      padding: 15px;
+    th,
+    td {
+      padding: 15px; /* Standardized padding */
       text-align: left;
-      border-bottom: 2px solid #dee2e6;
+      border-bottom: 1px solid #e0e0e0; /* Subtle border */
     }
 
     th {
-      background-color: #e9ecef;
+      background-color: #f8f9fa; /* Light gray header */
+      font-weight: 700; /* Bold headers */
+      color: #495057; /* Darker text */
     }
 
     tr:nth-child(even) {
-      background-color: #f9f9f9;
+      background-color: #f9f9f9; /* Alternating row colors */
+    }
+
+    tr:hover {
+      background-color: #e9ecef; /* Highlight row on hover */
+      transition: background-color 0.3s ease; /* Smooth transition */
     }
   }
 `;
+
 
 const SearchBarContainer = styled.div`
   display: flex;
@@ -205,8 +211,6 @@ const SearchInput = styled.input`
   margin-left: 10px;
   width: 100%;
 `;
-
-
 
 const SidebarFooter = styled.div`
   padding: 10px;
@@ -234,20 +238,213 @@ const LogoutButton = styled(SidebarItem)`
   }
 `;
 
+const ProfileImage = styled.img`
+  border-radius: 50%;
+  width: 60px; /* Adjusted for better visibility */
+  height: 60px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // Subtle shadow for a polished look
+`;
 
+const StyledButton = styled.button`
+  padding: 12px 24px; /* Padding for size */
+  font-size: 16px; /* Font size */
+  font-family: 'Roboto', sans-serif; /* Professional font */
+  font-weight: bold;
+  color: #ffffff; /* Text color */
+  background-color:#008000;/* Primary color */
+  border: 1px solid transparent; /* Transparent border */
+  border-radius: 4px; /* Rounded corners */
+  cursor: pointer; /* Pointer on hover */
+  transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s; /* Smooth transition */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+
+  /* Responsive font scaling */
+  @media (max-width: 768px) {
+    font-size: 14px; /* Slightly smaller font on smaller screens */
+  }
+
+  /* Hover effects */
+  &:hover {
+    background-color:#008000; /* Darker blue */
+    transform: translateY(-1px); /* Lift effect */
+  }
+
+  &:active {
+    transform: translateY(0); /* Reset lift on click */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* Shadow for active state */
+  }
+`;
+
+const FilterBar = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+`;
+const TableContainer = styled.div`
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 20px;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+
+    th, td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+      font-family: 'Inter', sans-serif; // Use a consistent font
+
+      &:first-child {
+        border-top-left-radius: 8px;
+        border-bottom-left-radius: 8px;
+      }
+
+      &:last-child {
+        border-top-right-radius: 8px;
+        border-bottom-right-radius: 8px;
+      }
+    }
+
+    th {
+      background-color: #188423;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    tr:hover {
+      background-color: #f5f5f5;
+    }
+  }
+`;
+
+const Label = styled.label`
+  display: flex;
+  flex-direction: column;
+  font-family: 'Inter', sans-serif;
+  margin-right: 20px;
+`;
+
+const Select = styled.select`
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: white;
+  font-family: 'Inter', sans-serif;
+`;
+const ActionButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: ${({ isDelete }) => (isDelete ? '#d9534f' : '#188423')}; /* Red for delete, green for edit */
+  font-size: 1.5rem; /* Font size for icons */
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: scale(1.1); /* Slightly enlarge the icon on hover */
+  }
+
+  &:focus {
+    outline: none; /* Remove focus outline */
+  }
+`;
+
+const Loading = styled.div`
+  text-align: center;
+  margin: 20px;
+`;
 
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [stallHolders, setStallHolders] = useState([]);
   const sidebarRef = useRef(null);
   const [loggedInUser, setLoggedInUser] = useState(null);
   const navigate = useNavigate();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // State for dropdown
+  const [stalls, setStalls] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [locationFilter, setLocationFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  const fetchStalls = async () => {
+    try {
+      const stallsRef = collection(rentmobileDb, 'Stall');
+      const querySnapshot = await getDocs(stallsRef);
+      const stallList = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setStalls(stallList);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching stalls: ', error);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStalls();
+  }, []);
+
+  const handleEdit = (id) => {
+    navigate(`/editstall/${id}`); // Navigate to EditStall.js with the stall id
+  };
+  
+  const handleDelete = async (id) => {
+    try {
+      const stallRef = doc(rentmobileDb, 'Stall', id);
+      await deleteDoc(stallRef);
+      fetchStalls(); // Refresh the stall list after deletion
+    } catch (error) {
+      console.error('Error deleting stall: ', error);
+    }
+  };
+
+  // Extract unique locations for the dropdown filter
+  const uniqueLocations = [...new Set(stalls.map((stall) => stall.location))];
+
+  // Filter the stalls based on selected location and status
+  const filteredStalls = stalls.filter(
+    (stall) =>
+      (locationFilter === '' || stall.location === locationFilter) &&
+      (statusFilter === '' || stall.status === statusFilter)
+  );
+
+  // Separate available and occupied stalls
+  const availableStalls = filteredStalls.filter((stall) => stall.status === 'Available');
+  const occupiedStalls = filteredStalls.filter((stall) => stall.status === 'Occupied');
+
+  // Concatenate available stalls first and then occupied stalls
+  const sortedStalls = [...availableStalls, ...occupiedStalls];
+
+  if (loading) {
+  }
+
+  
+  
+  const fetchUserData = async () => {
+    const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
+    if (loggedInUserData) {
+      const usersCollection = collection(interimDb, 'users');
+      const userDocs = await getDocs(usersCollection);
+      const users = userDocs.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      
+      const currentUser = users.find(user => user.email === loggedInUserData.email);
+      setLoggedInUser(currentUser || loggedInUserData);
+    }
+  };
+
+
   const handleClickOutside = (event) => {
-   
+    if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+      setIsSidebarOpen(false);
+    }
   };
 
   useEffect(() => {
@@ -257,40 +454,18 @@ const Dashboard = () => {
     };
   }, []);
 
-  // Fetch total users and recent user data from Firestore
-  
-      
-
-
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // State for dropdown
   const handleLogout = () => {
-   
     localStorage.removeItem('userData'); 
     navigate('/login');
   };
+
   const handleDropdownToggle = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-
-
-  useEffect(() => {
-    try {
-      const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
-      if (loggedInUserData) {
-        // Assuming you are fetching all users somewhere, otherwise fetch it
-        const currentUser = stallHolders.find(user => user.email === loggedInUserData.email);
-        setLoggedInUser(currentUser || loggedInUserData);
-      }
-    } catch (error) {
-      console.error('Error fetching users:', error);
-    }
-  }, [stallHolders]); 
-  
-
   return (
     <DashboardContainer>
-     <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
+      <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
         <Link to="/profile" style={{ textDecoration: 'none' }}>
         <ProfileHeader isSidebarOpen={isSidebarOpen}>
           {loggedInUser && loggedInUser.Image ? (
@@ -331,6 +506,7 @@ const Dashboard = () => {
       <span>List of Vendors</span>
     </SidebarItem>
   </Link>
+
   <Link to="/listofstalls" style={{ textDecoration: 'none' }}>
   <SidebarItem isSidebarOpen={isSidebarOpen}>
     <FontAwesomeIcon icon={faClipboard} className="icon" />
@@ -451,6 +627,7 @@ const Dashboard = () => {
     </ul>
   )}
 </SidebarMenu>
+
       <SidebarFooter isSidebarOpen={isSidebarOpen}>
           <LogoutButton isSidebarOpen={isSidebarOpen} onClick={handleLogout}>
             <span><FaSignOutAlt /></span>
@@ -459,8 +636,6 @@ const Dashboard = () => {
         </SidebarFooter>
       </Sidebar>
 
-
-
       <MainContent isSidebarOpen={isSidebarOpen}>
         <AppBar>
           <ToggleButton onClick={toggleSidebar}>
@@ -468,15 +643,78 @@ const Dashboard = () => {
           </ToggleButton>
           <div>LIST OF VENDORS</div>
         </AppBar>
+    
 
         <ToggleButton isSidebarOpen={isSidebarOpen} onClick={toggleSidebar}>
           <FaBars />
         </ToggleButton>
+        <br></br>
 
-        
-        <FormContainer>
-          
-        </FormContainer>
+        <br></br>
+
+
+<FilterBar>
+          <Label>
+            Filter by Location:
+            <Select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)}>
+              <option value="">All Locations</option>
+              {uniqueLocations.map((location) => (
+                <option key={location} value={location}>
+                  {location}
+                </option>
+              ))}
+            </Select>
+          </Label>
+          <Label>
+            Filter by Status:
+            <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+              <option value="">All Statuses</option>
+              <option value="Available">Available</option>
+              <option value="Occupied">Occupied</option>
+            </Select>
+          </Label>
+        </FilterBar>
+        <TableContainer>
+          <table>
+            <thead>
+              <tr>
+                <th>Location</th>
+                <th>Stall Number</th>
+                <th>Size</th>
+                <th>Rate per Meter</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedStalls.length === 0 ? (
+                <tr>
+                  <td colSpan={6} align="center">No stalls found</td>
+                </tr>
+              ) : (
+                sortedStalls.map((stall) => (
+                  <tr key={stall.id}>
+                    <td>{stall.location}</td>
+                    <td>{stall.stallNumber}</td>
+                    <td>{stall.stallSize}</td>
+                    <td>{stall.ratePerMeter}</td>
+                    <td>{stall.status}</td>
+                    <td>
+                      <ActionButton onClick={() => handleEdit(stall.id)}>
+                        <FaPencilAlt />
+                      </ActionButton>
+                      <ActionButton isDelete onClick={() => handleDelete(stall.id)}>
+                        <FaTrash />
+                      </ActionButton>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </TableContainer>
+
+
       </MainContent>
     </DashboardContainer>
   );
