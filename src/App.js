@@ -35,6 +35,7 @@ import AssignCollector from './Interim/AssignCollector';
 import ManageAppraise from './Interim/ManageAppraise'; 
 import Stallholders from './Collector/Stallholders';
 import CollectorDash from './Collector/CollectorDash';
+import InterimAnnouncement from './Interim/InterimAnnouncement';
 
 function App() {
   return (
@@ -88,6 +89,7 @@ function App() {
           <Route path="/appraise" element={<ManageAppraise />} />
           <Route path="/stallholders" element={<Stallholders />} />
           <Route path="/collectdash" element={<CollectorDash />} />
+          <Route path="/announce" element={<InterimAnnouncement />} />
 
         </Routes>
       </Router>

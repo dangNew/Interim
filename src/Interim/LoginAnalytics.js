@@ -7,7 +7,7 @@ import {
   LineElement,
   CategoryScale,
   LinearScale,
-  PointElement, // Important for rendering data points on the chart
+  PointElement,
   Title,
   Tooltip,
   Legend,
@@ -24,55 +24,19 @@ const LoginAnalytics = () => {
       const usersCollection = collection(interimDb, 'users');
       const snapshot = await getDocs(usersCollection);
       const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-      console.log('Fetched users:', users);
-
-      // Filter users with a valid createdAt timestamp
       const logins = users.filter(user => user.createdAt);
       setLoginData(logins);
     };
-
     fetchLoginData();
   }, []);
 
-  const processData = () => {
-    const counts = {
-      daily: {},
-      weekly: {},
-      monthly: {},
-    };
-
-    loginData.forEach(user => {
-      const date = parseCreatedAt(user.createdAt); // Parse the createdAt timestamp
-      if (!date) return; // Skip if parsing fails
-
-      const day = date.toISOString().split('T')[0]; // Get date in YYYY-MM-DD format
-      const week = `${date.getFullYear()}-W${getWeekNumber(date)}`; // Get week number
-      const month = `${date.getFullYear()}-${date.getMonth() + 1}`; // Get month in YYYY-MM format
-
-      // Increment the counts
-      counts.daily[day] = (counts.daily[day] || 0) + 1;
-      counts.weekly[week] = (counts.weekly[week] || 0) + 1;
-      counts.monthly[month] = (counts.monthly[month] || 0) + 1;
-    });
-
-    console.log('Aggregated counts:', counts); // Debug log to check aggregated data
-    return counts;
-  };
-
   const parseCreatedAt = (createdAt) => {
-    // Check if createdAt is a Firestore Timestamp
-    if (createdAt && createdAt.seconds) {
-      return new Date(createdAt.seconds * 1000); // Convert seconds to milliseconds
-    }
-
-    // If createdAt is a string, convert it to a Date object
+    if (createdAt && createdAt.seconds) return new Date(createdAt.seconds * 1000);
     if (typeof createdAt === 'string') {
       const date = new Date(createdAt);
-      return isNaN(date.getTime()) ? null : date; // Return null if date is invalid
+      return isNaN(date.getTime()) ? null : date;
     }
-
-    return null; // Return null for unexpected types
+    return null;
   };
 
   const getWeekNumber = (date) => {
@@ -81,36 +45,91 @@ const LoginAnalytics = () => {
     return Math.ceil((days + startDate.getDay() + 1) / 7);
   };
 
+  const processData = () => {
+    const counts = { daily: {}, weekly: {}, monthly: {} };
+    loginData.forEach(user => {
+      const date = parseCreatedAt(user.createdAt);
+      if (!date) return;
+      const day = date.toISOString().split('T')[0];
+      const week = `${date.getFullYear()}-W${getWeekNumber(date)}`;
+      const month = `${date.getFullYear()}-${date.getMonth() + 1}`;
+      counts.daily[day] = (counts.daily[day] || 0) + 1;
+      counts.weekly[week] = (counts.weekly[week] || 0) + 1;
+      counts.monthly[month] = (counts.monthly[month] || 0) + 1;
+    });
+    return counts;
+  };
+
   const aggregatedData = processData();
 
   const data = {
-    labels: Object.keys(aggregatedData.daily), // Daily labels for the x-axis
+    labels: Object.keys(aggregatedData.daily),
     datasets: [
       {
         label: 'Daily Logins',
         data: Object.values(aggregatedData.daily),
-        fill: false,
-        borderColor: 'green',
-      },
-      {
-        label: 'Monthly Logins',
-        data: Object.values(aggregatedData.monthly),
-        fill: false,
-        borderColor: 'blue',
+        borderColor: '#4caf50',
+        backgroundColor: 'rgba(76, 175, 80, 0.2)',
+        pointBackgroundColor: '#4caf50',
+        fill: true,
       },
       {
         label: 'Weekly Logins',
         data: Object.values(aggregatedData.weekly),
-        fill: false,
-        borderColor: 'orange',
+        borderColor: '#ff9800',
+        backgroundColor: 'rgba(255, 152, 0, 0.2)',
+        pointBackgroundColor: '#ff9800',
+        fill: true,
+      },
+      {
+        label: 'Monthly Logins',
+        data: Object.values(aggregatedData.monthly),
+        borderColor: '#2196f3',
+        backgroundColor: 'rgba(33, 150, 243, 0.2)',
+        pointBackgroundColor: '#2196f3',
+        fill: true,
       },
     ],
   };
 
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      title: {
+        display: true,
+        text: 'User Login Trends',
+        font: { size: 18 },
+      },
+      legend: {
+        display: true,
+        position: 'top',
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => ` ${context.dataset.label}: ${context.raw}`,
+        },
+      },
+    },
+    scales: {
+      x: { title: { display: true, text: 'Date' } },
+      y: { title: { display: true, text: 'Logins' } },
+    },
+  };
+
   return (
-    <div>
-      <h2>User Logins Analytics</h2>
-      <Line data={data} />
+    <div style={{
+      maxWidth: '900px',
+      marginLeft: '50px',
+      padding: '20px',
+      borderRadius: '10px',
+      boxShadow: '0 6px 12px rgba(0, 0, 0, 0.1)',
+      backgroundColor: '#fff',
+    }}>
+      <h2 style={{ textAlign: 'center', color: '#333', marginBottom: '50px' }}>User Login Analytics</h2>
+      <div style={{ height: '400px' }}>
+        <Line data={data} options={options} />
+      </div>
     </div>
   );
 };

@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
+import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt, FaPlusCircle, FaTimes   } from 'react-icons/fa';
 import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faClipboard, faCheck, faPlusCircle,faCogs} from '@fortawesome/free-solid-svg-icons';
+import { HiPlusCircle, HiXCircle } from 'react-icons/hi';
 import { collection, getDocs, addDoc, setDoc, doc, query, orderBy, limit } from 'firebase/firestore';
 import DatePicker from 'react-datepicker';
 import { rentmobileDb } from '../components/firebase.config'; 
@@ -145,104 +146,127 @@ const ProfileHeader = styled.div`
 
 const FormContainer = styled.div`
   margin-top: 2rem;
-  padding: 3rem; /* Spacious feel */
-  border-radius: 12px; /* Softer border radius */
-  background-color: #ffffff; /* White background */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Soft shadow */
-  border: 1px solid #e0e0e0; /* Subtle border */
-  max-width: 600px; /* Max width */
-  margin-left: auto; /* Center align */
-  margin-right: auto; /* Center align */
-  font-family: 'Roboto', sans-serif; /* Consistent font */
+  padding: 3rem;
+  border-radius: 12px;
+  background-color: #ffffff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+  max-width: 700px;
+  margin: 2rem auto;
+  font-family: 'Roboto', sans-serif;
 
   h3 {
-    margin-bottom: 2rem; /* Increased margin */
-    color: #343a40; /* Dark gray for the heading */
-    font-size: 26px; /* Larger heading */
-    font-weight: 700; /* Bold weight */
-    text-align: center; /* Centered heading */
-    border-bottom: 2px solid #e0e0e0; /* Underline */
-    padding-bottom: 1rem; /* Space below heading */
+    margin-bottom: 2rem;
+    color: #343a40;
+    font-size: 26px;
+    font-weight: 700;
+    text-align: center;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 1rem;
+  }
+
+  button {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: #0056b3;
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+    }
   }
 
   table {
     width: 100%;
     border-collapse: collapse;
+    margin-top: 2rem;
 
-    th,
-    td {
-      padding: 15px; /* Standardized padding */
+    th, td {
+      padding: 15px;
       text-align: left;
-      border-bottom: 1px solid #e0e0e0; /* Subtle border */
+      border-bottom: 1px solid #e0e0e0;
+      font-size: 14px;
     }
 
     th {
-      background-color: #f8f9fa; /* Light gray header */
-      font-weight: 700; /* Bold headers */
-      color: #495057; /* Darker text */
+      background-color: #f8f9fa;
+      font-weight: 700;
+      color: #495057;
     }
 
     tr:nth-child(even) {
-      background-color: #f9f9f9; /* Alternating row colors */
+      background-color: #f9f9f9;
     }
 
     tr:hover {
-      background-color: #e9ecef; /* Highlight row on hover */
-      transition: background-color 0.3s ease; /* Smooth transition */
+      background-color: #e9ecef;
+      transition: background-color 0.3s ease;
     }
   }
 `;
 
 const InputField = styled.div`
   position: relative;
-  margin-bottom: 1.5rem;
+  margin-bottom: 20px;
 
   input, select {
     width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ced4da;
+    padding: 10px;
+    border: 1px solid #ccc;
     border-radius: 4px;
-    font-size: 16px;
-    font-family: 'Roboto', sans-serif;
-    color: #495057;
-    transition: border-color 0.3s ease;
-
-    &:focus {
-      border-color: #188423;
-      outline: none;
-    }
+    outline: none;
+    box-sizing: border-box;
   }
 
   label {
     position: absolute;
-    top: -10px;
-    left: 12px;
-    background-color: #ffffff;
-    color: #000000; /* Changed to black */
-    font-size: 16px;
+    top: -8px;
+    left: 10px;
+    background: white;
     padding: 0 5px;
-    transition: all 0.3s ease;
-    font-family: 'Roboto', sans-serif;
+    font-size: 0.9rem;
+    color: #555;
   }
 `;
-
+const RateSizeContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 20px;
+`;
 const SaveButton = styled.button`
-  background-color: #4caf50;
-  color: white;
-  padding: 0.75rem 1.5rem;
-  font-size: 16px;
-  font-weight: 600;
+  width: 100%;
+  padding: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  background-color: #28a745;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  width: 100%;
 
   &:hover {
-    background-color: #45a049;
+    background-color: #218838;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.3);
   }
 `;
-
 
 const SearchBarContainer = styled.div`
   display: flex;
@@ -375,7 +399,32 @@ const CloseButton = styled.span`
   font-size: 20px;
   float: right;
 `;
+const AddIcon = styled(HiPlusCircle)`
+  font-size: 28px;
+  color: #007bff;
+  cursor: pointer;
+  margin-left: 50px;
+  margin-top: -25px; /* Adjust this value to position the icon higher */
+  position: relative;
+  transition: color 0.3s;
 
+  &:hover {
+    color: #0056b3;
+  }
+`;
+const DeleteIcon = styled(HiXCircle)`
+  font-size: 28px;
+  color: #ff4d4d;
+  cursor: pointer;
+  margin-left: 50px;
+  margin-top: -25px; /* Adjust this value to position the icon higher */
+  position: relative;
+  transition: color 0.3s;
+
+  &:hover {
+    color: #0056b3;
+  }
+`;
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const sidebarRef = useRef(null);
@@ -388,31 +437,57 @@ const Dashboard = () => {
   const [appSize, setAppSize] = useState('');
   const [goodsName, setGoodsName] = useState('');
   const [unitMeasure, setUnitMeasure] = useState('');
+  const [location, setLocation] = useState(''); 
+  const [rateSizePairs, setRateSizePairs] = useState([{ rate_1: '', size_1: '' }]);
+  const [locations, setLocations] = useState([]);
 
+
+  const addRateSizePair = () => {
+    setRateSizePairs([...rateSizePairs, { [`rate_${rateSizePairs.length + 1}`]: '', [`size_${rateSizePairs.length + 1}`]: '' }]);
+  };
+
+  const removeRateSizePair = (index) => {
+    const updatedPairs = rateSizePairs.filter((_, i) => i !== index);
+    setRateSizePairs(updatedPairs);
+  };
+
+  // Function to handle changes in rate-size pair inputs
+  const handleRateSizeChange = (index, field, value) => {
+    const updatedPairs = rateSizePairs.map((pair, i) =>
+      i === index ? { ...pair, [field]: value } : pair
+    );
+    setRateSizePairs(updatedPairs);
+  };
+
+  // Save appraisal to Firestore
   const handleSaveAppraisal = async () => {
     try {
-      // Add a new document to the 'appraisal_rate' collection
       await addDoc(collection(rentmobileDb, 'appraisal_rate'), {
-        app_rate: Number(appRate),
-        app_size: appSize,
         goods_name: goodsName,
+        location: location,
         unit_measure: unitMeasure,
+        rate_size_pairs: rateSizePairs.map((pair, index) => ({
+          [`rate_${index + 1}`]: Number(pair[`rate_${index + 1}`]),
+          [`size_${index + 1}`]: pair[`size_${index + 1}`]
+        })),
       });
-      // Firestore will create the 'appraisal_rate' collection if it doesn't exist
       setModalMessage('Appraisal data saved successfully!');
       setIsModalOpen(true);
 
       // Clear input fields after saving
-      setAppRate('');
-      setAppSize('');
       setGoodsName('');
+      setLocation('');
       setUnitMeasure('');
+      setRateSizePairs([{ rate_1: '', size_1: '' }]);
     } catch (error) {
       setModalMessage('Error saving appraisal data');
       setIsModalOpen(true);
       console.error('Error saving appraisal data:', error);
     }
   };
+
+  // Save appraisal to Firestore
+ 
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -458,7 +533,15 @@ const Dashboard = () => {
   const handleDropdownToggle = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
-
+  const fetchLocations = async () => {
+    const unitsCollection = collection(rentmobileDb, 'unit');
+    const unitDocs = await getDocs(unitsCollection);
+    const unitNames = unitDocs.docs.map(doc => doc.data().name);
+    setLocations(unitNames);
+  };
+  useEffect(() => {
+    fetchLocations();
+  }, []);
   return (
     <DashboardContainer>
       <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
@@ -542,7 +625,7 @@ const Dashboard = () => {
     </SidebarItem>
   </Link>
 
-  <Link to="/manage-roles" style={{ textDecoration: 'none' }}>
+  <Link to="/appraise" style={{ textDecoration: 'none' }}>
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faUsers} className="icon" />
       <span>Manage Appraisal</span>
@@ -652,28 +735,6 @@ const Dashboard = () => {
 
       <InputField>
         <input
-          type="number"
-          value={appRate}
-          onChange={(e) => setAppRate(e.target.value)}
-          placeholder=" "
-          required
-        />
-        <label htmlFor="appRate">Appraisal Rate</label>
-      </InputField>
-
-      <InputField>
-        <input
-          type="text"
-          value={appSize}
-          onChange={(e) => setAppSize(e.target.value)}
-          placeholder=" "
-          required
-        />
-        <label htmlFor="appSize">Appraisal Size</label>
-      </InputField>
-
-      <InputField>
-        <input
           type="text"
           value={goodsName}
           onChange={(e) => setGoodsName(e.target.value)}
@@ -682,6 +743,50 @@ const Dashboard = () => {
         />
         <label htmlFor="goodsName">Goods Name</label>
       </InputField>
+
+      <InputField>
+        <select
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          required
+        >
+          <option value="" disabled>Select Location</option>
+          {locations.map((loc, index) => (
+            <option key={index} value={loc}>{loc}</option>
+          ))}
+        </select>
+        <label htmlFor="location">Location</label>
+      </InputField>
+
+      {rateSizePairs.map((pair, index) => (
+        <RateSizeContainer key={index}>
+          <InputField>
+            <input
+              type="number"
+              placeholder={`Rate ${index + 1}`}
+              value={pair[`rate_${index + 1}`]}
+              onChange={(e) => handleRateSizeChange(index, `rate_${index + 1}`, e.target.value)}
+            />
+            <label htmlFor={`rate_${index + 1}`}>Rate {index + 1}</label>
+          </InputField>
+
+          <InputField>
+            <input
+              type="text"
+              value={pair[`size_${index + 1}`]}
+              onChange={(e) => handleRateSizeChange(index, `size_${index + 1}`, e.target.value)}
+              placeholder=" "
+              required
+            />
+            <label htmlFor={`size_${index + 1}`}>Size {index + 1}</label>
+          </InputField>
+
+          {/* Icon for adding more rate/size pairs */}
+          {index === 0 && <AddIcon onClick={addRateSizePair} title="Add Rate/Size Pair" />}
+          {/* Show delete icon for pairs after the first */}
+          {index > 0 && <DeleteIcon onClick={() => removeRateSizePair(index)} title="Remove Rate/Size Pair" />}
+        </RateSizeContainer>
+      ))}
 
       <InputField>
         <input
@@ -699,9 +804,9 @@ const Dashboard = () => {
       {isModalOpen && (
         <Modal>
           <ModalContent>
-            <CloseButton onClick={closeModal} aria-label="Close modal">×</CloseButton>
+            <CloseButton onClick={() => setIsModalOpen(false)} aria-label="Close modal">×</CloseButton>
             <p>{modalMessage}</p>
-            <button onClick={closeModal}>Close</button>
+            <button onClick={() => setIsModalOpen(false)}>Close</button>
           </ModalContent>
         </Modal>
       )}

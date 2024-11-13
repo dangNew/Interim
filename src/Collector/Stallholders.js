@@ -208,66 +208,8 @@ const StatBox = styled.div`
   }
 `;
 
-const FormContainer = styled.div`
-  margin-top: 2rem;
-  padding: 1rem;
-  border-radius: 20px;
-  background-color: #f8f9fa;
-  border: 1px solid #ddd;
-  box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
 
-  h3 {
-    margin-bottom: 1rem;
-  }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-
-    th, td {
-      padding: 15px;
-      text-align: left;
-      border-bottom: 2px solid #dee2e6;
-    }
-
-    th {
-      background-color: #e9ecef;
-      color: #333;
-      font-weight: bold;
-    }
-
-    tr:nth-child(even) {
-      background-color: #f2f2f2;
-    }
-
-    tr:nth-child(odd) {
-      background-color: #ffffff;
-    }
-
-    tr:hover {
-      background-color: #f1f3f5; /* Highlight row on hover */
-    }
-  }
-
-  .view-btn {
-    padding: 8px 12px;
-    font-size: 14px;
-    border: none;
-    color: #ffffff;
-    background-color: #007bff; /* Blue */
-    cursor: pointer;
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    transition: background-color 0.3s ease;
-  }
-
-  .view-btn:hover {
-    background-color: #0056b3;
-  }
-`;
 
 const SearchBarContainer = styled.div`
   display: flex;
@@ -308,85 +250,15 @@ const SearchBarCont = styled.div`
   }
 `;
 
-const SearchIcon = styled(FaSearch)`
-  color: #6c757d;
-  font-size: 1.2em;
-`;
-
-const SearchIn = styled.input`
-  border: none;
-  background: none;
-  outline: none;
-  margin-left: 10px;
-  width: 100%;
-  font-size: 1em;
-  color: #495057;
-
-  ::placeholder {
-    color: #adb5bd;
-  }
-
-  &:focus {
-    color: #212529;
-  }
-`;
 const TopBarContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
   
 `;
-const PrintButton = styled.button`
-  background-color: #188423; /* Match the AppBar color */
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 12px 20px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
-
-  &:hover {
-    background-color: #155724; /* Darker shade for hover */
-  }
-
-  svg {
-    margin-right: 5px; /* Space between icon and text */
-  }
-`;
 
 
-const FilterContainer = styled.div`
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 20px;
-`;
 
-const FilterButton = styled.button`
-  display: flex;
-  align-items: center;
-  background-color: #e9ecef;
-  border: none;
-  border-radius: 5px;
-  padding: 12px 20px;
-  cursor: pointer;
-  height: 35px;
-
-  &:hover {
-    background-color: #d3d3d3;
-  }
-
-  svg {
-    margin-right: 2px;
-  }
-`;
-
-const ButtonContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1rem; /* Space between buttons */
-`;
 const SidebarFooter = styled.div`
   padding: 10px;
   margin-top: auto; /* Pushes the footer to the bottom */
@@ -412,189 +284,280 @@ const LogoutButton = styled(SidebarItem)`
     transform: scale(1.05); /* Slightly scale up on hover */
   }
 `;
-const PaginationContainer = styled.div`
+const ButtonContainer = ({ children }) => (
+  <div style={{ display: 'flex', gap: '10px' }}>{children}</div>
+);
+
+
+const FormContainer = styled.div`
+  padding: 40px;
+  background-color: #ffffff;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  font-family: 'Inter', sans-serif;
+  max-width: 1200px;
+  margin: auto;
+
+  h3 {
+    font-size: 22px;
+    color: #000;
+    font-weight: 700;
+    margin-bottom: 25px;
+  }
+`;
+
+const UnitFilterContainer = styled.div`
+  margin-bottom: 30px;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: space-between; /* Aligns select and search box to opposite ends */
+
+  .select-container {
+    flex: 1;
+  }
+
+  .search-container {
+    flex: 1;
+    max-width: 300px;
+    display: flex;
+    position: relative;
+  }
+   .filter-container {
+    margin-left: 10px; /* Add some space between the select and filter button */
+  }
+
+  .filter-button {
+    padding: 12px 20px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    background-color: #3498db;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.3s;
+
+    &:hover {
+      background-color: #2980b9;
+    }
+
+    &:active {
+      background-color: #2471a3;
+    }
+  }
+
+  select {
+    padding: 12px 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: bold;
+    color: #333;
+    outline: none;
+    transition: all 0.3s;
+
+    &:hover,
+    &:focus {
+      border-color: #2ecc71;
+      box-shadow: 0 0 6px rgba(46, 204, 113, 0.4);
+    }
+  }
+
+   .search-container input {
+    padding: 12px 15px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    width: 100%; /* Ensure input takes full width */
+    transition: all 0.3s;
+    outline: none;
+    font-weight: bold;
+    padding-left: 30px; /* Add padding to the left to make space for the icon */
+
+    &:focus {
+      border-color: #3498db;
+      box-shadow: 0 0 5px rgba(52, 152, 219, 0.4);
+    }
+
+    &::placeholder {
+      color: #bbb; /* Placeholder text color */
+      font-weight: bold; /* Bold placeholder text */
+    }
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 10px; /* Position the icon inside the input */
+    top: 50%;
+    transform: translateY(-50%); /* Vertically center the icon */
+    color: #888; /* Icon color */
+    font-size: 18px; /* Icon size */
+  }
+`;
+
+const StallHolderContainer = styled.div`
+  display: flex;
   flex-wrap: wrap;
-  gap: 10px; /* Spacing between buttons */
-  margin-top: 20px;
+  gap: 25px;
 `;
 
-const PageButton = styled.button`
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 16px;
-  font-size: 1.1rem; /* Larger font */
-  min-width: 50px;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-
-  &:hover {
-    background-color: #0056b3;
-    transform: scale(1.05); /* Slightly enlarges on hover */
-  }
-
-  &:disabled {
-    background-color: #c3c3c3;
-    cursor: not-allowed;
-  }
-
-  @media (max-width: 600px) {
-    padding: 10px 14px;
-    font-size: 1rem;
-  }
-`;
-
-const CurrentPageIndicator = styled.span`
-  margin: 0 8px;
-  font-size: 1.2rem;
-  color: #333;
-`;
-
-const DropdownContainer = styled.div`
+const StallHolderCard = styled.div`
+  background-color: #f9fafb;
+  border-radius: 15px;
+  border: 3px solid #ddd; /* Adding 4px solid border with light gray color */
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  padding: 25px;
+  width: 320px;
   position: relative;
-  display: inline-block;
-`;
-
-const DropdownButton = styled.button`
-  background-color: #007bff; /* Match the AppBar color */
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 10px 15px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
+  transition: transform 0.3s, box-shadow 0.3s;
 
   &:hover {
-    background-color: #155724; /* Darker shade for hover */
-  }
-
-  svg {
-    margin-right: 5px; /* Space between icon and text */
+    transform: translateY(-6px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   }
 `;
 
-const DropdownContent = styled.div`
-  display: ${({ isOpen }) => (isOpen ? 'block' : 'none')};
+const PaymentDate = styled.div`
   position: absolute;
-  background-color: #f1f1f1;
-  min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  z-index: 1;
+  top: 15px;
+  right: 15px;
+  font-size: 12px;
+  color: #888; /* Changed to a lighter gray color */
+  font-weight: bold;
 `;
 
-const DropdownItem = styled.div`
-  color: black;
-  padding: 12px 16px;
-  text-decoration: none;
-  display: block;
-  cursor: pointer;
+const StallHolderInfo = styled.div`
+  margin-bottom: 20px;
+  font-size: 15px;
+  color: #333;
 
-  &:hover {
-    background-color: #ddd;
+  div {
+    margin-bottom: 10px;
+    color: #333;
+
+    &::before {
+      font-weight: bold;
+      margin-right: 5px;
+    }
+
+    &:nth-child(1)::before { content: "Name:"; }
+    &:nth-child(2)::before { content: "Amount Due:"; }
+    &:nth-child(3)::before { content: "Garbage Fee:"; }
+    &:nth-child(4)::before { content: "Interest Amount:"; }
+    &:nth-child(5)::before { content: "Interest Rate:"; }
+    &:nth-child(6)::before { content: "Total Amount Due:"; }
+    &:nth-child(7)::before { content: "Status:"; }
   }
 `;
-const ViewButton = styled.button`
-  background-color: #28a745; /* Green color */
-  color: white;
-  border: none;
-  padding: 8px 16px; /* Increased padding for a larger button */
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem; /* Increased font size for better readability */
 
-  &:hover {
-    background-color: #218838; /* Darker green on hover */
+const StallHolderActions = styled.div`
+  display: flex;
+  justify-content: space-between;
+
+  button {
+    background-color: #3498db; /* Default color */
+    color: #ffffff;
+    border: none;
+    padding: 12px 20px; /* Adjust padding to match your design */
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px; /* Font size */
+    font-weight: bold;
+    transition: background-color 0.3s, transform 0.2s;
+
+    &:hover {
+      background-color: #2980b9; /* Darker shade on hover */
+      transform: scale(1.05);
+    }
+
+    &:active {
+      transform: scale(0.98); /* Slightly smaller when active */
+    }
+  }
+
+  .mark-as-paid {
+    background-color: #2ecc71; /* Green color for 'Mark as Paid' button */
+
+    &:hover {
+      background-color: #27ae60; /* Darker green on hover */
+    }
+  }
+
+  /* Custom styles for the View button */
+  .view-button {
+    background-color: #3498db; /* Default blue color */
+    padding: 10px 16px; /* Adjusted padding for a larger button */
+    font-size: 16px; /* Font size matching your design */
+    border-radius: 10px; /* Slightly rounder corners */
+    width: 40%; /* Ensure it takes up full width of its container */
+    transition: background-color 0.3s, transform 0.2s;
+
+    &:hover {
+      background-color: #2980b9; /* Darker shade on hover */
+      transform: scale(1.05);
+    }
+
+    &:active {
+      transform: scale(0.98); /* Slightly smaller when active */
+    }
   }
 `;
-
 
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [stallHolders, setStallHolders] = useState([]);
+  const [totalDailyRent, setTotalDailyRent] = useState(0);
   const sidebarRef = useRef(null);
   const [loggedInUser, setLoggedInUser] = useState(null);
-  const [totalUsers, setTotalUsers] = useState(0);
-  const [filteredStallHolders, setFilteredStallHolders] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-  const [stallNoFilter, setStallNoFilter] = useState('');
   const [units, setUnits] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState('Select Unit');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
-  
+
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
-  const handleView = (stallHolder) => navigate(`/view-stallholder/${stallHolder.id}`);
-
   const fetchStallholders = async () => {
-    const querySnapshot = await getDocs(collection(interimDb, 'users'));
-    const data = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      paymentStatus: doc.data().paymentStatus || 'Unpaid',
-    }));
-    setStallHolders(data);
-    setFilteredStallHolders(data);
+    try {
+      const querySnapshot = await getDocs(collection(rentmobileDb, 'stall_payment'));
+      const data = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        firstName: doc.data().firstName || '',
+        lastName: doc.data().lastName || '',
+        dailyRent: doc.data().dailyRent || 0,
+        garbageFee: doc.data().garbageFee || 0,
+        amountDue: doc.data().amountDue || 0,
+        interestAmount: doc.data().interestAmount || 0,
+        interestRat: doc.data().interestRat || 0,
+        numOfDays: doc.data().numOfDays || 0,
+        paymentDate: doc.data().paymentDate?.toDate() || null,
+        status: doc.data().status || 'Unpaid',
+        surcharge: doc.data().surcharge || 0,
+        totalAmountDue: doc.data().totalAmountDue || 0,
+      }));
+
+      // Calculate total daily rent
+      const totalRent = data.reduce((sum, stall) => sum + stall.dailyRent, 0);
+      setTotalDailyRent(totalRent);
+
+      setStallHolders(data);
+    } catch (error) {
+      console.error("Error fetching stallholders:", error);
+    }
   };
 
   useEffect(() => {
     fetchStallholders();
   }, []);
 
-  const markAsPaid = async (stallHolderId) => {
-    try {
-      const stallholderDoc = doc(interimDb, 'users', stallHolderId);
-      await updateDoc(stallholderDoc, { paymentStatus: 'Paid by Cash' });
-
-      setStallHolders(prevState =>
-        prevState.map(stall =>
-          stall.id === stallHolderId ? { ...stall, paymentStatus: 'Paid by Cash' } : stall
-        )
-      );
-      setFilteredStallHolders(prevState =>
-        prevState.map(stall =>
-          stall.id === stallHolderId ? { ...stall, paymentStatus: 'Paid by Cash' } : stall
-        )
-      );
-    } catch (error) {
-      console.error("Error updating payment status:", error);
-    }
-  };
-
-  useEffect(() => {
-    let filteredData = stallHolders.filter(stall =>
-      stall.firstName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    if (stallNoFilter) {
-      filteredData = filteredData.filter(stall => stall.stallNumber === stallNoFilter);
-    }
-    if (selectedUnit !== 'Select Unit') {
-      filteredData = filteredData.filter(stall => stall.location === selectedUnit);
-    }
-
-    setFilteredStallHolders(filteredData);
-  }, [searchTerm, stallHolders, stallNoFilter, selectedUnit]);
-
-  const handleUnitSelect = (unit) => {
-    setSelectedUnit(unit);
-    setIsDropdownOpen(false);
-    setFilteredStallHolders(unit === 'All' ? stallHolders : stallHolders.filter(stall => stall.location === unit));
+  const handleFilter = () => {
+    // Add your filter logic here
+    console.log('Filter button clicked');
   };
 
   const fetchUnits = async () => {
     try {
-      const querySnapshot = await getDocs(collection(interimDb, 'unit'));
+      const querySnapshot = await getDocs(collection(rentmobileDb, 'unit'));
       const unitData = querySnapshot.docs.map(doc => doc.data().name);
       setUnits(['All', ...unitData]);
     } catch (error) {
@@ -606,73 +569,25 @@ const Dashboard = () => {
     fetchUnits();
   }, []);
 
-  const totalPages = Math.ceil(filteredStallHolders.length / itemsPerPage);
-  const currentStallHolders = filteredStallHolders.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const markAsPaid = async (stallId) => {
+    try {
+      const stallRef = doc(rentmobileDb, 'stall_payment', stallId);
+      await updateDoc(stallRef, { status: 'Paid' });
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+      // Update local state
+      setStallHolders(prevStallHolders =>
+        prevStallHolders.map(stall =>
+          stall.id === stallId ? { ...stall, status: 'Paid' } : stall
+        )
+      );
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
   };
 
-  const handlePrevPage = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
-  };
-
-  const handleSearchChange = (event) => setSearchTerm(event.target.value);
-  
   const handleLogout = () => {
     localStorage.removeItem('userData');
     navigate('/login');
-  };
-
-  const handlePrint = () => {
-    const printContent = `
-      <html>
-        <head>
-          <title>Print</title>
-          <style>
-            body { font-family: 'Inter', sans-serif; }
-            table { width: 100%; border-collapse: collapse; font-size: 14px; }
-            th, td { padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; }
-            th { background-color: #e9ecef; }
-            tr:nth-child(even) { background-color: #f9f9f9; }
-            h3 { text-align: center; }
-          </style>
-        </head>
-        <body>
-          <h3>CARBON MARKET</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Stall No.</th>
-                <th>Stall Holder</th>
-                <th>Unit</th>
-                <th>Area (Meters)</th>
-                <th>Rate Per Meter</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${filteredStallHolders.map(stall => `
-                <tr>
-                  <td>${stall.stallNumber}</td>
-                  <td>${stall.firstName} ${stall.lastName}</td>
-                  <td>${stall.location}</td>
-                  <td>${stall.areaMeters}</td>
-                  <td>${stall.billing}</td>
-                  <td>${stall.date}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </body>
-      </html>
-    `;
-
-    const newWindow = window.open('', '_blank');
-    newWindow.document.write(printContent);
-    newWindow.document.close();
-    newWindow.print();
-    newWindow.close();
   };
 
   useEffect(() => {
@@ -688,6 +603,7 @@ const Dashboard = () => {
   }, [stallHolders]);
 
   return (
+
     <DashboardContainer>
      <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
         <Link to="/profile" style={{ textDecoration: 'none' }}>
@@ -746,7 +662,7 @@ const Dashboard = () => {
       <MainContent isSidebarOpen={isSidebarOpen}>
         <AppBar>
           <ToggleButton onClick={toggleSidebar}>
-            <FaBars />
+              <FaBars />
           </ToggleButton>
           <div>LIST OF VENDORS</div>
         </AppBar>
@@ -756,97 +672,94 @@ const Dashboard = () => {
         </ToggleButton>
 
         <StatsContainer>
-          <StatBox bgColor="#11768C">
-            <h3>Total Vendor</h3>
-            <p>{totalUsers}</p>
-          </StatBox>
+        <StatBox bgColor="#11768C">
+          <h3>Daily Rent</h3>
+          <p>{totalDailyRent}</p>
+        </StatBox>
 
-          <StatBox bgColor="#188423">
-            <h3>Total Logins</h3>
-            <p>{totalUsers}</p>
-          </StatBox>
-        </StatsContainer><span>
+        <StatBox bgColor="#188423">
+          <h3>Weekly Rent</h3>
+          <p>{/* Add your weekly rent logic here */}</p>
+        </StatBox>
+
+        <StatBox bgColor="#188423">
+          <h3>Monthly Rent</h3>
+          <p>{/* Add your monthly rent logic here */}</p>
+        </StatBox>
+      </StatsContainer>
           
-        </span>
+        
 
         <TopBarContainer>
-        <SearchBarCont>
-      <SearchIcon />
-      <SearchIn
-        type="text"
-        placeholder="Search Stall Holders..."
-        value={searchTerm}
-        onChange={handleSearchChange}
-      />
-    </SearchBarCont>
+       
 
         <ButtonContainer>
-        <PrintButton onClick={handlePrint}>
-              <FaPrint />
-              Print
-            </PrintButton>
-            <DropdownContainer>
-  <DropdownButton onClick={toggleDropdown}>
-    {selectedUnit}
-  </DropdownButton>
-  <DropdownContent isOpen={isDropdownOpen}>
-    {units.map((unit, index) => (
-      <DropdownItem key={index} onClick={() => handleUnitSelect(unit)}>
-        {unit}
-      </DropdownItem>
-    ))}
-  </DropdownContent>
-</DropdownContainer>
-            
+        
           </ButtonContainer>
           </TopBarContainer>
-         <FormContainer>
-        <table>
-          <thead>
-            <tr>
-              <th>Stall No.</th>
-              <th>Stall Holder</th>
-              <th>Unit</th>
-              <th>Area (Meters)</th>
-              <th>Rate Per Meter</th>
-              <th>Date</th>
-              <th>Payment Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredStallHolders.map((stall) => (
-              <tr key={stall.id}>
-                <td>{stall.stallNumber}</td>
-                <td>{stall.firstName} {stall.lastName}</td>
-                <td>{stall.location}</td>
-                <td>{stall.areaMeters}</td>
-                <td>{stall.billing}</td>
-                <td>{stall.date}</td>
-                <td>{stall.paymentStatus}</td>
-                <td>
-                  {stall.paymentStatus === 'Unpaid' && (
-                    <button onClick={() => markAsPaid(stall.id)}>
-                      Mark as Paid
-                    </button>
-                  )}
-                </td>
-              </tr>
+
+          <FormContainer>
+      <h3>Stall Holders</h3>
+      <UnitFilterContainer>
+        <div className="select-container">
+          <select value={selectedUnit} onChange={(e) => setSelectedUnit(e.target.value)}>
+            {units.map((unit, index) => (
+              <option key={index} value={unit}>{unit}</option>
             ))}
-          </tbody>
-        </table>
-      </FormContainer>
-        <PaginationContainer>
-        <PageButton onClick={handlePrevPage} disabled={currentPage === 1}>
-          Prev
-        </PageButton>
-        <CurrentPageIndicator>
-          Page {currentPage} of {totalPages}
-        </CurrentPageIndicator>
-        <PageButton onClick={handleNextPage} disabled={currentPage === totalPages}>
-          Next
-        </PageButton>
-      </PaginationContainer>
+          </select>
+        </div>
+       
+       {/* Filter Button */}
+    <div className="filter-container">
+      <button className="filter-button" onClick={handleFilter}>
+        Filter
+      </button>
+    </div>
+
+
+        <div className="search-container">
+  <input
+    type="text"
+    placeholder="Search Stallholder"
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+  />
+  <div className="search-icon">
+    <FontAwesomeIcon icon={faSearch} /> {/* FontAwesome search icon */}
+  </div>
+</div>
+
+      </UnitFilterContainer>
+
+     
+
+      <StallHolderContainer>
+        {stallHolders.map((stall) => (
+          <StallHolderCard key={stall.id}>
+            <PaymentDate>{stall.paymentDate ? stall.paymentDate.toLocaleDateString() : 'N/A'}</PaymentDate>
+            <StallHolderInfo>
+              <div>{stall.firstName} {stall.lastName}</div>
+              <div>{stall.amountDue}</div>
+              <div>{stall.garbageFee}</div>
+              <div>{stall.interestAmount}</div>
+              <div>{stall.interestRat}</div>
+              <div>{stall.totalAmountDue}</div>
+              <div style={{ color: stall.status === 'Pending' ? 'red' : stall.status === 'Paid' ? 'blue' : 'black' }}>
+                {stall.status}
+              </div>
+            </StallHolderInfo>
+            <StallHolderActions>
+              {(stall.status === 'Pending' || stall.status === 'Unpaid') && (
+                <button className="mark-as-paid" onClick={() => markAsPaid(stall.id)}>
+                  Mark as Paid
+                </button>
+              )}
+              <button className="view-button" onClick={() => navigate(`/view-stallholder/${stall.id}`)}>View</button>
+            </StallHolderActions>
+          </StallHolderCard>
+        ))}
+      </StallHolderContainer>
+    </FormContainer>
 
       </MainContent>
     </DashboardContainer>

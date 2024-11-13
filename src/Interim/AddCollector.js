@@ -580,6 +580,14 @@ const Dashboard = () => {
           </SidebarItem>
         </li>
       </Link>
+      <Link to="/addcollector" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+            <FontAwesomeIcon icon={faPlus} className="icon" />
+            <span>Add Ambulant Collector</span>
+          </SidebarItem>
+        </li>
+      </Link>
     </ul>
   )}
 
@@ -589,7 +597,7 @@ const Dashboard = () => {
       <span>Add New Unit</span>
     </SidebarItem>
   </Link>
-  <Link to="/manage-roles" style={{ textDecoration: 'none' }}>
+  <Link to="/appraise" style={{ textDecoration: 'none' }}>
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faUsers} className="icon" />
       <span>Manage Appraisal</span>
@@ -657,14 +665,7 @@ const Dashboard = () => {
           </SidebarItem>
         </li>
       </Link>
-      <Link to="/addcollector" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlus} className="icon" />
-            <span>Add Ambulant Collector</span>
-          </SidebarItem>
-        </li>
-      </Link>
+      
     </ul>
   )}
 </SidebarMenu>

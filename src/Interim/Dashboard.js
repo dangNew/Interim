@@ -522,7 +522,7 @@ const Dashboard = () => {
     </SidebarItem>
   </Link>
 
-  <Link to="/manage-roles" style={{ textDecoration: 'none' }}>
+  <Link to="/appraise" style={{ textDecoration: 'none' }}>
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faUsers} className="icon" />
       <span>Manage Appraisal</span>
@@ -624,7 +624,44 @@ const Dashboard = () => {
       </AppBar>
          
           <br></br>
-          <LoginAnalytics /> 
+          <div style={{
+  display: 'flex',
+  justifyContent: 'space-between',  // Align the items to space them apart (left and right)
+  alignItems: 'flex-start',
+  width: '100%',  // Make the container take full width
+  padding: '0 20px',  // Adjust the padding for some breathing room
+}}>
+
+  <div style={{
+    width: '48%', // You can adjust the width depending on how much space you want
+    maxWidth: '900px', // Maximum width for your LoginAnalytics
+    margin: '20px 0', // Add spacing above and below the chart container
+    padding: '20px',
+    borderRadius: '10px',
+    boxShadow: '0 6px 12px rgba(0, 0, 0, 0.1)',
+    backgroundColor: '#fff',
+  }}>
+    <LoginAnalytics />
+  </div>
+  
+  {/* Add another analytics component on the right side */}
+  <div style={{
+    width: '48%', // Adjust this as well to match the left container width
+    maxWidth: '900px',
+    margin: '20px 0',
+    padding: '20px',
+    borderRadius: '10px',
+    boxShadow: '0 6px 12px rgba(0, 0, 0, 0.1)',
+    backgroundColor: '#fff',
+  }}>
+    {/* Placeholder for another component */}
+    {/* You can replace this with another analytics chart or content */}
+    <h3>LoginAnalytics Analytics</h3>
+  </div>
+
+</div>
+
+
 
           <StatsContainer>
       <StatBox bgColor="#11768C">

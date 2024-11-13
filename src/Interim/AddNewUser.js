@@ -12,6 +12,7 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { interimStorage as storage } from '../components/firebase.config';
 import { interimDb, interimAuth } from '../components/firebase.config';
+import { rentmobileDb, rentmobileAuth } from '../components/firebase.config';
 import { serverTimestamp } from "firebase/firestore";
 library.add(faList, faPlus, faUser, faIdBadge, faMagnifyingGlass, faHouseChimney, faUsers, faTriangleExclamation, faEye, faCircleUser, faBars, FaSignOutAlt);
 
@@ -411,6 +412,7 @@ const NewUnit = () => {
     Image: null,
     status: 'Active' 
   });
+  const [locations, setLocations] = useState([]);
 
   const togglePositionSwitch = () => {
     setIsPositionActive(prevState => !prevState); 
@@ -419,29 +421,15 @@ const NewUnit = () => {
     const toggleSidebar = () => {
       setIsSidebarOpen(!isSidebarOpen);
     };
+
     useEffect(() => {
       const checkAndCreateCollection = async () => {
-        const collectionName = 'users'; // Replace with your desired collection name
-        const usersCollection = collection(interimDb, collectionName);
+        const collectionName = 'admin_users'; // Replace with your desired collection name
+        const usersCollection = collection(rentmobileDb, collectionName);
         const userDocs = await getDocs(usersCollection);
-        
+  
         // If the collection is empty, we can assume it doesn't exist
         if (userDocs.empty) {
-          // Create the collection by adding a document or using setDoc if you want a specific document
-          await setDoc(doc(usersCollection, 'dummyDocument'), {
-            // Provide default fields as necessary
-            firstName: '',
-            lastName: '',
-            middleName: '',
-            contactNum: '',
-            email: '',
-            password: '',
-            address: '',
-            position: '',
-            location: '',
-            Image: null,
-            status: 'Active'
-          });
           console.log(`Collection '${collectionName}' was created.`);
         } else {
           console.log(`Collection '${collectionName}' already exists.`);
@@ -449,7 +437,7 @@ const NewUnit = () => {
       };
   
       checkAndCreateCollection(); // Call the function
-    }, []);  
+    }, []);
 
     useEffect(() => {
       const fetchUserData = async () => {
@@ -465,6 +453,17 @@ const NewUnit = () => {
       };
   
       fetchUserData();
+    }, []);
+
+    useEffect(() => {
+      const fetchLocations = async () => {
+        const unitsCollection = collection(rentmobileDb, 'unit');
+        const unitDocs = await getDocs(unitsCollection);
+        const unitNames = unitDocs.docs.map(doc => doc.data().name);
+        setLocations(unitNames);
+      };
+  
+      fetchLocations();
     }, []);
 
     const handleClickOutside = (event) => {
@@ -534,8 +533,7 @@ const NewUnit = () => {
 
     const handleSubmit = async (e) => {
       e.preventDefault();
-    
-      
+  
       if (!userData.email || !userData.password || !/\S+@\S+\.\S+/.test(userData.email)) {
         alert('Please provide a valid email and password.');
         return;
@@ -544,34 +542,33 @@ const NewUnit = () => {
         alert('Please fill in all required fields.');
         return;
       }
-    
+  
       try {
-       
-        const userCredential = await createUserWithEmailAndPassword(interimAuth, userData.email, userData.password);
+        const userCredential = await createUserWithEmailAndPassword(rentmobileAuth, userData.email, userData.password);
         const user = userCredential.user;
-    
+  
         const { password, ...userWithoutPassword } = userData;
   
         let imageUrl = '';
         if (userData.Image) {
           try {
-            const imageRef = ref(storage, 'images/' + userData.Image.name); 
-            await uploadBytes(imageRef, userData.Image); 
-            imageUrl = await getDownloadURL(imageRef); 
+            const imageRef = ref(storage, 'images/' + userData.Image.name);
+            await uploadBytes(imageRef, userData.Image);
+            imageUrl = await getDownloadURL(imageRef);
           } catch (error) {
             console.error('Error uploading image:', error);
             alert('Failed to upload image. Please try again.');
-            return; 
+            return;
           }
         }
-
-        await setDoc(doc(interimDb, 'users', user.uid), {
-          ...userWithoutPassword, 
-          Image: imageUrl,        
+  
+        await setDoc(doc(rentmobileDb, 'admin_users', user.uid), {
+          ...userWithoutPassword,
+          Image: imageUrl,
           status: userData.status || 'Active',
-          createdAt: serverTimestamp() 
+          createdAt: serverTimestamp()
         });
-    
+  
         alert('User added successfully!');
         setUserData({
           firstName: '',
@@ -586,7 +583,7 @@ const NewUnit = () => {
           Image: null,
           status: 'Active'
         });
-        setImagePreviewUrl(null); 
+        setImagePreviewUrl(null);
       } catch (error) {
         console.error('Error adding user: ', error);
         if (error.code === 'auth/email-already-in-use') {
@@ -598,10 +595,9 @@ const NewUnit = () => {
         }
       }
     };
-
-      
-
-  return (
+  
+  
+    return (
     <>
       <ToggleButton onClick={toggleSidebar}>
         <FaBars />
@@ -679,6 +675,14 @@ const NewUnit = () => {
           </SidebarItem>
         </li>
       </Link>
+      <Link to="/addcollector" style={{ textDecoration: 'none' }}>
+        <li>
+          <SidebarItem isSidebarOpen={isSidebarOpen}>
+            <FontAwesomeIcon icon={faPlus} className="icon" />
+            <span>Add Ambulant Collector</span>
+          </SidebarItem>
+        </li>
+      </Link>
     </ul>
   )}
 
@@ -689,7 +693,7 @@ const NewUnit = () => {
     </SidebarItem>
   </Link>
 
-  <Link to="/manage-roles" style={{ textDecoration: 'none' }}>
+  <Link to="/appraise" style={{ textDecoration: 'none' }}>
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faUsers} className="icon" />
       <span>Manage Appraisal</span>
@@ -759,14 +763,7 @@ const NewUnit = () => {
           </SidebarItem>
         </li>
       </Link>
-      <Link to="/addcollector" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlus} className="icon" />
-            <span>Add Ambulant Collector</span>
-          </SidebarItem>
-        </li>
-      </Link>
+      
     </ul>
   )}
 </SidebarMenu>
@@ -790,90 +787,96 @@ const NewUnit = () => {
           </ProfileHeader>
 
           <FormContainer onSubmit={handleSubmit}>
-            <div className="section-title">Basic Details</div>
-            <Divider /> {/* Full-width horizontal line */}<span></span>
-            <div className="form-section">
-              <label htmlFor="firstName">First Name</label>
-              <input id="firstName" type="text" value={userData.firstName} onChange={handleChange} placeholder="Enter First Name" />
-            </div>
-            <div className="form-section">
-              <label htmlFor="middleName">Middle Name</label>
-              <input id="middleName" type="text" value={userData.middleName} onChange={handleChange} placeholder="Enter Middle Name" />
-            </div>
-            <div className="form-section">
-              <label htmlFor="lastName">Last Name</label>
-              <input id="lastName" type="text" value={userData.lastName} onChange={handleChange} placeholder="Enter Last Name" />
-            </div>
-            <div className="form-section">
-            <label htmlFor="contactNum">Contact Number</label>
-  <input
-    type="text"
-    id="contactNum"
-    value={userData.contactNum}
-    onChange={handleChange}
-    placeholder="Enter 11-digit contact number"
-  />
-  {contactNumWarning && <p style={{ color: 'red' }}>{contactNumWarning}</p>}
-  {/* Other form elements */}
-            </div>
-            <span></span>
-            <div className="section-title">Login Details</div>
-            <Divider /> {/* Add the horizontal line here */}<span></span>
-            <div className="form-section">
-              <label htmlFor="email">Email</label>
-              <input id="email" type="email" value={userData.email} onChange={handleChange} placeholder="Enter Email" />
-            </div>
-            <div className="form-section">
-              <label htmlFor="password">Password</label>
-              <input id="password" type="password" value={userData.password} onChange={handleChange} placeholder="Enter Password" />
-            </div>
-            <span></span><span></span>
-            <div className="section-title">Other Details</div>
-            <Divider /> {/* Add the horizontal line here */}<span></span>
-            <div className="form-section">
-              <label htmlFor="address">Address</label>
-              <input id="address" type="text" value={userData.address} onChange={handleChange} placeholder="Enter Address" />
-            </div>
-            <div className="form-section">
-              <label htmlFor="location">Location</label>
-              <input id="location" type="text" value={userData.location} onChange={handleChange} placeholder="Enter Location" />
-            </div>
-            <div className="form-section">
-              <label htmlFor="position">Position</label>
-              <select id="position" value={userData.position} onChange={handleChange}>
-              <option value="Admin">Admin</option>
-              <option value="Collector">Collector</option>
-              <option value="Office In Charge">Office In Charge</option>
-              <option value="CTO">CTO</option>
-              <option value="Interim">Interim</option>
+      <div className="section-title">Basic Details</div>
+      <Divider /> {/* Full-width horizontal line */}<span></span>
+      <div className="form-section">
+        <label htmlFor="firstName">First Name</label>
+        <input id="firstName" type="text" value={userData.firstName} onChange={handleChange} placeholder="Enter First Name" />
+      </div>
+      <div className="form-section">
+        <label htmlFor="middleName">Middle Name</label>
+        <input id="middleName" type="text" value={userData.middleName} onChange={handleChange} placeholder="Enter Middle Name" />
+      </div>
+      <div className="form-section">
+        <label htmlFor="lastName">Last Name</label>
+        <input id="lastName" type="text" value={userData.lastName} onChange={handleChange} placeholder="Enter Last Name" />
+      </div>
+      <div className="form-section">
+        <label htmlFor="contactNum">Contact Number</label>
+        <input
+          type="text"
+          id="contactNum"
+          value={userData.contactNum}
+          onChange={handleChange}
+          placeholder="Enter 11-digit contact number"
+        />
+        {contactNumWarning && <p style={{ color: 'red' }}>{contactNumWarning}</p>}
+        {/* Other form elements */}
+      </div>
+      <span></span>
+      <div className="section-title">Login Details</div>
+      <Divider /> {/* Add the horizontal line here */}<span></span>
+      <div className="form-section">
+        <label htmlFor="email">Email</label>
+        <input id="email" type="email" value={userData.email} onChange={handleChange} placeholder="Enter Email" />
+      </div>
+      <div className="form-section">
+        <label htmlFor="password">Password</label>
+        <input id="password" type="password" value={userData.password} onChange={handleChange} placeholder="Enter Password" />
+      </div>
+      <span></span><span></span>
+      <div className="section-title">Other Details</div>
+      <Divider /> {/* Add the horizontal line here */}<span></span>
+      <div className="form-section">
+        <label htmlFor="address">Address</label>
+        <input id="address" type="text" value={userData.address} onChange={handleChange} placeholder="Enter Address" />
+      </div>
+      <div className="form-section">
+        <label htmlFor="location">Location</label>
+        <select id="location" value={userData.location} onChange={handleChange}>
+          <option value="">Select Location</option>
+          {locations.map((location, index) => (
+            <option key={index} value={location}>
+              {location}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="form-section">
+        <label htmlFor="position">Position</label>
+        <select id="position" value={userData.position} onChange={handleChange}>
+          <option value="Admin">Admin</option>
+          <option value="Collector">Collector</option>
+          <option value="Office In Charge">Office In Charge</option>
+          <option value="CTO">CTO</option>
+          <option value="Interim">Interim</option>
+        </select>
+      </div>
 
-              </select>
-            </div>
+      <div>
+        <label htmlFor="toggleSwitch">Active Status</label>
+        <ToggleSwitch>
+          <span>Active</span>
+          <label className="switch">
+            <input type="checkbox" checked={isPositionActive} onChange={togglePositionSwitch} />
+            <span className="slider"></span>
+          </label>
+        </ToggleSwitch>
+      </div>
 
-            <div>
-            <label htmlFor="toggleSwitch">Active Status</label>
-            <ToggleSwitch>
-            <span>Active</span>
-            <label className="switch">
-              <input type="checkbox" checked={isPositionActive} onChange={togglePositionSwitch} />
-              <span className="slider"></span>
-            </label>
-          </ToggleSwitch>
-                </div>
+      <div className="form-section">
+        <label htmlFor="Image">Upload Image:</label>
+        <input type="file" id="Image" onChange={handleFileChange} />
+        <div className="image-preview">
+          {imagePreviewUrl ? <img src={imagePreviewUrl} alt="Preview" style={{ width: '100px', height: '100px', objectFit: 'cover' }} /> : 'No file chosen'}
+        </div>
+      </div>
 
-            <div className="form-section">
-              <label htmlFor="Image">Upload Image:</label>
-              <input type="file" id="Image" onChange={handleFileChange} />
-              <div className="image-preview">
-                {imagePreviewUrl ? <img src={imagePreviewUrl} alt="Preview" style={{ width: '100px', height: '100px', objectFit: 'cover' }} /> : 'No file chosen'}
-              </div>
-            </div>
-
-            <div className="button-group">
-              <button className="cancel" type="button">Cancel</button>
-              <button type="submit">Save</button>
-            </div>
-          </FormContainer>
+      <div className="button-group">
+        <button className="cancel" type="button">Cancel</button>
+        <button type="submit">Save</button>
+      </div>
+    </FormContainer>
         
         </MainContent>
       </AddUser>

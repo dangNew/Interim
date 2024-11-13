@@ -4,10 +4,11 @@ import styled from 'styled-components';
 import { FaBars, FaEye, FaPen, FaTrash, FaSearch, FaUserCircle, FaUsers,FaUser, FaUserSlash, FaChevronDown } from 'react-icons/fa';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { FaSignOutAlt, FaCaretDown } from 'react-icons/fa';
+import { FaSignOutAlt, FaCaretDown, FaPlus } from 'react-icons/fa';
 import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faCheck, faClipboard, faPlusCircle, faCogs} from '@fortawesome/free-solid-svg-icons';
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { interimDb } from '../components/firebase.config'; // Import the correct firestore instance
+import { rentmobileDb } from '../components/firebase.config';
 
 
 const UserManagementContainer = styled.div`
@@ -432,27 +433,6 @@ const DropdownMenu = styled.ul`
     }
   }
 `;
-const DropdownButton = styled.button`
-  margin-top: 1rem;
-  display: flex; /* Flexbox for aligning items */
-  align-items: center; /* Center items vertically */
-  padding: 10px;
-  background-color: #007bff;
-  color: white;
-  border: 1rem;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 
-
-  &:hover {
-    background-color: #0056b3;
-  }
-
-  span {
-    margin-left: 10px; /* Space between icon and text */
-  }
-`;
 
 const SearchContainer = styled.div`
   margin-top: 1rem;
@@ -485,6 +465,41 @@ const IconWrapper = styled.div`
   margin-right: 8px;
   font-size: 16px;
 `;
+const AddButton = styled.button`
+  margin-top: 1rem;
+  padding: 10px;
+  background-color: #4CAF50; 
+  color: white;
+  border: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  
+
+  &:hover {
+    background-color: #45a049;  // Darker green on hover
+  }
+`;
+const DropdownButton = styled.button`
+  margin-top: 1rem;
+  display: flex; /* Flexbox for aligning items */
+  align-items: center; /* Center items vertically */
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 
+
+  &:hover {
+    background-color: #0056b3;
+  }
+
+  span {
+    margin-left: 10px; /* Space between icon and text */
+  }
+`;
 
 const UserManagement = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -504,7 +519,6 @@ const UserManagement = () => {
   const [inactiveUsers, setInactiveUsers] = useState(0); // State to hold inactive users count
   const navigate = useNavigate();
 
-
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -513,10 +527,10 @@ const UserManagement = () => {
     const fetchUserData = async () => {
       const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
       if (loggedInUserData) {
-        const usersCollection = collection(interimDb, 'users');
+        const usersCollection = collection(rentmobileDb, 'admin_users');
         const userDocs = await getDocs(usersCollection);
         const users = userDocs.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        
+
         const currentUser = users.find(user => user.email === loggedInUserData.email);
         setLoggedInUser(currentUser || loggedInUserData);
       }
@@ -526,28 +540,27 @@ const UserManagement = () => {
   }, []);
 
   const handleDropdownToggle = () => {
-  setIsDropdownOpen(!isDropdownOpen);
-};
+    setIsDropdownOpen(!isDropdownOpen);
+  };
 
-const handleRoleSelect = (role) => {
-  // If 'All Users' is selected, reset the filter (set to null)
-  setSelectedRole(role === 'All Users' ? null : role);
-  setIsRoleDropdownOpen(false); // Close the dropdown after selection
-};
+  const handleRoleSelect = (role) => {
+    // If 'All Users' is selected, reset the filter (set to null)
+    setSelectedRole(role === 'All Users' ? null : role);
+    setIsRoleDropdownOpen(false); // Close the dropdown after selection
+  };
 
+  const handleLogout = () => {
+    localStorage.removeItem('userData');
+    navigate('/login');
+  };
 
-
-const handleLogout = () => {
-   
-  localStorage.removeItem('userData'); 
-  navigate('/login');
-};
   const handleUserDropdownToggle = () => {
     setIsUserDropdownOpen(!isUserDropdownOpen);
     if (isRoleDropdownOpen) {
       setIsRoleDropdownOpen(false); // Close Roles dropdown if open
     }
   };
+
   const handleRoleDropdownToggle = () => {
     setIsRoleDropdownOpen(!isRoleDropdownOpen);
     if (isUserDropdownOpen) {
@@ -555,7 +568,6 @@ const handleLogout = () => {
     }
   };
 
-  
   const handleShowModal = (type, message) => {
     setModalType(type);
     setModalMessage(message);
@@ -566,14 +578,13 @@ const handleLogout = () => {
     setShowModal(false);
   };
 
-  // Remove one of these declarations to avoid duplication
   const handleEditClick = (userId) => {
     navigate(`/edit/${userId}`); // Navigate to a specific edit page for the user
   };
-   const handleViewClick = (userId) => {
+
+  const handleViewClick = (userId) => {
     navigate(`/viewuser/${userId}`);
   };
-
 
   const handleDeleteClick = (user) => {
     setUserToDelete(user); // Set the user to delete
@@ -583,7 +594,7 @@ const handleLogout = () => {
   const handleConfirmDelete = async () => {
     if (userToDelete) {
       try {
-        await deleteDoc(doc(interimDb, 'users', userToDelete.id)); // Delete the user from Firestore
+        await deleteDoc(doc(rentmobileDb, 'admin_users', userToDelete.id)); // Delete the user from Firestore
         setUserData(users.filter(user => user.id !== userToDelete.id)); // Remove from local state
         handleShowModal('success', `${userToDelete.firstName} ${userToDelete.lastName} has been deleted.`);
       } catch (error) {
@@ -595,11 +606,10 @@ const handleLogout = () => {
     }
   };
 
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const querySnapshot = await getDocs(collection(interimDb, 'users'));
+        const querySnapshot = await getDocs(collection(rentmobileDb, 'admin_users'));
         const userList = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
@@ -614,8 +624,7 @@ const handleLogout = () => {
     fetchData();
   }, []);
 
-
-useEffect(() => {
+  useEffect(() => {
     let filtered = users;
     if (selectedRole) {
       filtered = filtered.filter(user => user.position === selectedRole);
@@ -637,7 +646,7 @@ useEffect(() => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const querySnapshot = await getDocs(collection(interimDb, 'users'));
+        const querySnapshot = await getDocs(collection(rentmobileDb, 'admin_users'));
         const userList = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
@@ -658,9 +667,8 @@ useEffect(() => {
     fetchData();
   }, [selectedRole]);
 
-
   const handleClickOutside = (event) => {
-   
+    // Your click outside logic here
   };
 
   useEffect(() => {
@@ -670,12 +678,9 @@ useEffect(() => {
     };
   }, []);
 
-      // Calculate total users and active users based on valid data
-    const totalUsers = users.filter(user => user.firstName && user.lastName).length; // Only count users with first and last names
-    const activeUsers = users.filter(user => user.status === 'Active' && user.firstName && user.lastName).length; // Active users with valid names
-
-
-  
+  // Calculate total users and active users based on valid data
+  const totalUsers = users.filter(user => user.firstName && user.lastName).length; // Only count users with first and last names
+  const activeUsers = users.filter(user => user.status === 'Active' && user.firstName && user.lastName).length; // Active users with valid names
 
   return (
 
@@ -762,7 +767,7 @@ useEffect(() => {
     </SidebarItem>
   </Link>
 
-   <Link to="/manage-roles" style={{ textDecoration: 'none' }}>
+   <Link to="/appraise" style={{ textDecoration: 'none' }}>
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faUsers} className="icon" />
       <span>Manage Appraisal</span>
@@ -911,45 +916,49 @@ useEffect(() => {
 
       <FormContainer>
       <ControlsContainer>
-  <DropdownButton onClick={handleRoleDropdownToggle}>
-    <FaUser style={{ marginRight: '8px' }} /> {/* User icon */}
-    <span>{selectedRole || 'Select Role'}</span>
-    <FaCaretDown style={{ marginLeft: '8px' }} /> {/* Dropdown arrow */}
-  </DropdownButton>
+        <AddButton onClick={() => navigate('/newuser')}>
+      <FaPlus style={{ marginRight: '8px' }} /> {/* Plus Icon */}
+      Add New User
+    </AddButton>
 
-  {isRoleDropdownOpen && (
-    <DropdownMenu>
-      <li onClick={() => handleRoleSelect('All Users')}>All Users</li>
-      <li onClick={() => handleRoleSelect('Collector')}>Collector</li>
-      <li onClick={() => handleRoleSelect('CTO')}>CTO</li>
-      <li onClick={() => handleRoleSelect('OIC')}>OIC</li>
-      <li onClick={() => handleRoleSelect('Interim')}>Interim</li>
-    </DropdownMenu>
-  )}
+        <DropdownButton onClick={handleRoleDropdownToggle}>
+          <FaUser style={{ marginRight: '8px' }} /> {/* User icon */}
+          <span>{selectedRole || 'Select Role'}</span>
+          <FaCaretDown style={{ marginLeft: '8px' }} /> {/* Dropdown arrow */}
+        </DropdownButton>
 
-<SearchContainer>
-  <IconWrapper>
-    <FaSearch />
-  </IconWrapper>
-  <StyledSearchBar
-    type="text"
-    placeholder="Search by name..."
-    value={searchQuery}
-    onChange={handleSearchChange}
-  />
-  </SearchContainer>
-</ControlsContainer>
+        {isRoleDropdownOpen && (
+          <DropdownMenu>
+            <li onClick={() => handleRoleSelect('All Users')}>All Users</li>
+            <li onClick={() => handleRoleSelect('Collector')}>Collector</li>
+            <li onClick={() => handleRoleSelect('CTO')}>CTO</li>
+            <li onClick={() => handleRoleSelect('OIC')}>OIC</li>
+            <li onClick={() => handleRoleSelect('Interim')}>Interim</li>
+          </DropdownMenu>
+        )}
 
-        <table>
-          <thead>
-            <tr>
-             <th>Email</th>
-              <th>Full Name</th>
-              <th>Position</th>
-              <th>Unit</th>
-              <th>Status</th>
-             
-              <th>Actions</th>
+        <SearchContainer>
+          <IconWrapper>
+            <FaSearch />
+          </IconWrapper>
+          <StyledSearchBar
+            type="text"
+            placeholder="Search by name..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+          />
+        </SearchContainer>
+      </ControlsContainer>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Full Name</th>
+            <th>Position</th>
+            <th>Unit</th>
+            <th>Status</th>
+            <th>Actions</th>
             </tr>
           </thead>
           <tbody>

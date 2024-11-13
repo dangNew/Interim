@@ -3,11 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { FaBars, FaSearch, FaUserCircle, FaFilter, FaPrint } from 'react-icons/fa';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faCheck, faClipboard, faPlusCircle, faEye, faCogs} from '@fortawesome/free-solid-svg-icons';
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faCheck, faClipboard, faPlusCircle, faEye, faCogs } from '@fortawesome/free-solid-svg-icons';
 import { FaSignOutAlt } from 'react-icons/fa';
 import { collection, getDocs } from 'firebase/firestore';
-import { stallholderDb } from '../components/firebase.config';
+import { rentmobileDb } from '../components/firebase.config';
 import { interimDb } from '../components/firebase.config';
+import ConfirmationModal from './ConfirmationModal'; // Import the modal component
 
 const ROWS_PER_PAGE = 10;
 
@@ -72,7 +73,6 @@ const SidebarItem = styled.li`
   }
 `;
 
-
 const ToggleButton = styled.div`
   display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'none' : 'block')};
   position: absolute;
@@ -107,8 +107,6 @@ const AppBar = styled.div`
   font-family: 'Inter', sans-serif; /* Use a professional font */
   font-weight: bold; /* Apply bold weight */
 `;
-
-
 
 const ProfileHeader = styled.div`
   display: flex;
@@ -145,7 +143,6 @@ const ProfileHeader = styled.div`
   }
 `;
 
-
 const ProfileImage = styled.img`
   border-radius: 50%;
   width: 60px; /* Adjusted for better visibility */
@@ -153,7 +150,6 @@ const ProfileImage = styled.img`
   margin-bottom: 15px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // Subtle shadow for a polished look
 `;
-
 
 const StatsContainer = styled.div`
   display: flex;
@@ -288,7 +284,6 @@ const SearchInput = styled.input`
   width: 100%;
 `;
 
-
 const SearchBarCont = styled.div`
   display: flex;
   align-items: center;
@@ -334,8 +329,8 @@ const TopBarContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  
 `;
+
 const PrintButton = styled.button`
   background-color: #188423; /* Match the AppBar color */
   color: white;
@@ -355,7 +350,6 @@ const PrintButton = styled.button`
     margin-right: 5px; /* Space between icon and text */
   }
 `;
-
 
 const FilterContainer = styled.div`
   display: flex;
@@ -387,6 +381,7 @@ const ButtonContainer = styled.div`
   align-items: center;
   gap: 1rem; /* Space between buttons */
 `;
+
 const SidebarFooter = styled.div`
   padding: 10px;
   margin-top: auto; /* Pushes the footer to the bottom */
@@ -412,6 +407,7 @@ const LogoutButton = styled(SidebarItem)`
     transform: scale(1.05); /* Slightly scale up on hover */
   }
 `;
+
 const PaginationContainer = styled.div`
   display: flex;
   justify-content: center;
@@ -499,6 +495,7 @@ const DropdownItem = styled.div`
     background-color: #ddd;
   }
 `;
+
 const ViewButton = styled.button`
   background-color: #28a745; /* Green color */
   color: white;
@@ -513,13 +510,12 @@ const ViewButton = styled.button`
   }
 `;
 
-
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [stallHolders, setStallHolders] = useState([]);
   const sidebarRef = useRef(null);
   const [loggedInUser, setLoggedInUser] = useState(null);
-  const [totalUsers, setTotalUsers] = useState(0); // State to store 
+  const [totalUsers, setTotalUsers] = useState(0); // State to store
   const [filteredStallHolders, setFilteredStallHolders] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -529,36 +525,39 @@ const Dashboard = () => {
   const [units, setUnits] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState('Select Unit');
   const navigate = useNavigate();
-  
+
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
+
   const handleView = (stallHolder) => {
-    navigate(`/view-stallholder/${stallHolder.id}`);
+    setSelectedStallHolder(stallHolder);
+    setIsModalOpen(true);
   };
+
   const handleUnitSelect = (unit) => {
     setSelectedUnit(unit);
     setIsDropdownOpen(false);
     setFilteredStallHolders(unit === 'All' ? stallHolders : stallHolders.filter(stall => stall.location === unit));
   };
-  
+
   useEffect(() => {
     const fetchUnits = async () => {
       try {
         const querySnapshot = await getDocs(collection(interimDb, 'unit'));
-        const unitData = querySnapshot.docs.map(doc => doc.data().name); 
+        const unitData = querySnapshot.docs.map(doc => doc.data().name);
         setUnits(['All', ...unitData]); // Add "All" as the first option
       } catch (error) {
         console.error("Error fetching units:", error);
       }
     };
-  
+
     fetchUnits();
   }, []);
-  
 
   const totalPages = Math.ceil(filteredStallHolders.length / itemsPerPage);
 
@@ -571,11 +570,13 @@ const Dashboard = () => {
   const handlePrevPage = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
   };
-  
+
   const handleClickOutside = (event) => {
-    // Handle clicks outside of dropdown, if necessary
+    if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+      setIsSidebarOpen(false);
+    }
   };
-  
+
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
@@ -583,10 +584,11 @@ const Dashboard = () => {
     };
   }, []);
 
-  // Fetch total users and recent user data from Firestore
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
   useEffect(() => {
     const fetchData = async () => {
-      const querySnapshot = await getDocs(collection(stallholderDb, 'users'));
+      const querySnapshot = await getDocs(collection(rentmobileDb, 'approvedVendors'));
 
       const data = querySnapshot.docs.map((doc) => {
         const stallInfo = doc.data().stallInfo || {};
@@ -621,7 +623,7 @@ const Dashboard = () => {
 
     fetchData();
   }, [selectedUnit]);
-  
+
   useEffect(() => {
     if (selectedUnit === 'All') {
       setFilteredStallHolders(stallHolders); // Show all stallholders when "All" is selected
@@ -630,15 +632,38 @@ const Dashboard = () => {
     }
   }, [selectedUnit, stallHolders]);
 
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // State for dropdown
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedStallHolder, setSelectedStallHolder] = useState(null);
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedStallHolder(null);
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  useEffect(() => {
+    let filteredData = stallHolders.filter(stall =>
+      stall.firstName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    if (stallNoFilter) {
+      filteredData = filteredData.filter(stall => stall.stallNumber === stallNoFilter);
+    }
+    if (selectedUnit !== 'Select Unit') {
+      filteredData = filteredData.filter(stall => stall.location === selectedUnit);
+    }
+
+    setFilteredStallHolders(filteredData);
+  }, [searchTerm, stallHolders, stallNoFilter, selectedUnit]);
+
   const handleLogout = () => {
-    localStorage.removeItem('userData'); 
+    localStorage.removeItem('userData');
     navigate('/login');
   };
-  const handleDropdownToggle = () => {
-    setIsDropdownOpen(!isDropdownOpen);
-  };
-  
+
   const handlePrint = () => {
     const printContent = `
       <html>
@@ -682,34 +707,13 @@ const Dashboard = () => {
         </body>
       </html>
     `;
-  
+
     const newWindow = window.open('', '_blank');
     newWindow.document.write(printContent);
     newWindow.document.close();
     newWindow.print();
     newWindow.close();
   };
-
-  useEffect(() => {
-    let filteredData = stallHolders.filter(stall => 
-      stall.firstName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-
-    if (stallNoFilter) {
-      filteredData = filteredData.filter(stall => stall.stallNumber === stallNoFilter);
-    }
-    if (selectedUnit !== 'Select Unit') {
-      filteredData = filteredData.filter(stall => stall.location === selectedUnit);
-    }
-
-    setFilteredStallHolders(filteredData);
-  }, [searchTerm, stallHolders,  stallNoFilter]);
-
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
-  };
-
 
   useEffect(() => {
     try {
@@ -721,180 +725,185 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Error fetching users:', error);
     }
-  }, [stallHolders]); 
-  
+  }, [stallHolders]);
 
   return (
     <DashboardContainer>
-     <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
+      <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
         <Link to="/profile" style={{ textDecoration: 'none' }}>
-        <ProfileHeader isSidebarOpen={isSidebarOpen}>
-          {loggedInUser && loggedInUser.Image ? (
-            <ProfileImage src={loggedInUser.Image} alt={`${loggedInUser.firstName} ${loggedInUser.lastName}`} />
-          ) : (
-            <FaUserCircle className="profile-icon" />
-          )}
-          <span className="profile-name">{loggedInUser ? `${loggedInUser.firstName} ${loggedInUser.lastName}` : 'Guest'}</span>
-          
-          <span className="profile-email" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
-            {loggedInUser ? loggedInUser.email : ''}
-          </span>
-          
-          {/* Add position below the email */}
-          <span className="profile-position" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
-            {loggedInUser ? loggedInUser.position : ''}
-          </span>
-        </ProfileHeader>
-      </Link>
-      
+          <ProfileHeader isSidebarOpen={isSidebarOpen}>
+            {loggedInUser && loggedInUser.Image ? (
+              <ProfileImage src={loggedInUser.Image} alt={`${loggedInUser.firstName} ${loggedInUser.lastName}`} />
+            ) : (
+              <FaUserCircle className="profile-icon" />
+            )}
+            <span className="profile-name">{loggedInUser ? `${loggedInUser.firstName} ${loggedInUser.lastName}` : 'Guest'}</span>
+
+            <span className="profile-email" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
+              {loggedInUser ? loggedInUser.email : ''}
+            </span>
+
+            {/* Add position below the email */}
+            <span className="profile-position" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
+              {loggedInUser ? loggedInUser.position : ''}
+            </span>
+          </ProfileHeader>
+        </Link>
+
         <SearchBarContainer isSidebarOpen={isSidebarOpen}>
           <FaSearch />
-          <SearchInput type="text" placeholder="Search..." />
+          <SearchInput
+            type="text"
+            placeholder="Search..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
         </SearchBarContainer>
-        
+
         <SidebarMenu>
-  <Link to="/dashboard" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faHome} className="icon" />
-      <span>Dashboard</span>
-    </SidebarItem>
-  </Link>
-  
-  <Link to="/list" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faShoppingCart} className="icon" />
-      <span>List of Vendors</span>
-    </SidebarItem>
-  </Link>
-  <Link to="/listofstalls" style={{ textDecoration: 'none' }}>
-  <SidebarItem isSidebarOpen={isSidebarOpen}>
-    <FontAwesomeIcon icon={faClipboard} className="icon" />
-    <span>List of Stalls</span>
-  </SidebarItem>
-</Link>
+          <Link to="/dashboard" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faHome} className="icon" />
+              <span>Dashboard</span>
+            </SidebarItem>
+          </Link>
 
-  <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faUser} className="icon" />
-    <span>User Management</span>
-  </SidebarItem>
+          <Link to="/list" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faShoppingCart} className="icon" />
+              <span>List of Vendors</span>
+            </SidebarItem>
+          </Link>
 
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/usermanagement" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span>View Users</span>
+          <Link to="/listofstalls" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faClipboard} className="icon" />
+              <span>List of Stalls</span>
+            </SidebarItem>
+          </Link>
+
+          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={toggleDropdown}>
+            <FontAwesomeIcon icon={faUser} className="icon" />
+            <span>User Management</span>
           </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/newuser" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlus} className="icon" />
-            <span>Add User</span>
-          </SidebarItem>
-        </li>
-      </Link>
-    </ul>
-  )}
 
-  <Link to="/viewunit" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faPlus} className="icon" />
-      <span>Add New Unit</span>
-    </SidebarItem>
-  </Link>
+          {isDropdownOpen && (
+            <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+              <Link to="/usermanagement" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faSearch} className="icon" />
+                    <span>View Users</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+              <Link to="/newuser" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faPlus} className="icon" />
+                    <span>Add User</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+            </ul>
+          )}
 
-  <Link to="/manage-roles" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faUsers} className="icon" />
-      <span>Manage Appraisal</span>
-    </SidebarItem>
-  </Link>
+          <Link to="/viewunit" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faPlus} className="icon" />
+              <span>Add New Unit</span>
+            </SidebarItem>
+          </Link>
 
-  <Link to="/contract" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faFileContract} className="icon" />
-      <span>Contract</span>
-    </SidebarItem>
-  </Link>
+          <Link to="/appraise" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faUsers} className="icon" />
+              <span>Manage Appraisal</span>
+            </SidebarItem>
+          </Link>
 
-  <Link to="/ticket" style={{ textDecoration: 'none' }}>
-  <SidebarItem isSidebarOpen={isSidebarOpen}>
-    <FontAwesomeIcon icon={faTicketAlt} className="icon" />
-    <span>Manage Ticket</span>
-  </SidebarItem>
-</Link>
-<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faCogs} className="icon" />
-    <span>Manage Zone</span>
-  </SidebarItem>
+          <Link to="/contract" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faFileContract} className="icon" />
+              <span>Contract</span>
+            </SidebarItem>
+          </Link>
 
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/addzone" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
-            <span> Add Zone</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/viewzone" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-          <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span> View Zone</span>
-          </SidebarItem>
-        </li>
-      </Link>
-    
-    </ul>
-  )}
-<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faUser} className="icon" />
-    <span>Manage Space</span>
-  </SidebarItem>
+          <Link to="/ticket" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faTicketAlt} className="icon" />
+              <span>Manage Ticket</span>
+            </SidebarItem>
+          </Link>
 
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/addspace" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
-            <span> Add Space</span>
+          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={toggleDropdown}>
+            <FontAwesomeIcon icon={faCogs} className="icon" />
+            <span>Manage Zone</span>
           </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/viewspace" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-          <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span> View Space</span>
+
+          {isDropdownOpen && (
+            <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+              <Link to="/addzone" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+                    <span> Add Zone</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+              <Link to="/viewzone" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faSearch} className="icon" />
+                    <span> View Zone</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+            </ul>
+          )}
+
+          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={toggleDropdown}>
+            <FontAwesomeIcon icon={faUser} className="icon" />
+            <span>Manage Space</span>
           </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/addcollector" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlus} className="icon" />
-            <span>Add Ambulant Collector</span>
-          </SidebarItem>
-        </li>
-      </Link>
-    </ul>
-  )}
-</SidebarMenu>
-      <SidebarFooter isSidebarOpen={isSidebarOpen}>
+
+          {isDropdownOpen && (
+            <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+              <Link to="/addspace" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+                    <span> Add Space</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+              <Link to="/viewspace" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faSearch} className="icon" />
+                    <span> View Space</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+              <Link to="/addcollector" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faPlus} className="icon" />
+                    <span>Add Ambulant Collector</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+            </ul>
+          )}
+        </SidebarMenu>
+
+        <SidebarFooter isSidebarOpen={isSidebarOpen}>
           <LogoutButton isSidebarOpen={isSidebarOpen} onClick={handleLogout}>
             <span><FaSignOutAlt /></span>
             <span>Logout</span>
           </LogoutButton>
         </SidebarFooter>
       </Sidebar>
-
-
 
       <MainContent isSidebarOpen={isSidebarOpen}>
         <AppBar>
@@ -904,57 +913,38 @@ const Dashboard = () => {
           <div>LIST OF VENDORS</div>
         </AppBar>
 
-        <ToggleButton isSidebarOpen={isSidebarOpen} onClick={toggleSidebar}>
-          <FaBars />
-        </ToggleButton>
-
-        <StatsContainer>
-          <StatBox bgColor="#11768C">
-            <h3>Total Vendor</h3>
-            <p>{totalUsers}</p>
-          </StatBox>
-
-          <StatBox bgColor="#188423">
-            <h3>Total Logins</h3>
-            <p>{totalUsers}</p>
-          </StatBox>
-        </StatsContainer><span>
-          
-        </span>
-
         <TopBarContainer>
-        <SearchBarCont>
-      <SearchIcon />
-      <SearchIn
-        type="text"
-        placeholder="Search Stall Holders..."
-        value={searchTerm}
-        onChange={handleSearchChange}
-      />
-    </SearchBarCont>
+          <SearchBarCont>
+            <SearchIcon />
+            <SearchIn
+              type="text"
+              placeholder="Search Stall Holders..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
+          </SearchBarCont>
 
-        <ButtonContainer>
-        <PrintButton onClick={handlePrint}>
+          <ButtonContainer>
+            <PrintButton onClick={handlePrint}>
               <FaPrint />
               Print
             </PrintButton>
             <DropdownContainer>
-  <DropdownButton onClick={toggleDropdown}>
-    {selectedUnit}
-  </DropdownButton>
-  <DropdownContent isOpen={isDropdownOpen}>
-    {units.map((unit, index) => (
-      <DropdownItem key={index} onClick={() => handleUnitSelect(unit)}>
-        {unit}
-      </DropdownItem>
-    ))}
-  </DropdownContent>
-</DropdownContainer>
-            
+              <DropdownButton onClick={toggleDropdown}>
+                {selectedUnit}
+              </DropdownButton>
+              <DropdownContent isOpen={isDropdownOpen}>
+                {units.map((unit, index) => (
+                  <DropdownItem key={index} onClick={() => handleUnitSelect(unit)}>
+                    {unit}
+                  </DropdownItem>
+                ))}
+              </DropdownContent>
+            </DropdownContainer>
           </ButtonContainer>
-          </TopBarContainer>
+        </TopBarContainer>
+
         <FormContainer>
-          
           <table>
             <thead>
               <tr>
@@ -964,12 +954,11 @@ const Dashboard = () => {
                 <th>Area (Meters)</th>
                 <th>Rate Per Meter</th>
                 <th>Date</th>
-               
                 <th className="actions">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredStallHolders.map((stall, index) => (
+              {currentStallHolders.map((stall, index) => (
                 <tr key={index}>
                   <td>{stall.stallNumber}</td>
                   <td>{stall.firstName} {stall.lastName}</td>
@@ -977,29 +966,35 @@ const Dashboard = () => {
                   <td>{stall.areaMeters}</td>
                   <td>{stall.billing}</td>
                   <td>{stall.date}</td>
-                  
-                   <td>
-            <button className="view-btn" onClick={() => handleView(stall)}>
-              <FontAwesomeIcon icon={faEye} /> View
-            </button>
-          </td>
+                  <td>
+                    <button className="view-btn" onClick={() => handleView(stall)}>
+                      <FontAwesomeIcon icon={faEye} /> View
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </FormContainer>
-        <PaginationContainer>
-        <PageButton onClick={handlePrevPage} disabled={currentPage === 1}>
-          Prev
-        </PageButton>
-        <CurrentPageIndicator>
-          Page {currentPage} of {totalPages}
-        </CurrentPageIndicator>
-        <PageButton onClick={handleNextPage} disabled={currentPage === totalPages}>
-          Next
-        </PageButton>
-      </PaginationContainer>
 
+        <PaginationContainer>
+          <PageButton onClick={handlePrevPage} disabled={currentPage === 1}>
+            Prev
+          </PageButton>
+          <CurrentPageIndicator>
+            Page {currentPage} of {totalPages}
+          </CurrentPageIndicator>
+          <PageButton onClick={handleNextPage} disabled={currentPage === totalPages}>
+            Next
+          </PageButton>
+        </PaginationContainer>
+
+        <ConfirmationModal
+          isOpen={isModalOpen}
+          onClose={handleModalClose}
+          message="View Stall Holder"
+          stallHolder={selectedStallHolder}
+        />
       </MainContent>
     </DashboardContainer>
   );

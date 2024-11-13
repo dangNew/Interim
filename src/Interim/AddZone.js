@@ -5,10 +5,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
 import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faClipboard, faCheck, faPlusCircle,faCogs} from '@fortawesome/free-solid-svg-icons';
 import { collection, getDocs, addDoc, setDoc, doc, query, orderBy, limit } from 'firebase/firestore';
-import DatePicker from 'react-datepicker';
+
 import { rentmobileDb } from '../components/firebase.config'; 
 import { interimDb } from '../components/firebase.config'; 
-import "react-datepicker/dist/react-datepicker.css";
+
 
 const DashboardContainer = styled.div`
   display: flex;
@@ -379,7 +379,8 @@ const CloseButton = styled.span`
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const sidebarRef = useRef(null);
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  
+  
   const [zone, setZone] = useState("");
   const [size, setSize] = useState("");
   const [loggedInUser, setLoggedInUser] = useState(null);
@@ -403,14 +404,16 @@ const Dashboard = () => {
         await addDoc(zonesCollection, {
           zone: zone,
           size: size,
-          date: selectedDate,
+          
+          
         });
       } else {
         // If the collection exists, just add a new zone
         await addDoc(zonesCollection, {
           zone: zone,
           size: size,
-          date: selectedDate,
+          
+          
         });
       }
 
@@ -421,7 +424,8 @@ const Dashboard = () => {
       // Clear input fields after saving
       setZone('');
       setSize('');
-      setSelectedDate(new Date());
+      
+      
       
     } catch (error) {
       console.error("Error adding document: ", error);
@@ -557,7 +561,7 @@ const Dashboard = () => {
     </SidebarItem>
   </Link>
 
-  <Link to="/manage-roles" style={{ textDecoration: 'none' }}>
+  <Link to="/appraise" style={{ textDecoration: 'none' }}>
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faUsers} className="icon" />
       <span>Manage Appraisal</span>
@@ -686,16 +690,7 @@ const Dashboard = () => {
         />
         <label htmlFor="address">Zone Address</label>
       </InputField>
-      <InputField>
-        <DatePicker
-          selected={selectedDate}
-          onChange={(date) => setSelectedDate(date)}
-          dateFormat="yyyy-MM-dd" // format as Year-Month-Day
-          placeholderText="Select Date" // Placeholder when no date is selected
-          className="datepicker-input" // Add a custom class for styling if needed
-        />
-        <label htmlFor="date">Select Date</label>
-      </InputField>
+      
 
   <SaveButton onClick={handleSaveSpace}>Save Space</SaveButton>
   {isModalOpen && (

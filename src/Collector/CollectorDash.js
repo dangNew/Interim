@@ -589,39 +589,7 @@ const Dashboard = () => {
     </tbody>
   </table>
 </FormContainer>
-<CollectorTableContainer>
-  <h3>Collector Users</h3>
-  <CollectorTable>
-    <thead>
-      <tr>
-        <th>Email</th>
-        <th>Name</th>
-        <th>Address</th>
-        <th>Collector</th>
-        <th>Location</th>
-        <th>Contact Number</th>
-      </tr>
-    </thead>
-    <tbody>
-      {collectorsData.length > 0 ? (
-        collectorsData.map((collector) => (
-          <tr key={collector.id}> {/* Ensure you have a unique identifier for each collector */}
-            <td>{collector.email}</td> {/* Make sure to display email if required */}
-            <td>{collector.firstName + ' ' + collector.lastName}</td> {/* Concatenate firstName and lastName */}
-            <td>{collector.address}</td>
-            <td>{collector.collector}</td>
-            <td>{collector.location}</td>
-            <td>{collector.contactNum}</td>
-          </tr>
-        ))
-      ) : (
-        <tr>
-          <td colSpan="6">No collectors found.</td> {/* Adjusted colSpan to match the number of columns */}
-        </tr>
-      )}
-    </tbody>
-  </CollectorTable>
-</CollectorTableContainer>
+
       </MainContent>
       </DashboardContainer>
   );
