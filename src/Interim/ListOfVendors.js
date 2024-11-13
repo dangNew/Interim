@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { FaBars, FaSearch, FaUserCircle, FaFilter, FaPrint } from 'react-icons/fa';
+import { FaBars, FaSearch, FaUserCircle, FaFilter, FaPrint, FaSignOutAlt, FaEye } from 'react-icons/fa';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faCheck, faClipboard, faPlusCircle, faEye, faCogs } from '@fortawesome/free-solid-svg-icons';
-import { FaSignOutAlt } from 'react-icons/fa';
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faClipboard, faPlusCircle, faCogs } from '@fortawesome/free-solid-svg-icons';
 import { collection, getDocs } from 'firebase/firestore';
-import { rentmobileDb } from '../components/firebase.config';
-import { interimDb } from '../components/firebase.config';
+import { rentmobileDb, interimDb } from '../components/firebase.config';
 import ConfirmationModal from './ConfirmationModal'; // Import the modal component
 
 const ROWS_PER_PAGE = 10;
@@ -22,7 +20,7 @@ const Sidebar = styled.div`
   background-color: #f8f9fa;
   padding: 10px;
   display: flex;
-  border: 1px solid #ddd;  /* ADD THIS */
+  border: 1px solid #ddd;
   flex-direction: column;
   justify-content: space-between;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -30,8 +28,7 @@ const Sidebar = styled.div`
   position: fixed;
   height: 100vh;
   z-index: 100;
-  overflow: auto;
-  max-height: 100vh;
+  overflow: hidden;
 `;
 
 const SidebarMenu = styled.ul`
@@ -62,7 +59,7 @@ const SidebarItem = styled.li`
   }
 
   .icon {
-    font-size: 1rem;  /* Increase the icon size */
+    font-size: 1rem;
     color: #000;
     transition: margin-left 0.2s ease;
   }
@@ -100,12 +97,12 @@ const AppBar = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 40px 50px;
-  background-color: #188423; /* Updated color */
+  background-color: #188423;
   color: white;
   box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
   font-size: 22px;
-  font-family: 'Inter', sans-serif; /* Use a professional font */
-  font-weight: bold; /* Apply bold weight */
+  font-family: 'Inter', sans-serif;
+  font-weight: bold;
 `;
 
 const ProfileHeader = styled.div`
@@ -118,13 +115,13 @@ const ProfileHeader = styled.div`
   .profile-icon {
     font-size: 3rem;
     margin-bottom: 15px;
-    color: #6c757d; // Subtle color for icon
+    color: #6c757d;
   }
 
   .profile-name {
     font-size: 1.2rem;
-    font-weight: 700; // Bolder text
-    color: black; // Darker gray for a professional look
+    font-weight: 700;
+    color: black;
     display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
   }
 
@@ -135,26 +132,26 @@ const ProfileHeader = styled.div`
   }
 
   .profile-position {
-    font-size: 1rem; /* Increase the font size */
-    font-weight: 600; /* Make it bold */
-    color: #007bff; /* Change color to blue for better visibility */
+    font-size: 1rem;
+    font-weight: 600;
+    color: #007bff;
     display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
-    margin-top: 5px; /* Add some margin for spacing */
+    margin-top: 5px;
   }
 `;
 
 const ProfileImage = styled.img`
   border-radius: 50%;
-  width: 60px; /* Adjusted for better visibility */
+  width: 60px;
   height: 60px;
   margin-bottom: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // Subtle shadow for a polished look
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
 
 const StatsContainer = styled.div`
   display: flex;
   gap: 2rem;
-  margin-top: 50px; /* Added margin to avoid overlapping with AppBar */
+  margin-top: 50px;
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -242,7 +239,7 @@ const FormContainer = styled.div`
     }
 
     tr:hover {
-      background-color: #f1f3f5; /* Highlight row on hover */
+      background-color: #f1f3f5;
     }
   }
 
@@ -251,7 +248,7 @@ const FormContainer = styled.div`
     font-size: 14px;
     border: none;
     color: #ffffff;
-    background-color: #007bff; /* Blue */
+    background-color: #007bff;
     cursor: pointer;
     border-radius: 5px;
     display: flex;
@@ -288,14 +285,14 @@ const SearchBarCont = styled.div`
   display: flex;
   align-items: center;
   padding: 12px 20px;
-  padding-left: 100px; /* Add more padding on the left */
+  padding-left: 100px;
   background-color: #f8f9fa;
   border-radius: 8px;
   border: 1px solid #ced4da;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 500px;
-  margin: 30px 0; /* Remove auto centering */
+  margin: 30px 0;
   transition: box-shadow 0.3s;
 
   &:hover {
@@ -325,6 +322,7 @@ const SearchIn = styled.input`
     color: #212529;
   }
 `;
+
 const TopBarContainer = styled.div`
   display: flex;
   align-items: center;
@@ -332,7 +330,7 @@ const TopBarContainer = styled.div`
 `;
 
 const PrintButton = styled.button`
-  background-color: #188423; /* Match the AppBar color */
+  background-color: #188423;
   color: white;
   border: none;
   border-radius: 5px;
@@ -343,11 +341,11 @@ const PrintButton = styled.button`
   margin-bottom: 1rem;
 
   &:hover {
-    background-color: #155724; /* Darker shade for hover */
+    background-color: #155724;
   }
 
   svg {
-    margin-right: 5px; /* Space between icon and text */
+    margin-right: 5px;
   }
 `;
 
@@ -379,32 +377,32 @@ const FilterButton = styled.button`
 const ButtonContainer = styled.div`
   display: flex;
   align-items: center;
-  gap: 1rem; /* Space between buttons */
+  gap: 1rem;
 `;
 
 const SidebarFooter = styled.div`
   padding: 10px;
-  margin-top: auto; /* Pushes the footer to the bottom */
+  margin-top: auto;
   display: flex;
   align-items: center;
   justify-content: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
 `;
 
 const LogoutButton = styled(SidebarItem)`
-  margin-top: 5px; /* Add some margin */
-  background-color: #dc3545; /* Bootstrap danger color */
+  margin-top: 5px;
+  background-color: #dc3545;
   color: white;
   align-items: center;
   margin-left: 20px;
-  padding: 5px 15px; /* Add padding for a better button size */
-  border-radius: 5px; /* Rounded corners */
-  font-weight: bold; /* Make text bold */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-  transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transitions */
+  padding: 5px 15px;
+  border-radius: 5px;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease, transform 0.2s ease;
 
   &:hover {
-    background-color: #c82333; /* Darker red on hover */
-    transform: scale(1.05); /* Slightly scale up on hover */
+    background-color: #c82333;
+    transform: scale(1.05);
   }
 `;
 
@@ -413,7 +411,7 @@ const PaginationContainer = styled.div`
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px; /* Spacing between buttons */
+  gap: 10px;
   margin-top: 20px;
 `;
 
@@ -423,14 +421,14 @@ const PageButton = styled.button`
   border: none;
   border-radius: 8px;
   padding: 12px 16px;
-  font-size: 1.1rem; /* Larger font */
+  font-size: 1.1rem;
   min-width: 50px;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.2s ease;
 
   &:hover {
     background-color: #0056b3;
-    transform: scale(1.05); /* Slightly enlarges on hover */
+    transform: scale(1.05);
   }
 
   &:disabled {
@@ -456,7 +454,7 @@ const DropdownContainer = styled.div`
 `;
 
 const DropdownButton = styled.button`
-  background-color: #007bff; /* Match the AppBar color */
+  background-color: #007bff;
   color: white;
   border: none;
   border-radius: 5px;
@@ -467,11 +465,11 @@ const DropdownButton = styled.button`
   margin-bottom: 1rem;
 
   &:hover {
-    background-color: #155724; /* Darker shade for hover */
+    background-color: #155724;
   }
 
   svg {
-    margin-right: 5px; /* Space between icon and text */
+    margin-right: 5px;
   }
 `;
 
@@ -497,16 +495,16 @@ const DropdownItem = styled.div`
 `;
 
 const ViewButton = styled.button`
-  background-color: #28a745; /* Green color */
+  background-color: #28a745;
   color: white;
   border: none;
-  padding: 8px 16px; /* Increased padding for a larger button */
+  padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 1rem; /* Increased font size for better readability */
+  font-size: 1rem;
 
   &:hover {
-    background-color: #218838; /* Darker green on hover */
+    background-color: #218838;
   }
 `;
 
@@ -515,15 +513,17 @@ const Dashboard = () => {
   const [stallHolders, setStallHolders] = useState([]);
   const sidebarRef = useRef(null);
   const [loggedInUser, setLoggedInUser] = useState(null);
-  const [totalUsers, setTotalUsers] = useState(0); // State to store
+  const [totalUsers, setTotalUsers] = useState(0);
   const [filteredStallHolders, setFilteredStallHolders] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [stallNoFilter, setStallNoFilter] = useState('');
   const [units, setUnits] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState('Select Unit');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedStallHolder, setSelectedStallHolder] = useState(null);
   const navigate = useNavigate();
 
   const toggleSidebar = () => {
@@ -550,7 +550,7 @@ const Dashboard = () => {
       try {
         const querySnapshot = await getDocs(collection(interimDb, 'unit'));
         const unitData = querySnapshot.docs.map(doc => doc.data().name);
-        setUnits(['All', ...unitData]); // Add "All" as the first option
+        setUnits(['All', ...unitData]);
       } catch (error) {
         console.error("Error fetching units:", error);
       }
@@ -584,12 +584,9 @@ const Dashboard = () => {
     };
   }, []);
 
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
   useEffect(() => {
     const fetchData = async () => {
       const querySnapshot = await getDocs(collection(rentmobileDb, 'approvedVendors'));
-
       const data = querySnapshot.docs.map((doc) => {
         const stallInfo = doc.data().stallInfo || {};
         const dateOfRegistration = doc.data().dateOfRegistration
@@ -608,7 +605,6 @@ const Dashboard = () => {
         };
       });
 
-      console.log(data);
       setStallHolders(data);
       setTotalUsers(data.length);
 
@@ -626,14 +622,11 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (selectedUnit === 'All') {
-      setFilteredStallHolders(stallHolders); // Show all stallholders when "All" is selected
+      setFilteredStallHolders(stallHolders);
     } else if (selectedUnit !== 'Select Unit') {
       setFilteredStallHolders(stallHolders.filter(stall => stall.location === selectedUnit));
     }
   }, [selectedUnit, stallHolders]);
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedStallHolder, setSelectedStallHolder] = useState(null);
 
   const handleModalClose = () => {
     setIsModalOpen(false);
@@ -743,7 +736,6 @@ const Dashboard = () => {
               {loggedInUser ? loggedInUser.email : ''}
             </span>
 
-            {/* Add position below the email */}
             <span className="profile-position" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
               {loggedInUser ? loggedInUser.position : ''}
             </span>
@@ -808,7 +800,7 @@ const Dashboard = () => {
             </ul>
           )}
 
-          <Link to="/viewunit" style={{ textDecoration: 'none' }}>
+          <Link to="/Addunit" style={{ textDecoration: 'none' }}>
             <SidebarItem isSidebarOpen={isSidebarOpen}>
               <FontAwesomeIcon icon={faPlus} className="icon" />
               <span>Add New Unit</span>

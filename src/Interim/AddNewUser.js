@@ -1,21 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate} from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import styled from 'styled-components';
-import { faBars, faList, faPlus, faIdBadge, faMagnifyingGlass, faHouseChimney, faUsers, faTriangleExclamation, faEye, faCircleUser, faPlusCircle, faStore, faTicketAlt, faCheck, faClipboard } from '@fortawesome/free-solid-svg-icons';
-import { FaSignOutAlt } from 'react-icons/fa';
-import { FaSearch, FaUserCircle, FaBars } from 'react-icons/fa';
-import { collection, addDoc, setDoc, doc, getDocs} from 'firebase/firestore';
-import { faHome, faShoppingCart, faUser, faSearch, faFileContract, faCogs} from '@fortawesome/free-solid-svg-icons';
+import { faBars, faList, faPlus, faIdBadge, faMagnifyingGlass, faHouseChimney, faUsers, faTriangleExclamation, faEye, faCircleUser, faPlusCircle, faStore, faTicketAlt, faCheck, faClipboard, faFileContract, faCogs } from '@fortawesome/free-solid-svg-icons';
+import { FaSignOutAlt, FaSearch, FaUserCircle, FaBars } from 'react-icons/fa';
+import { collection, addDoc, setDoc, doc, getDocs } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { interimStorage as storage } from '../components/firebase.config';
-import { interimDb, interimAuth } from '../components/firebase.config';
-import { rentmobileDb, rentmobileAuth } from '../components/firebase.config';
+import { interimDb, interimAuth, rentmobileDb, rentmobileAuth } from '../components/firebase.config';
 import { serverTimestamp } from "firebase/firestore";
-library.add(faList, faPlus, faUser, faIdBadge, faMagnifyingGlass, faHouseChimney, faUsers, faTriangleExclamation, faEye, faCircleUser, faBars, FaSignOutAlt);
 
+library.add(faList, faPlus, faUser, faIdBadge, faMagnifyingGlass, faHouseChimney, faUsers, faTriangleExclamation, faEye, faCircleUser, faBars, FaSignOutAlt);
 
 const AddUser = styled.div`
   display: flex;
@@ -27,7 +24,7 @@ const Sidebar = styled.div`
   background-color: #f8f9fa;
   padding: 10px;
   display: flex;
-  border: 1px solid #ddd;  /* ADD THIS */
+  border: 1px solid #ddd;
   flex-direction: column;
   justify-content: space-between;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -66,7 +63,7 @@ const SidebarItem = styled.li`
   }
 
   .icon {
-    font-size: 1rem;  /* Increase the icon size */
+    font-size: 1rem;
     color: #000;
     transition: margin-left 0.2s ease;
   }
@@ -98,7 +95,6 @@ const MainContent = styled.div`
   overflow-y: auto;
 `;
 
-
 const ProfileHeader = styled.div`
   display: flex;
   align-items: center;
@@ -109,13 +105,13 @@ const ProfileHeader = styled.div`
   .profile-icon {
     font-size: 3rem;
     margin-bottom: 15px;
-    color: #6c757d; // Subtle color for icon
+    color: #6c757d;
   }
 
   .profile-name {
     font-size: 1.2rem;
-    font-weight: 700; // Bolder text
-    color: black; // Darker gray for a professional look
+    font-weight: 700;
+    color: black;
     display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
   }
 
@@ -126,30 +122,30 @@ const ProfileHeader = styled.div`
   }
 
   .profile-position {
-    font-size: 1rem; /* Increase the font size */
-    font-weight: 600; /* Make it bold */
-    color: #007bff; /* Change color to blue for better visibility */
+    font-size: 1rem;
+    font-weight: 600;
+    color: #007bff;
     display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
-    margin-top: 5px; /* Add some margin for spacing */
+    margin-top: 5px;
   }
 `;
 
-
 const ProfileImage = styled.img`
   border-radius: 50%;
-  width: 60px; /* Adjusted for better visibility */
+  width: 60px;
   height: 60px;
   margin-bottom: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // Subtle shadow for a polished look
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
 
 const Divider = styled.hr`
   border: 2;
   height: 1px;
   background-color: #dee2e6;
-  margin: 10px 0; /* Adjust margin for spacing as needed */
-  width: 150%; /* Ensure the line spans the full width */
+  margin: 10px 0;
+  width: 150%;
 `;
+
 const FormContainer = styled.form`
   display: grid;
   gap: 1.5rem;
@@ -163,7 +159,6 @@ const FormContainer = styled.form`
   align-self: center;
   margin-top: 20px;
 
-
   label {
     font-size: 20px;
     margin-bottom: 5px;
@@ -173,7 +168,7 @@ const FormContainer = styled.form`
     padding: 0.5rem;
     border-radius: 4px;
     border: 1px solid #ddd;
-    width:90%;
+    width: 90%;
   }
 
   .section-title {
@@ -356,46 +351,45 @@ const AppBar = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 40px 50px;
-  background-color: #188423; /* Updated color */
+  background-color: #188423;
   color: white;
   box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
   font-size: 22px;
-  font-family: 'Inter', sans-serif; /* Use a professional font */
-  font-weight: bold; /* Apply bold weight */
+  font-family: 'Inter', sans-serif;
+  font-weight: bold;
 `;
 
 const SidebarFooter = styled.div`
   padding: 10px;
-  margin-top: auto; /* Pushes the footer to the bottom */
+  margin-top: auto;
   display: flex;
   align-items: center;
   justify-content: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
 `;
 
 const LogoutButton = styled(SidebarItem)`
-  margin-top: 5px; /* Add some margin */
-  background-color: #dc3545; /* Bootstrap danger color */
+  margin-top: 5px;
+  background-color: #dc3545;
   color: white;
   align-items: center;
   margin-left: 20px;
-  padding: 5px 15px; /* Add padding for a better button size */
-  border-radius: 5px; /* Rounded corners */
-  font-weight: bold; /* Make text bold */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-  transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transitions */
+  padding: 5px 15px;
+  border-radius: 5px;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease, transform 0.2s ease;
 
   &:hover {
-    background-color: #c82333; /* Darker red on hover */
-    transform: scale(1.05); /* Slightly scale up on hover */
+    background-color: #c82333;
+    transform: scale(1.05);
   }
 `;
 
 const NewUnit = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  
-  const [imagePreviewUrl, setImagePreviewUrl] = useState(null); 
+  const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
   const sidebarRef = useRef(null);
-  const [isPositionActive, setIsPositionActive] = useState(false); // State for Toggle Switch
+  const [isPositionActive, setIsPositionActive] = useState(false);
   const [contactNumWarning, setContactNumWarning] = useState('');
   const [loggedInUser, setLoggedInUser] = useState(null);
   const navigate = useNavigate();
@@ -410,376 +404,378 @@ const NewUnit = () => {
     position: '',
     location: '',
     Image: null,
-    status: 'Active' 
+    status: 'Active'
   });
   const [locations, setLocations] = useState([]);
 
   const togglePositionSwitch = () => {
-    setIsPositionActive(prevState => !prevState); 
+    setIsPositionActive(prevState => !prevState);
   };
-  
-    const toggleSidebar = () => {
-      setIsSidebarOpen(!isSidebarOpen);
-    };
 
-    useEffect(() => {
-      const checkAndCreateCollection = async () => {
-        const collectionName = 'admin_users'; // Replace with your desired collection name
-        const usersCollection = collection(rentmobileDb, collectionName);
-        const userDocs = await getDocs(usersCollection);
-  
-        // If the collection is empty, we can assume it doesn't exist
-        if (userDocs.empty) {
-          console.log(`Collection '${collectionName}' was created.`);
-        } else {
-          console.log(`Collection '${collectionName}' already exists.`);
-        }
-      };
-  
-      checkAndCreateCollection(); // Call the function
-    }, []);
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 
-    useEffect(() => {
-      const fetchUserData = async () => {
-        const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
-        if (loggedInUserData) {
-          const usersCollection = collection(interimDb, 'users');
-          const userDocs = await getDocs(usersCollection);
-          const users = userDocs.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          
-          const currentUser = users.find(user => user.email === loggedInUserData.email);
-          setLoggedInUser(currentUser || loggedInUserData);
-        }
-      };
-  
-      fetchUserData();
-    }, []);
+  useEffect(() => {
+    const checkAndCreateCollection = async () => {
+      const collectionName = 'admin_users';
+      const usersCollection = collection(rentmobileDb, collectionName);
+      const userDocs = await getDocs(usersCollection);
 
-    useEffect(() => {
-      const fetchLocations = async () => {
-        const unitsCollection = collection(rentmobileDb, 'unit');
-        const unitDocs = await getDocs(unitsCollection);
-        const unitNames = unitDocs.docs.map(doc => doc.data().name);
-        setLocations(unitNames);
-      };
-  
-      fetchLocations();
-    }, []);
-
-    const handleClickOutside = (event) => {
-     
-      
-    };
-  
-    useEffect(() => {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
-      };
-    }, []);
-    
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false); 
-
-    const handleLogout = () => {
-   
-      localStorage.removeItem('userData'); 
-      navigate('/login');
-    };
-
-    const handleDropdownToggle = () => {
-      setIsDropdownOpen(!isDropdownOpen);
-    };
-  
-    const handleChange = (e) => {
-      const { id, value } = e.target;
-    
-      if (id === 'contactNum') {
-        // Only allow digits and limit to 11 characters
-        const numericValue = value.replace(/\D/g, ''); // Remove any non-numeric characters
-        if (numericValue.length <= 11) {
-          setUserData(prevState => ({
-            ...prevState,
-            [id]: numericValue
-          }));
-          
-          // Set warning if contactNum is not exactly 11 digits
-          if (numericValue.length !== 11 && numericValue.length > 0) {
-            setContactNumWarning('Contact number must be exactly 11 digits.');
-          } else {
-            setContactNumWarning(''); // Clear warning if length is valid
-          }
-        }
+      if (userDocs.empty) {
+        console.log(`Collection '${collectionName}' was created.`);
       } else {
-        setUserData(prevState => ({
-          ...prevState,
-          [id]: value
-        }));
-      }
-    };
-    
-  
-    const handleFileChange = (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const previewUrl = URL.createObjectURL(file); 
-        setImagePreviewUrl(previewUrl);              
-        setUserData(prevState => ({
-          ...prevState,
-          Image: file
-        }));
+        console.log(`Collection '${collectionName}' already exists.`);
       }
     };
 
+    checkAndCreateCollection();
+  }, []);
 
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-  
-      if (!userData.email || !userData.password || !/\S+@\S+\.\S+/.test(userData.email)) {
-        alert('Please provide a valid email and password.');
-        return;
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
+      if (loggedInUserData) {
+        const usersCollection = collection(interimDb, 'users');
+        const userDocs = await getDocs(usersCollection);
+        const users = userDocs.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        const currentUser = users.find(user => user.email === loggedInUserData.email);
+        setLoggedInUser(currentUser || loggedInUserData);
       }
-      if (!userData.firstName || !userData.lastName || !userData.contactNum || !userData.address) {
-        alert('Please fill in all required fields.');
-        return;
-      }
-  
-      try {
-        const userCredential = await createUserWithEmailAndPassword(rentmobileAuth, userData.email, userData.password);
-        const user = userCredential.user;
-  
-        const { password, ...userWithoutPassword } = userData;
-  
-        let imageUrl = '';
-        if (userData.Image) {
-          try {
-            const imageRef = ref(storage, 'images/' + userData.Image.name);
-            await uploadBytes(imageRef, userData.Image);
-            imageUrl = await getDownloadURL(imageRef);
-          } catch (error) {
-            console.error('Error uploading image:', error);
-            alert('Failed to upload image. Please try again.');
-            return;
-          }
-        }
-  
-        await setDoc(doc(rentmobileDb, 'admin_users', user.uid), {
-          ...userWithoutPassword,
-          Image: imageUrl,
-          status: userData.status || 'Active',
-          createdAt: serverTimestamp()
-        });
-  
-        alert('User added successfully!');
-        setUserData({
-          firstName: '',
-          lastName: '',
-          middleName: '',
-          contactNum: '',
-          email: '',
-          password: '',
-          address: '',
-          position: '',
-          location: '',
-          Image: null,
-          status: 'Active'
-        });
-        setImagePreviewUrl(null);
-      } catch (error) {
-        console.error('Error adding user: ', error);
-        if (error.code === 'auth/email-already-in-use') {
-          alert('The email address is already in use.');
-        } else if (error.code === 'auth/weak-password') {
-          alert('The password is too weak.');
+    };
+
+    fetchUserData();
+  }, []);
+
+  useEffect(() => {
+    const fetchLocations = async () => {
+      const unitsCollection = collection(rentmobileDb, 'unit');
+      const unitDocs = await getDocs(unitsCollection);
+      const unitNames = unitDocs.docs.map(doc => doc.data().name);
+      setLocations(unitNames);
+    };
+
+    fetchLocations();
+  }, []);
+
+  const handleClickOutside = (event) => {
+    if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+      setIsSidebarOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem('userData');
+    navigate('/login');
+  };
+
+  const handleDropdownToggle = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+
+    if (id === 'contactNum') {
+      const numericValue = value.replace(/\D/g, '');
+      if (numericValue.length <= 11) {
+        setUserData(prevState => ({
+          ...prevState,
+          [id]: numericValue
+        }));
+
+        if (numericValue.length !== 11 && numericValue.length > 0) {
+          setContactNumWarning('Contact number must be exactly 11 digits.');
         } else {
-          alert('Failed to add user. Please try again.');
+          setContactNumWarning('');
         }
       }
-    };
-  
-  
-    return (
+    } else {
+      setUserData(prevState => ({
+        ...prevState,
+        [id]: value
+      }));
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreviewUrl(previewUrl);
+      setUserData(prevState => ({
+        ...prevState,
+        Image: file
+      }));
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!userData.email || !userData.password || !/\S+@\S+\.\S+/.test(userData.email)) {
+      alert('Please provide a valid email and password.');
+      return;
+    }
+    if (!userData.firstName || !userData.lastName || !userData.contactNum || !userData.address) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(rentmobileAuth, userData.email, userData.password);
+      const user = userCredential.user;
+
+      const { password, ...userWithoutPassword } = userData;
+
+      let imageUrl = '';
+      if (userData.Image) {
+        try {
+          const imageRef = ref(storage, 'images/' + userData.Image.name);
+          await uploadBytes(imageRef, userData.Image);
+          imageUrl = await getDownloadURL(imageRef);
+        } catch (error) {
+          console.error('Error uploading image:', error);
+          alert('Failed to upload image. Please try again.');
+          return;
+        }
+      }
+
+      await setDoc(doc(rentmobileDb, 'admin_users', user.uid), {
+        ...userWithoutPassword,
+        Image: imageUrl,
+        status: userData.status || 'Active',
+        createdAt: serverTimestamp()
+      });
+
+      alert('User added successfully!');
+      setUserData({
+        firstName: '',
+        lastName: '',
+        middleName: '',
+        contactNum: '',
+        email: '',
+        password: '',
+        address: '',
+        position: '',
+        location: '',
+        Image: null,
+        status: 'Active'
+      });
+      setImagePreviewUrl(null);
+    } catch (error) {
+      console.error('Error adding user: ', error);
+      if (error.code === 'auth/email-already-in-use') {
+        alert('The email address is already in use.');
+      } else if (error.code === 'auth/weak-password') {
+        alert('The password is too weak.');
+      } else {
+        alert('Failed to add user. Please try again.');
+      }
+    }
+  };
+
+  return (
     <>
       <ToggleButton onClick={toggleSidebar}>
         <FaBars />
       </ToggleButton>
 
       <AddUser>
-      <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
-        <Link to="/profile" style={{ textDecoration: 'none' }}>
-        <ProfileHeader isSidebarOpen={isSidebarOpen}>
-          {loggedInUser && loggedInUser.Image ? (
-            <ProfileImage src={loggedInUser.Image} alt={`${loggedInUser.firstName} ${loggedInUser.lastName}`} />
-          ) : (
-            <FaUserCircle className="profile-icon" />
-          )}
-          <span className="profile-name">{loggedInUser ? `${loggedInUser.firstName} ${loggedInUser.lastName}` : 'Guest'}</span>
-          
-          <span className="profile-email" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
-            {loggedInUser ? loggedInUser.email : ''}
-          </span>
-          
-          {/* Add position below the email */}
-          <span className="profile-position" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
-            {loggedInUser ? loggedInUser.position : ''}
-          </span>
-        </ProfileHeader>
-      </Link>
+        <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
+          <Link to="/profile" style={{ textDecoration: 'none' }}>
+            <ProfileHeader isSidebarOpen={isSidebarOpen}>
+              {loggedInUser && loggedInUser.Image ? (
+                <ProfileImage src={loggedInUser.Image} alt={`${loggedInUser.firstName} ${loggedInUser.lastName}`} />
+              ) : (
+                <FaUserCircle className="profile-icon" />
+              )}
+              <span className="profile-name">{loggedInUser ? `${loggedInUser.firstName} ${loggedInUser.lastName}` : 'Guest'}</span>
 
+              <span className="profile-email" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
+                {loggedInUser ? loggedInUser.email : ''}
+              </span>
 
-        <SearchBarContainer isSidebarOpen={isSidebarOpen}>
-          <FaSearch />
-          <SearchInput type="text" placeholder="Search..." />
-        </SearchBarContainer>
-        
-        <SidebarMenu>
-  <Link to="/dashboard" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faHome} className="icon" />
-      <span>Dashboard</span>
-    </SidebarItem>
-  </Link>
-  
-  <Link to="/list" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faShoppingCart} className="icon" />
-      <span>List of Vendors</span>
-    </SidebarItem>
-  </Link>
-  <Link to="/listofstalls" style={{ textDecoration: 'none' }}>
-  <SidebarItem isSidebarOpen={isSidebarOpen}>
-    <FontAwesomeIcon icon={faClipboard} className="icon" />
-    <span>List of Stalls</span>
-  </SidebarItem>
-</Link>
+              <span className="profile-position" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
+                {loggedInUser ? loggedInUser.position : ''}
+              </span>
+            </ProfileHeader>
+          </Link>
 
-  <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faUser} className="icon" />
-    <span>User Management</span>
-  </SidebarItem>
+          <SearchBarContainer isSidebarOpen={isSidebarOpen}>
+            <FaSearch />
+            <SearchInput type="text" placeholder="Search..." />
+          </SearchBarContainer>
 
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/usermanagement" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span>View Users</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/newuser" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlus} className="icon" />
-            <span>Add User</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/addcollector" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlus} className="icon" />
-            <span>Add Ambulant Collector</span>
-          </SidebarItem>
-        </li>
-      </Link>
-    </ul>
-  )}
+          <SidebarMenu>
+            <Link to="/dashboard" style={{ textDecoration: 'none' }}>
+              <SidebarItem isSidebarOpen={isSidebarOpen}>
+                <FontAwesomeIcon icon={faHome} className="icon" />
+                <span>Dashboard</span>
+              </SidebarItem>
+            </Link>
 
-  <Link to="/viewunit" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faPlus} className="icon" />
-      <span>Add New Unit</span>
-    </SidebarItem>
-  </Link>
+            <Link to="/list" style={{ textDecoration: 'none' }}>
+              <SidebarItem isSidebarOpen={isSidebarOpen}>
+                <FontAwesomeIcon icon={faShoppingCart} className="icon" />
+                <span>List of Vendors</span>
+              </SidebarItem>
+            </Link>
 
-  <Link to="/appraise" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faUsers} className="icon" />
-      <span>Manage Appraisal</span>
-    </SidebarItem>
-  </Link>
+            <Link to="/stalls" style={{ textDecoration: 'none' }}>
+              <SidebarItem isSidebarOpen={isSidebarOpen}>
+                <FontAwesomeIcon icon={faClipboard} className="icon" />
+                <span>List of Stalls</span>
+              </SidebarItem>
+            </Link>
 
-  <Link to="/contract" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faFileContract} className="icon" />
-      <span>Contract</span>
-    </SidebarItem>
-  </Link>
+            <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+              <FontAwesomeIcon icon={faUser} className="icon" />
+              <span>User Management</span>
+            </SidebarItem>
 
-  <Link to="/ticket" style={{ textDecoration: 'none' }}>
-  <SidebarItem isSidebarOpen={isSidebarOpen}>
-    <FontAwesomeIcon icon={faTicketAlt} className="icon" />
-    <span>Manage Ticket</span>
-  </SidebarItem>
-</Link>
-<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faCogs} className="icon" />
-    <span>Manage Zone</span>
-  </SidebarItem>
+            {isDropdownOpen && (
+              <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+                <Link to="/usermanagement" style={{ textDecoration: 'none' }}>
+                  <li>
+                    <SidebarItem isSidebarOpen={isSidebarOpen}>
+                      <FontAwesomeIcon icon={faSearch} className="icon" />
+                      <span>View Users</span>
+                    </SidebarItem>
+                  </li>
+                </Link>
+                <Link to="/newuser" style={{ textDecoration: 'none' }}>
+                  <li>
+                    <SidebarItem isSidebarOpen={isSidebarOpen}>
+                      <FontAwesomeIcon icon={faPlus} className="icon" />
+                      <span>Add User</span>
+                    </SidebarItem>
+                  </li>
+                </Link>
+                <Link to="/addcollector" style={{ textDecoration: 'none' }}>
+                  <li>
+                    <SidebarItem isSidebarOpen={isSidebarOpen}>
+                      <FontAwesomeIcon icon={faPlus} className="icon" />
+                      <span>Add Ambulant Collector</span>
+                    </SidebarItem>
+                  </li>
+                </Link>
+              </ul>
+            )}
 
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/addzone" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
-            <span> Add Zone</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/viewzone" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-          <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span> View Zone</span>
-          </SidebarItem>
-        </li>
-      </Link>
-    
-    </ul>
-  )}
+            <Link to="/Addunit" style={{ textDecoration: 'none' }}>
+              <SidebarItem isSidebarOpen={isSidebarOpen}>
+                <FontAwesomeIcon icon={faPlus} className="icon" />
+                <span>Add New Unit</span>
+              </SidebarItem>
+            </Link>
 
-<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faUser} className="icon" />
-    <span>Manage Space</span>
-  </SidebarItem>
+            <Link to="/appraise" style={{ textDecoration: 'none' }}>
+              <SidebarItem isSidebarOpen={isSidebarOpen}>
+                <FontAwesomeIcon icon={faUsers} className="icon" />
+                <span>Manage Appraisal</span>
+              </SidebarItem>
+            </Link>
 
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/addspace" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
-            <span> Add Space</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/viewspace" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-          <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span> View Space</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      
-    </ul>
-  )}
-</SidebarMenu>
-      <SidebarFooter isSidebarOpen={isSidebarOpen}>
-          <LogoutButton isSidebarOpen={isSidebarOpen} onClick={handleLogout}>
-            <span><FaSignOutAlt /></span>
-            <span>Logout</span>
-          </LogoutButton>
-        </SidebarFooter>
-      </Sidebar>
+            <Link to="/contract" style={{ textDecoration: 'none' }}>
+              <SidebarItem isSidebarOpen={isSidebarOpen}>
+                <FontAwesomeIcon icon={faFileContract} className="icon" />
+                <span>Contract</span>
+              </SidebarItem>
+            </Link>
+
+            <Link to="/ticket" style={{ textDecoration: 'none' }}>
+              <SidebarItem isSidebarOpen={isSidebarOpen}>
+                <FontAwesomeIcon icon={faTicketAlt} className="icon" />
+                <span>Manage Ticket</span>
+              </SidebarItem>
+            </Link>
+
+            <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+              <FontAwesomeIcon icon={faCogs} className="icon" />
+              <span>Manage Zone</span>
+            </SidebarItem>
+
+            {isDropdownOpen && (
+              <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+                <Link to="/addzone" style={{ textDecoration: 'none' }}>
+                  <li>
+                    <SidebarItem isSidebarOpen={isSidebarOpen}>
+                      <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+                      <span> Add Zone</span>
+                    </SidebarItem>
+                  </li>
+                </Link>
+                <Link to="/viewzone" style={{ textDecoration: 'none' }}>
+                  <li>
+                    <SidebarItem isSidebarOpen={isSidebarOpen}>
+                      <FontAwesomeIcon icon={faSearch} className="icon" />
+                      <span> View Zone</span>
+                    </SidebarItem>
+                  </li>
+                </Link>
+              </ul>
+            )}
+
+            <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+              <FontAwesomeIcon icon={faUser} className="icon" />
+              <span>Manage Space</span>
+            </SidebarItem>
+
+            {isDropdownOpen && (
+              <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+                <Link to="/addspace" style={{ textDecoration: 'none' }}>
+                  <li>
+                    <SidebarItem isSidebarOpen={isSidebarOpen}>
+                      <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+                      <span> Add Space</span>
+                    </SidebarItem>
+                  </li>
+                </Link>
+                <Link to="/viewspace" style={{ textDecoration: 'none' }}>
+                  <li>
+                    <SidebarItem isSidebarOpen={isSidebarOpen}>
+                      <FontAwesomeIcon icon={faSearch} className="icon" />
+                      <span> View Space</span>
+                    </SidebarItem>
+                  </li>
+                </Link>
+                <Link to="/addcollector" style={{ textDecoration: 'none' }}>
+                  <li>
+                    <SidebarItem isSidebarOpen={isSidebarOpen}>
+                      <FontAwesomeIcon icon={faPlus} className="icon" />
+                      <span>Add Ambulant Collector</span>
+                    </SidebarItem>
+                  </li>
+                </Link>
+              </ul>
+            )}
+          </SidebarMenu>
+
+          <SidebarFooter isSidebarOpen={isSidebarOpen}>
+            <LogoutButton isSidebarOpen={isSidebarOpen} onClick={handleLogout}>
+              <span><FaSignOutAlt /></span>
+              <span>Logout</span>
+            </LogoutButton>
+          </SidebarFooter>
+        </Sidebar>
+
         <MainContent isSidebarOpen={isSidebarOpen}>
-        <AppBar>
-        <div className="title">INTERIM</div>
-      </AppBar>
+          <AppBar>
+            <div className="title">INTERIM</div>
+          </AppBar>
 
-            <ProfileHeader>
+          <ProfileHeader>
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <FontAwesomeIcon icon={faPlusCircle} style={{ color: 'green', marginRight: '10px' }} size="3x" />
               <h1 style={{ margin: 0 }}>NEW USER</h1>
@@ -787,97 +783,95 @@ const NewUnit = () => {
           </ProfileHeader>
 
           <FormContainer onSubmit={handleSubmit}>
-      <div className="section-title">Basic Details</div>
-      <Divider /> {/* Full-width horizontal line */}<span></span>
-      <div className="form-section">
-        <label htmlFor="firstName">First Name</label>
-        <input id="firstName" type="text" value={userData.firstName} onChange={handleChange} placeholder="Enter First Name" />
-      </div>
-      <div className="form-section">
-        <label htmlFor="middleName">Middle Name</label>
-        <input id="middleName" type="text" value={userData.middleName} onChange={handleChange} placeholder="Enter Middle Name" />
-      </div>
-      <div className="form-section">
-        <label htmlFor="lastName">Last Name</label>
-        <input id="lastName" type="text" value={userData.lastName} onChange={handleChange} placeholder="Enter Last Name" />
-      </div>
-      <div className="form-section">
-        <label htmlFor="contactNum">Contact Number</label>
-        <input
-          type="text"
-          id="contactNum"
-          value={userData.contactNum}
-          onChange={handleChange}
-          placeholder="Enter 11-digit contact number"
-        />
-        {contactNumWarning && <p style={{ color: 'red' }}>{contactNumWarning}</p>}
-        {/* Other form elements */}
-      </div>
-      <span></span>
-      <div className="section-title">Login Details</div>
-      <Divider /> {/* Add the horizontal line here */}<span></span>
-      <div className="form-section">
-        <label htmlFor="email">Email</label>
-        <input id="email" type="email" value={userData.email} onChange={handleChange} placeholder="Enter Email" />
-      </div>
-      <div className="form-section">
-        <label htmlFor="password">Password</label>
-        <input id="password" type="password" value={userData.password} onChange={handleChange} placeholder="Enter Password" />
-      </div>
-      <span></span><span></span>
-      <div className="section-title">Other Details</div>
-      <Divider /> {/* Add the horizontal line here */}<span></span>
-      <div className="form-section">
-        <label htmlFor="address">Address</label>
-        <input id="address" type="text" value={userData.address} onChange={handleChange} placeholder="Enter Address" />
-      </div>
-      <div className="form-section">
-        <label htmlFor="location">Location</label>
-        <select id="location" value={userData.location} onChange={handleChange}>
-          <option value="">Select Location</option>
-          {locations.map((location, index) => (
-            <option key={index} value={location}>
-              {location}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="form-section">
-        <label htmlFor="position">Position</label>
-        <select id="position" value={userData.position} onChange={handleChange}>
-          <option value="Admin">Admin</option>
-          <option value="Collector">Collector</option>
-          <option value="Office In Charge">Office In Charge</option>
-          <option value="CTO">CTO</option>
-          <option value="Interim">Interim</option>
-        </select>
-      </div>
+            <div className="section-title">Basic Details</div>
+            <Divider />
+            <div className="form-section">
+              <label htmlFor="firstName">First Name</label>
+              <input id="firstName" type="text" value={userData.firstName} onChange={handleChange} placeholder="Enter First Name" />
+            </div>
+            <div className="form-section">
+              <label htmlFor="middleName">Middle Name</label>
+              <input id="middleName" type="text" value={userData.middleName} onChange={handleChange} placeholder="Enter Middle Name" />
+            </div>
+            <div className="form-section">
+              <label htmlFor="lastName">Last Name</label>
+              <input id="lastName" type="text" value={userData.lastName} onChange={handleChange} placeholder="Enter Last Name" />
+            </div>
+            <div className="form-section">
+              <label htmlFor="contactNum">Contact Number</label>
+              <input
+                type="text"
+                id="contactNum"
+                value={userData.contactNum}
+                onChange={handleChange}
+                placeholder="Enter 11-digit contact number"
+              />
+              {contactNumWarning && <p style={{ color: 'red' }}>{contactNumWarning}</p>}
+            </div>
 
-      <div>
-        <label htmlFor="toggleSwitch">Active Status</label>
-        <ToggleSwitch>
-          <span>Active</span>
-          <label className="switch">
-            <input type="checkbox" checked={isPositionActive} onChange={togglePositionSwitch} />
-            <span className="slider"></span>
-          </label>
-        </ToggleSwitch>
-      </div>
+            <div className="section-title">Login Details</div>
+            <Divider />
+            <div className="form-section">
+              <label htmlFor="email">Email</label>
+              <input id="email" type="email" value={userData.email} onChange={handleChange} placeholder="Enter Email" />
+            </div>
+            <div className="form-section">
+              <label htmlFor="password">Password</label>
+              <input id="password" type="password" value={userData.password} onChange={handleChange} placeholder="Enter Password" />
+            </div>
 
-      <div className="form-section">
-        <label htmlFor="Image">Upload Image:</label>
-        <input type="file" id="Image" onChange={handleFileChange} />
-        <div className="image-preview">
-          {imagePreviewUrl ? <img src={imagePreviewUrl} alt="Preview" style={{ width: '100px', height: '100px', objectFit: 'cover' }} /> : 'No file chosen'}
-        </div>
-      </div>
+            <div className="section-title">Other Details</div>
+            <Divider />
+            <div className="form-section">
+              <label htmlFor="address">Address</label>
+              <input id="address" type="text" value={userData.address} onChange={handleChange} placeholder="Enter Address" />
+            </div>
+            <div className="form-section">
+              <label htmlFor="location">Location</label>
+              <select id="location" value={userData.location} onChange={handleChange}>
+                <option value="">Select Location</option>
+                {locations.map((location, index) => (
+                  <option key={index} value={location}>
+                    {location}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="form-section">
+              <label htmlFor="position">Position</label>
+              <select id="position" value={userData.position} onChange={handleChange}>
+                <option value="Admin">Admin</option>
+                <option value="Collector">Collector</option>
+                <option value="Office In Charge">Office In Charge</option>
+                <option value="CTO">CTO</option>
+                <option value="Interim">Interim</option>
+              </select>
+            </div>
 
-      <div className="button-group">
-        <button className="cancel" type="button">Cancel</button>
-        <button type="submit">Save</button>
-      </div>
-    </FormContainer>
-        
+            <div>
+              <label htmlFor="toggleSwitch">Active Status</label>
+              <ToggleSwitch>
+                <span>Active</span>
+                <label className="switch">
+                  <input type="checkbox" checked={isPositionActive} onChange={togglePositionSwitch} />
+                  <span className="slider"></span>
+                </label>
+              </ToggleSwitch>
+            </div>
+
+            <div className="form-section">
+              <label htmlFor="Image">Upload Image:</label>
+              <input type="file" id="Image" onChange={handleFileChange} />
+              <div className="image-preview">
+                {imagePreviewUrl ? <img src={imagePreviewUrl} alt="Preview" style={{ width: '100px', height: '100px', objectFit: 'cover' }} /> : 'No file chosen'}
+              </div>
+            </div>
+
+            <div className="button-group">
+              <button className="cancel" type="button">Cancel</button>
+              <button type="submit">Save</button>
+            </div>
+          </FormContainer>
         </MainContent>
       </AddUser>
     </>

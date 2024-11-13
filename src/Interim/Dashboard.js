@@ -1,17 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link,  useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt,FaUserSlash, FaUser, FaUsers, FaWallet, FaList} from 'react-icons/fa';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faCheck, faPlusCircle, faCogs} from '@fortawesome/free-solid-svg-icons';
-import { faClipboard } from '@fortawesome/free-regular-svg-icons'; 
-import { interimDb } from '../components/firebase.config';
-import { rentmobileDb } from '../components/firebase.config';
-
+import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt, FaUserSlash, FaUser, FaUsers, FaWallet, FaList } from 'react-icons/fa';
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faCheck, faPlusCircle, faCogs } from '@fortawesome/free-solid-svg-icons';
+import { faClipboard } from '@fortawesome/free-regular-svg-icons';
+import { interimDb, rentmobileDb } from '../components/firebase.config';
 import { collection, getDocs } from 'firebase/firestore';
 import LoginAnalytics from './LoginAnalytics';
-
 
 const DashboardContainer = styled.div`
   display: flex;
@@ -24,7 +21,7 @@ const Sidebar = styled.div`
   background-color: #f8f9fa;
   padding: 10px;
   display: flex;
-  border: 1px solid #ddd;  /* ADD THIS */
+  border: 1px solid #ddd;
   flex-direction: column;
   justify-content: space-between;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -32,7 +29,7 @@ const Sidebar = styled.div`
   position: fixed;
   height: 100vh;
   z-index: 100;
-  overflow-y: auto; 
+  overflow-y: auto;
 `;
 
 const SidebarMenu = styled.ul`
@@ -63,7 +60,7 @@ const SidebarItem = styled.li`
   }
 
   .icon {
-    font-size: 1rem;  /* Increase the icon size */
+    font-size: 1rem;
     color: #000;
     transition: margin-left 0.2s ease;
   }
@@ -74,30 +71,29 @@ const SidebarItem = styled.li`
   }
 `;
 
-
 const SidebarFooter = styled.div`
   padding: 10px;
-  margin-top: auto; /* Pushes the footer to the bottom */
+  margin-top: auto;
   display: flex;
   align-items: center;
   justify-content: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
 `;
 
 const LogoutButton = styled(SidebarItem)`
-  margin-top: 5px; /* Add some margin */
-  background-color: #dc3545; /* Bootstrap danger color */
+  margin-top: 5px;
+  background-color: #dc3545;
   color: white;
   align-items: center;
   margin-left: 20px;
-  padding: 5px 15px; /* Add padding for a better button size */
-  border-radius: 5px; /* Rounded corners */
-  font-weight: bold; /* Make text bold */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-  transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transitions */
+  padding: 5px 15px;
+  border-radius: 5px;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease, transform 0.2s ease;
 
   &:hover {
-    background-color: #c82333; /* Darker red on hover */
-    transform: scale(1.05); /* Slightly scale up on hover */
+    background-color: #c82333;
+    transform: scale(1.05);
   }
 `;
 
@@ -132,13 +128,13 @@ const ProfileHeader = styled.div`
   .profile-icon {
     font-size: 3rem;
     margin-bottom: 15px;
-    color: #6c757d; // Subtle color for icon
+    color: #6c757d;
   }
 
   .profile-name {
     font-size: 1.2rem;
-    font-weight: 700; // Bolder text
-    color: black; // Darker gray for a professional look
+    font-weight: 700;
+    color: black;
     display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
   }
 
@@ -149,23 +145,21 @@ const ProfileHeader = styled.div`
   }
 
   .profile-position {
-    font-size: 1rem; /* Increase the font size */
-    font-weight: 600; /* Make it bold */
-    color: #007bff; /* Change color to blue for better visibility */
+    font-size: 1rem;
+    font-weight: 600;
+    color: #007bff;
     display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
-    margin-top: 5px; /* Add some margin for spacing */
+    margin-top: 5px;
   }
 `;
 
-
 const ProfileImage = styled.img`
   border-radius: 50%;
-  width: 60px; /* Adjusted for better visibility */
+  width: 60px;
   height: 60px;
   margin-bottom: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // Subtle shadow for a polished look
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
-
 
 const StatsContainer = styled.div`
   display: flex;
@@ -181,7 +175,7 @@ const StatBox = styled.div`
   background-color: ${({ bgColor }) => bgColor || '#f4f4f4'};
   padding: 2rem;
   border-radius: 12px;
-  border: 1px solid #ddd;  /* ADD THIS */
+  border: 1px solid #ddd;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -223,24 +217,24 @@ const StatBox = styled.div`
 const FormContainer = styled.div`
   margin-top: 2rem;
   padding: 1rem;
-  border: 1px solid #ddd;  /* ADD THIS */
+  border: 1px solid #ddd;
   border-radius: 15px;
   background-color: #f8f9fa;
   box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
 
   h3 {
     margin-bottom: 1rem;
-    font-size: 16px; /* Adjusted for headings */
+    font-size: 16px;
   }
 
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px; /* ADD THIS */
-    border: 1px solid #ddd;  /* ADD THIS */
+    font-size: 14px;
+    border: 1px solid #ddd;
 
     th, td {
-      padding: 15px; 
+      padding: 15px;
       text-align: left;
       border-bottom: 2px solid #dee2e6;
       transition: background-color 0.2s ease;
@@ -249,7 +243,7 @@ const FormContainer = styled.div`
     th {
       background-color: #e9ecef;
       font-weight: bold;
-      color: #495057; 
+      color: #495057;
     }
 
     td {
@@ -257,30 +251,27 @@ const FormContainer = styled.div`
     }
 
     tr:nth-child(even) {
-      background-color: #f9f9f9; 
+      background-color: #f9f9f9;
     }
 
     tr:hover {
-      background-color: #f1f3f5; 
+      background-color: #f1f3f5;
     }
   }
 `;
 
 const AppBar = styled.div`
-  padding-top: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 40px 50px;
-  background-color: #188423; /* Updated color */
+  background-color: #188423;
   color: white;
   box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
   font-size: 22px;
-  font-family: 'Inter', sans-serif; /* Use a professional font */
-  font-weight: bold; /* Apply bold weight */
+  font-family: 'Inter', sans-serif;
+  font-weight: bold;
 `;
-
-
 
 const SearchBarContainer = styled.div`
   display: flex;
@@ -337,6 +328,7 @@ const CollectorTable = styled.table`
     background-color: #f1f3f5;
   }
 `;
+
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const sidebarRef = useRef(null);
@@ -354,15 +346,14 @@ const Dashboard = () => {
     const fetchCollectors = async () => {
       try {
         const querySnapshot = await getDocs(collection(rentmobileDb, 'ambulant_collector'));
-        const collectorsCount = querySnapshot.size; 
-        console.log('Number of collectors fetched:', collectorsCount); 
+        const collectorsCount = querySnapshot.size;
+        console.log('Number of collectors fetched:', collectorsCount);
 
         setTotalCollectors(collectorsCount);
-        
-        // Set the collectors data in the state
+
         const collectorsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         console.log('Fetched Collectors Data:', collectorsData);
-        setCollectorsData(collectorsData); 
+        setCollectorsData(collectorsData);
       } catch (error) {
         console.error('Error fetching collectors:', error);
       }
@@ -370,16 +361,16 @@ const Dashboard = () => {
 
     fetchCollectors();
   }, []);
-    
-  
+
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
   const handleClickOutside = (event) => {
-   
+    if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+      setIsSidebarOpen(false);
+    }
   };
-  
 
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
@@ -394,22 +385,17 @@ const Dashboard = () => {
         const querySnapshot = await getDocs(collection(interimDb, 'users'));
         const allUsers = querySnapshot.docs.map(doc => doc.data());
 
-        console.log('Fetched Users:', allUsers); 
+        console.log('Fetched Users:', allUsers);
         const validUsers = allUsers.filter(user => user.email && user.firstName && user.lastName);
         setTotalUsers(validUsers.length);
-        
-     
+
         const activeUsersCount = validUsers.filter(user => user.status?.toLowerCase() === 'active').length;
         setActiveUsers(activeUsersCount);
 
         const inactiveUsersCount = validUsers.filter(user => user.status?.toLowerCase() === 'inactive').length;
         setInactiveUsers(inactiveUsersCount);
 
-       
-
         setRecentUsers(validUsers.slice(-5));
-
-        
 
         const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
         if (loggedInUserData) {
@@ -425,185 +411,177 @@ const Dashboard = () => {
   }, []);
 
   const handleLogout = () => {
-   
-    localStorage.removeItem('userData'); 
+    localStorage.removeItem('userData');
     navigate('/login');
   };
-
 
   const handleDropdownToggle = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  
-    
   return (
-
-
     <DashboardContainer>
-        <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
+      <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
         <Link to="/profile" style={{ textDecoration: 'none' }}>
-        <ProfileHeader isSidebarOpen={isSidebarOpen}>
-          {loggedInUser && loggedInUser.Image ? (
-            <ProfileImage src={loggedInUser.Image} alt={`${loggedInUser.firstName} ${loggedInUser.lastName}`} />
-          ) : (
-            <FaUserCircle className="profile-icon" />
-          )}
-          <span className="profile-name">{loggedInUser ? `${loggedInUser.firstName} ${loggedInUser.lastName}` : 'Guest'}</span>
-          
-          <span className="profile-email" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
-            {loggedInUser ? loggedInUser.email : ''}
-          </span>
-          
-          {/* Add position below the email */}
-          <span className="profile-position" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
-            {loggedInUser ? loggedInUser.position : ''}
-          </span>
-        </ProfileHeader>
-      </Link>
-
+          <ProfileHeader isSidebarOpen={isSidebarOpen}>
+            {loggedInUser && loggedInUser.Image ? (
+              <ProfileImage src={loggedInUser.Image} alt={`${loggedInUser.firstName} ${loggedInUser.lastName}`} />
+            ) : (
+              <FaUserCircle className="profile-icon" />
+            )}
+            <span className="profile-name">{loggedInUser ? `${loggedInUser.firstName} ${loggedInUser.lastName}` : 'Guest'}</span>
+            <span className="profile-email" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
+              {loggedInUser ? loggedInUser.email : ''}
+            </span>
+            <span className="profile-position" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
+              {loggedInUser ? loggedInUser.position : ''}
+            </span>
+          </ProfileHeader>
+        </Link>
 
         <SearchBarContainer isSidebarOpen={isSidebarOpen}>
           <FaSearch />
           <SearchInput type="text" placeholder="Search..." />
         </SearchBarContainer>
-        
+
         <SidebarMenu>
-  <Link to="/dashboard" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faHome} className="icon" />
-      <span>Dashboard</span>
-    </SidebarItem>
-  </Link>
-  
-  <Link to="/list" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faShoppingCart} className="icon" />
-      <span>List of Vendors</span>
-    </SidebarItem>
-  </Link>
-  <Link to="/listofstalls" style={{ textDecoration: 'none' }}>
-  <SidebarItem isSidebarOpen={isSidebarOpen}>
-    <FontAwesomeIcon icon={faClipboard} className="icon" />
-    <span>List of Stalls</span>
-  </SidebarItem>
-</Link>
+          <Link to="/dashboard" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faHome} className="icon" />
+              <span>Dashboard</span>
+            </SidebarItem>
+          </Link>
 
-  <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faUser} className="icon" />
-    <span>User Management</span>
-  </SidebarItem>
+          <Link to="/list" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faShoppingCart} className="icon" />
+              <span>List of Vendors</span>
+            </SidebarItem>
+          </Link>
 
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/usermanagement" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span>View Users</span>
+          <Link to="/stalls" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faClipboard} className="icon" />
+              <span>List of Stalls</span>
+            </SidebarItem>
+          </Link>
+
+          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+            <FontAwesomeIcon icon={faUser} className="icon" />
+            <span>User Management</span>
           </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/newuser" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlus} className="icon" />
-            <span>Add User</span>
+
+          {isDropdownOpen && (
+            <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+              <Link to="/usermanagement" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faSearch} className="icon" />
+                    <span>View Users</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+              <Link to="/newuser" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faPlus} className="icon" />
+                    <span>Add User</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+            </ul>
+          )}
+
+          <Link to="/Addunit" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faPlus} className="icon" />
+              <span>Add New Unit</span>
+            </SidebarItem>
+          </Link>
+
+          <Link to="/appraise" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faUsers} className="icon" />
+              <span>Manage Appraisal</span>
+            </SidebarItem>
+          </Link>
+
+          <Link to="/contract" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faFileContract} className="icon" />
+              <span>Contract</span>
+            </SidebarItem>
+          </Link>
+
+          <Link to="/ticket" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faTicketAlt} className="icon" />
+              <span>Manage Ticket</span>
+            </SidebarItem>
+          </Link>
+
+          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+            <FontAwesomeIcon icon={faCogs} className="icon" />
+            <span>Manage Zone</span>
           </SidebarItem>
-        </li>
-      </Link>
-    </ul>
-  )}
 
-  <Link to="/viewunit" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faPlus} className="icon" />
-      <span>Add New Unit</span>
-    </SidebarItem>
-  </Link>
+          {isDropdownOpen && (
+            <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+              <Link to="/addzone" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+                    <span> Add Zone</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+              <Link to="/viewzone" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faSearch} className="icon" />
+                    <span> View Zone</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+            </ul>
+          )}
 
-  <Link to="/appraise" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faUsers} className="icon" />
-      <span>Manage Appraisal</span>
-    </SidebarItem>
-  </Link>
-
-  <Link to="/contract" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faFileContract} className="icon" />
-      <span>Contract</span>
-    </SidebarItem>
-  </Link>
-
-  <Link to="/ticket" style={{ textDecoration: 'none' }}>
-  <SidebarItem isSidebarOpen={isSidebarOpen}>
-    <FontAwesomeIcon icon={faTicketAlt} className="icon" />
-    <span>Manage Ticket</span>
-  </SidebarItem>
-</Link>
-<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faCogs} className="icon" />
-    <span>Manage Zone</span>
-  </SidebarItem>
-
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/addzone" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
-            <span> Add Zone</span>
+          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+            <FontAwesomeIcon icon={faUser} className="icon" />
+            <span>Manage Space</span>
           </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/viewzone" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-          <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span> View Zone</span>
-          </SidebarItem>
-        </li>
-      </Link>
-    
-    </ul>
-  )}
-<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faUser} className="icon" />
-    <span>Manage Space</span>
-  </SidebarItem>
 
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/addspace" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
-            <span> Add Space</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/viewspace" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-          <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span> View Space</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/addcollector" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlus} className="icon" />
-            <span>Add Ambulant Collector</span>
-          </SidebarItem>
-        </li>
-      </Link>
-    </ul>
-  )}
-</SidebarMenu>
+          {isDropdownOpen && (
+            <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+              <Link to="/addspace" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+                    <span> Add Space</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+              <Link to="/View" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faSearch} className="icon" />
+                    <span> View Space</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+              <Link to="/addcollector" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faPlus} className="icon" />
+                    <span>Add Ambulant Collector</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+            </ul>
+          )}
+        </SidebarMenu>
 
-      <SidebarFooter isSidebarOpen={isSidebarOpen}>
+        <SidebarFooter isSidebarOpen={isSidebarOpen}>
           <LogoutButton isSidebarOpen={isSidebarOpen} onClick={handleLogout}>
             <span><FaSignOutAlt /></span>
             <span>Logout</span>
@@ -611,169 +589,128 @@ const Dashboard = () => {
         </SidebarFooter>
       </Sidebar>
 
+      <MainContent isSidebarOpen={isSidebarOpen}>
+        <ToggleButton onClick={toggleSidebar}>
+          <FaBars />
+        </ToggleButton>
 
-        <MainContent isSidebarOpen={isSidebarOpen}>
-        
-          <ToggleButton onClick={toggleSidebar}>
-            <FaBars />
-          </ToggleButton>
-          
-        
-          <AppBar>
-        <div className="title">INTERIM</div>
-      </AppBar>
-         
-          <br></br>
-          <div style={{
-  display: 'flex',
-  justifyContent: 'space-between',  // Align the items to space them apart (left and right)
-  alignItems: 'flex-start',
-  width: '100%',  // Make the container take full width
-  padding: '0 20px',  // Adjust the padding for some breathing room
-}}>
+        <AppBar>
+          <div className="title">INTERIM</div>
+        </AppBar>
 
-  <div style={{
-    width: '48%', // You can adjust the width depending on how much space you want
-    maxWidth: '900px', // Maximum width for your LoginAnalytics
-    margin: '20px 0', // Add spacing above and below the chart container
-    padding: '20px',
-    borderRadius: '10px',
-    boxShadow: '0 6px 12px rgba(0, 0, 0, 0.1)',
-    backgroundColor: '#fff',
-  }}>
-    <LoginAnalytics />
-  </div>
-  
-  {/* Add another analytics component on the right side */}
-  <div style={{
-    width: '48%', // Adjust this as well to match the left container width
-    maxWidth: '900px',
-    margin: '20px 0',
-    padding: '20px',
-    borderRadius: '10px',
-    boxShadow: '0 6px 12px rgba(0, 0, 0, 0.1)',
-    backgroundColor: '#fff',
-  }}>
-    {/* Placeholder for another component */}
-    {/* You can replace this with another analytics chart or content */}
-    <h3>LoginAnalytics Analytics</h3>
-  </div>
+        <br></br>
+        <LoginAnalytics />
 
-</div>
+        <StatsContainer>
+          <StatBox bgColor="#11768C">
+            <h3>Total Users</h3>
+            <p>{totalUsers}</p>
+            <div className="icon-container">
+              <FaUsers className="fading-icon" style={{
+                fontSize: '30px',
+                opacity: 0.5,
+                animation: 'fade 2s infinite alternate'
+              }} />
+            </div>
+          </StatBox>
 
+          <StatBox bgColor="#11768C">
+            <h3>Active Users</h3>
+            <p>{activeUsers}</p>
+            <div className="icon-container">
+              <FaUser className="fading-icon" style={{
+                fontSize: '30px',
+                opacity: 0.5,
+                animation: 'fade 2s infinite alternate'
+              }} />
+            </div>
+          </StatBox>
 
+          <StatBox bgColor="#11768C">
+            <h3>Inactive Users</h3>
+            <p>{inactiveUsers}</p>
+            <div className="icon-container">
+              <FaUserSlash className="fading-icon" style={{
+                fontSize: '30px',
+                opacity: 0.5,
+                animation: 'fade 2s infinite alternate'
+              }} />
+            </div>
+          </StatBox>
 
-          <StatsContainer>
-      <StatBox bgColor="#11768C">
-        <h3>Total Users</h3>
-        <p>{totalUsers}</p> {/* Display the total user count */}
-        <div className="icon-container">
-          <FaUsers className="fading-icon" style={{ 
-            fontSize: '30px', 
-            opacity: 0.5, 
-            animation: 'fade 2s infinite alternate' 
-          }} />
-        </div>
-      </StatBox>
-    
-      <StatBox bgColor="#11768C">
-        <h3>Active Users</h3>
-        <p>{activeUsers}</p> {/* Display the total user count */}
-        <div className="icon-container">
-          <FaUser className="fading-icon" style={{ 
-            fontSize: '30px', 
-            opacity: 0.5, 
-            animation: 'fade 2s infinite alternate' 
-          }} />
-        </div>
-      </StatBox>
+          <StatBox bgColor="#007bff">
+            <h3>Total Collectors</h3>
+            <p>{totalCollectors}</p>
+            <div className="icon-container">
+              <FaWallet className="fading-icon" style={{
+                fontSize: '30px',
+                opacity: 0.5,
+                animation: 'fade 2s infinite alternate'
+              }} />
+            </div>
+          </StatBox>
+        </StatsContainer>
 
-      <StatBox bgColor="#11768C">
-  <h3>Inactive Users</h3> 
-  <p>{inactiveUsers}</p> {/* Display the total user count */} 
-  <div className="icon-container">
-    <FaUserSlash className="fading-icon" style={{ 
-      fontSize: '30px', 
-      opacity: 0.5, 
-      animation: 'fade 2s infinite alternate' 
-    }} />
-  </div>
-</StatBox>
-<StatBox bgColor="#007bff">
-  <h3>Total Collectors</h3>
-  <p>{totalCollectors}</p>
-  <div className="icon-container">
-    <FaWallet className="fading-icon" style={{ 
-      fontSize: '30px', 
-      opacity: 0.5, 
-      animation: 'fade 2s infinite alternate' 
-    }} />
-  </div>
-</StatBox>
+        <FormContainer>
+          <h3>Recently Registered</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Phone</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recentUsers.map((user, index) => (
+                <tr key={index}>
+                  <td>{user.email || ''}</td>
+                  <td>{user.firstName || ''}</td>
+                  <td>{user.lastName || ''}</td>
+                  <td>{user.contactNum || ''}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </FormContainer>
 
-</StatsContainer>
-        
-
-        {/* Recently Registered Users Section */}
-        {/* Recently Registered Users Section */}
-<FormContainer>
-  <h3>Recently Registered</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Email</th>
-        <th>First Name</th>
-        <th>Last Name</th>
-        <th>Phone</th>
-      </tr>
-    </thead>
-    <tbody>
-      {recentUsers.map((user, index) => (
-        <tr key={index}>
-          <td>{user.email || ''}</td>
-          <td>{user.firstName || ''}</td>
-          <td>{user.lastName || ''}</td>
-          <td>{user.contactNum || ''}</td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</FormContainer>
-<CollectorTableContainer>
-  <h3>Collector Users</h3>
-  <CollectorTable>
-    <thead>
-      <tr>
-        <th>Email</th>
-        <th>Name</th>
-        <th>Address</th>
-        <th>Collector</th>
-        <th>Location</th>
-        <th>Contact Number</th>
-      </tr>
-    </thead>
-    <tbody>
-      {collectorsData.length > 0 ? (
-        collectorsData.map((collector) => (
-          <tr key={collector.id}> {/* Ensure you have a unique identifier for each collector */}
-            <td>{collector.email}</td> {/* Make sure to display email if required */}
-            <td>{collector.firstName + ' ' + collector.lastName}</td> {/* Concatenate firstName and lastName */}
-            <td>{collector.address}</td>
-            <td>{collector.collector}</td>
-            <td>{collector.location}</td>
-            <td>{collector.contactNum}</td>
-          </tr>
-        ))
-      ) : (
-        <tr>
-          <td colSpan="6">No collectors found.</td> {/* Adjusted colSpan to match the number of columns */}
-        </tr>
-      )}
-    </tbody>
-  </CollectorTable>
-</CollectorTableContainer>
+        <CollectorTableContainer>
+          <h3>Collector Users</h3>
+          <CollectorTable>
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Name</th>
+                <th>Address</th>
+                <th>Collector</th>
+                <th>Location</th>
+                <th>Contact Number</th>
+              </tr>
+            </thead>
+            <tbody>
+              {collectorsData.length > 0 ? (
+                collectorsData.map((collector) => (
+                  <tr key={collector.id}>
+                    <td>{collector.email}</td>
+                    <td>{collector.firstName + ' ' + collector.lastName}</td>
+                    <td>{collector.address}</td>
+                    <td>{collector.collector}</td>
+                    <td>{collector.location}</td>
+                    <td>{collector.contactNum}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6">No collectors found.</td>
+                </tr>
+              )}
+            </tbody>
+          </CollectorTable>
+        </CollectorTableContainer>
       </MainContent>
-      </DashboardContainer>
+    </DashboardContainer>
   );
 };
+
 export default Dashboard;

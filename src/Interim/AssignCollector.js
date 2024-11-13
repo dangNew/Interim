@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faClipboard, faCheck, faPlusCircle, faCogs} from '@fortawesome/free-solid-svg-icons';
-import { query, where, serverTimestamp  ,  getDocs, updateDoc , collection,  addDoc, doc } from 'firebase/firestore';
+import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt, FaEdit } from 'react-icons/fa';
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faClipboard, faCheck, faPlusCircle, faCogs } from '@fortawesome/free-solid-svg-icons';
+import { query, where, serverTimestamp, getDocs, updateDoc, collection, addDoc, doc } from 'firebase/firestore';
 import { rentmobileDb } from '../components/firebase.config'; // Import the correct firestore instance
 
 const DashboardContainer = styled.div`
@@ -13,12 +13,12 @@ const DashboardContainer = styled.div`
 `;
 
 const Sidebar = styled.div`
-  width: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')};
+  width: \\${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')};
   background-color: #f8f9fa;
   padding: 10px;
   display: flex;
   flex-direction: column;
-  border: 1px solid #ddd;  /* ADD THIS */
+  border: 1px solid #ddd;
   justify-content: space-between;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   transition: width 0.3s ease;
@@ -40,36 +40,35 @@ const SidebarMenu = styled.ul`
 const SidebarItem = styled.li`
   display: flex;
   align-items: center;
-  justify-content: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
+  justify-content: \\${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
   padding: 10px;
   margin-bottom: 10px;
   margin-top: -10px;
   border-radius: 8px;
   font-size: 14px;
-  color: ${({ active }) => (active ? 'white' : '#333')};
-  background-color: ${({ active }) => (active ? '#007bff' : 'transparent')};
+  color: \\${({ active }) => (active ? 'white' : '#333')};
+  background-color: \\${({ active }) => (active ? '#007bff' : 'transparent')};
   cursor: pointer;
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: ${({ active }) => (active ? '#007bff' : '#f1f3f5')};
+    background-color: \\${({ active }) => (active ? '#007bff' : '#f1f3f5')};
   }
 
   .icon {
-    font-size: 1rem;  /* Increase the icon size */
+    font-size: 1rem;
     color: #000;
     transition: margin-left 0.2s ease;
   }
 
   span:last-child {
     margin-left: 10px;
-    display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'inline' : 'none')};
+    display: \\${({ isSidebarOpen }) => (isSidebarOpen ? 'inline' : 'none')};
   }
 `;
 
-
 const ToggleButton = styled.div`
-  display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'none' : 'block')};
+  display: \\${({ isSidebarOpen }) => (isSidebarOpen ? 'none' : 'block')};
   position: absolute;
   top: 5px;
   left: 15px;
@@ -80,7 +79,7 @@ const ToggleButton = styled.div`
 `;
 
 const MainContent = styled.div`
-  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')};
+  margin-left: \\${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')};
   padding-left: 40px;
   background-color: #fff;
   padding: 2rem;
@@ -95,15 +94,13 @@ const AppBar = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 40px 50px;
-  background-color: #188423; /* Updated color */
+  background-color: #188423;
   color: white;
   box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
   font-size: 22px;
-  font-family: 'Inter', sans-serif; /* Use a professional font */
-  font-weight: bold; /* Apply bold weight */
+  font-family: 'Inter', sans-serif;
+  font-weight: bold;
 `;
-
-
 
 const ProfileHeader = styled.div`
   display: flex;
@@ -115,14 +112,14 @@ const ProfileHeader = styled.div`
   .profile-icon {
     font-size: 3rem;
     margin-bottom: 15px;
-    color: #6c757d; // Subtle color for icon
+    color: #6c757d;
   }
 
   .profile-name {
     font-size: 1.2rem;
-    font-weight: 700; // Bolder text
-    color: black; // Darker gray for a professional look
-    display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
+    font-weight: 700;
+    color: black;
+    display: \\${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
   }
 
   hr {
@@ -132,11 +129,11 @@ const ProfileHeader = styled.div`
   }
 
   .profile-position {
-    font-size: 1rem; /* Increase the font size */
-    font-weight: 600; /* Make it bold */
-    color: #007bff; /* Change color to blue for better visibility */
-    display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
-    margin-top: 5px; /* Add some margin for spacing */
+    font-size: 1rem;
+    font-weight: 600;
+    color: #007bff;
+    display: \\${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
+    margin-top: 5px;
   }
 `;
 
@@ -190,7 +187,7 @@ const FormContainer = styled.div`
     border-radius: 6px;
     background-color: #ffffff;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    
+
     &:focus {
       border-color: #4CAF50;
       box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
@@ -245,7 +242,6 @@ const FormContainer = styled.div`
   }
 `;
 
-
 const SearchBarContainer = styled.div`
   display: flex;
   align-items: center;
@@ -267,129 +263,135 @@ const SearchInput = styled.input`
 
 const SidebarFooter = styled.div`
   padding: 10px;
-  margin-top: auto; /* Pushes the footer to the bottom */
+  margin-top: auto;
   display: flex;
   align-items: center;
   justify-content: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
 `;
 
 const LogoutButton = styled(SidebarItem)`
-  margin-top: 5px; /* Add some margin */
-  background-color: #dc3545; /* Bootstrap danger color */
+  margin-top: 5px;
+  background-color: #dc3545;
   color: white;
   align-items: center;
   margin-left: 20px;
-  padding: 5px 15px; /* Add padding for a better button size */
-  border-radius: 5px; /* Rounded corners */
-  font-weight: bold; /* Make text bold */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-  transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transitions */
+  padding: 5px 15px;
+  border-radius: 5px;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease, transform 0.2s ease;
 
   &:hover {
-    background-color: #c82333; /* Darker red on hover */
-    transform: scale(1.05); /* Slightly scale up on hover */
+    background-color: #c82333;
+    transform: scale(1.05);
   }
 `;
 
 const ProfileImage = styled.img`
   border-radius: 50%;
-  width: 60px; /* Adjusted for better visibility */
+  width: 60px;
   height: 60px;
   margin-bottom: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // Subtle shadow for a polished look
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
 
-
 const Dashboard = () => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const sidebarRef = useRef(null);
-    const [loggedInUser, setLoggedInUser] = useState(null);
-    const navigate = useNavigate();
-    const [zones, setZones] = useState([]);
-    const [selectedZone, setSelectedZone] = useState('');
-    const [assignments, setAssignments] = useState([]);
-    const [selectedCollector, setSelectedCollector] = useState('');
-    const [collectors, setCollectors] = useState([]);
-    const [currentAssignments, setCurrentAssignments] = useState([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const sidebarRef = useRef(null);
+  const [loggedInUser, setLoggedInUser] = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [stallholders, setStallholders] = useState([]);
+  const [zoneAssignments, setZoneAssignments] = useState([]);
+  const [collectors, setCollectors] = useState([]);
+  const [collectorZones, setCollectorZones] = useState({});
+  const [selectedRows, setSelectedRows] = useState(new Set());
+  const [zones, setZones] = useState([]);
+  const [selectedZone, setSelectedZone] = useState('');
+  const [assignments, setAssignments] = useState([]);
+  const [selectedCollector, setSelectedCollector] = useState('');
+  const [currentAssignments, setCurrentAssignments] = useState([]);
+  const navigate = useNavigate();
 
+  const fetchStallholders = async () => {
+    const stallholderCollection = collection(rentmobileDb, 'users');
+    const stallholderSnapshot = await getDocs(stallholderCollection);
+    const stallholderList = stallholderSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    setStallholders(stallholderList.filter(stallholder => stallholder.email));
+  };
 
-    useEffect(() => {
-      const fetchCollectors = async () => {
-        const collectorSnapshot = await getDocs(collection(rentmobileDb, 'ambulant_collector'));
-        setCollectors(collectorSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      };
-  
-      const fetchZones = async () => {
-        const zoneSnapshot = await getDocs(collection(rentmobileDb, 'zone'));
-        setZones(zoneSnapshot.docs.map(doc => doc.data().zone));
+  const fetchCollectors = async () => {
+    const collectorCollection = collection(rentmobileDb, 'ambulant_collector');
+    const collectorSnapshot = await getDocs(collectorCollection);
+    const collectorList = collectorSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    const filteredCollectors = collectorList.filter(collector => collector.firstName && collector.lastName && collector.collector);
+    setCollectors(filteredCollectors);
+  };
+
+  const fetchZones = async () => {
+    const zoneSnapshot = await getDocs(collection(rentmobileDb, 'zone'));
+    setZones(zoneSnapshot.docs.map(doc => doc.data().zone));
+  };
+
+  const fetchAssignments = async () => {
+    const assignmentsCollection = collection(rentmobileDb, 'ambulant_collector');
+    const assignmentSnapshot = await getDocs(assignmentsCollection);
+    const assignments = assignmentSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setCurrentAssignments(assignments);
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await fetchStallholders();
+      await fetchCollectors();
+      await fetchZones();
+      await fetchAssignments();
     };
 
-    const fetchAssignments = async () => {
-      const assignmentsCollection = collection(rentmobileDb, 'ambulant_collector'); // Replace with your actual assignments collection
-      const assignmentSnapshot = await getDocs(assignmentsCollection);
-      const assignments = assignmentSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setCurrentAssignments(assignments);
-      };
+    fetchData();
+  }, []);
 
-      fetchCollectors();
-      fetchZones();
-      fetchAssignments(); // Fetch assignments with non-empty zones
-    }, []);
-  
-    const handleAssign = async () => {
-      if (selectedCollector && selectedZone) {
-        const collectorDetails = collectors.find(collector =>
-          `${collector.firstName} ${collector.lastName} ${collector.middleName || ''}`.trim() === selectedCollector
-        );
-  
-        if (collectorDetails) {
-          try {
-            const collectorRef = doc(rentmobileDb, 'ambulant_collector', collectorDetails.id);
-            await updateDoc(collectorRef, { zone: selectedZone });
-  
-            setAssignments(prevAssignments => [
-              ...prevAssignments,
-              { collector: `${collectorDetails.firstName} ${collectorDetails.lastName}`, zone: selectedZone }
-            ]);
-  
-            setSelectedCollector('');
-            setSelectedZone('');
-          } catch (error) {
-            console.error("Error updating zone: ", error);
-          }
-        } else {
-          console.error("Collector details not found for:", selectedCollector);
+  const handleAssign = async () => {
+    if (selectedCollector && selectedZone) {
+      const collectorDetails = collectors.find(collector =>
+        `${collector.firstName} ${collector.lastName} ${collector.middleName || ''}`.trim() === selectedCollector
+      );
+
+      if (collectorDetails) {
+        try {
+          const collectorRef = doc(rentmobileDb, 'ambulant_collector', collectorDetails.id);
+          await updateDoc(collectorRef, { zone: selectedZone });
+
+          setAssignments(prevAssignments => [
+            ...prevAssignments,
+            { collector: `${collectorDetails.firstName} ${collectorDetails.lastName}`, zone: selectedZone }
+          ]);
+
+          setSelectedCollector('');
+          setSelectedZone('');
+        } catch (error) {
+          console.error("Error updating zone: ", error);
         }
       } else {
-        console.warn("Either collector or zone is not selected.");
+        console.error("Collector details not found for:", selectedCollector);
       }
-    };
-  
-    
+    } else {
+      console.warn("Either collector or zone is not selected.");
+    }
+  };
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
-      if (loggedInUserData) {
-        const usersCollection = collection(rentmobileDb, 'users');
-        const userDocs = await getDocs(usersCollection);
-        const users = userDocs.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        
-        const currentUser = users.find(user => user.email === loggedInUserData.email);
-        setLoggedInUser(currentUser || loggedInUserData);
-      }
-    };
-
-    fetchUserData();
-  }, []);
   const handleClickOutside = (event) => {
-    
+    // Implement click outside logic if needed
   };
 
   useEffect(() => {
@@ -399,186 +401,214 @@ const Dashboard = () => {
     };
   }, []);
 
-  
-
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // State for dropdown
-
   const handleLogout = () => {
-   
-    localStorage.removeItem('userData'); 
+    localStorage.removeItem('userData');
     navigate('/login');
   };
 
   const handleDropdownToggle = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
-  
-    
+
+  const handleZoneChange = (id, newZone) => {
+    setZoneAssignments(prevAssignments =>
+      prevAssignments.map(assignment =>
+        assignment.id === id ? { ...assignment, zone: newZone } : assignment
+      )
+    );
+  };
+
+  const handleCollectorZoneChange = (collectorId, newZone) => {
+    setCollectorZones(prevZones => ({
+      ...prevZones,
+      [collectorId]: newZone,
+    }));
+  };
+
+  const handleRowSelect = (email) => {
+    setSelectedRows((prevSelected) => {
+      const newSelected = new Set(prevSelected);
+      if (newSelected.has(email)) {
+        newSelected.delete(email);
+      } else {
+        newSelected.add(email);
+      }
+      return newSelected;
+    });
+  };
+
+  const handleSelectAll = (isChecked) => {
+    if (isChecked) {
+      const allEmails = new Set(stallholders.map((holder) => holder.email));
+      setSelectedRows(allEmails);
+    } else {
+      setSelectedRows(new Set());
+    }
+  };
 
   return (
     <DashboardContainer>
       <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
         <Link to="/profile" style={{ textDecoration: 'none' }}>
-        <ProfileHeader isSidebarOpen={isSidebarOpen}>
-          {loggedInUser && loggedInUser.Image ? (
-            <ProfileImage src={loggedInUser.Image} alt={`${loggedInUser.firstName} ${loggedInUser.lastName}`} />
-          ) : (
-            <FaUserCircle className="profile-icon" />
-          )}
-          <span className="profile-name">{loggedInUser ? `${loggedInUser.firstName} ${loggedInUser.lastName}` : 'Guest'}</span>
-          
-          <span className="profile-email" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
-            {loggedInUser ? loggedInUser.email : ''}
-          </span>
-          
-          {/* Add position below the email */}
-          <span className="profile-position" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
-            {loggedInUser ? loggedInUser.position : ''}
-          </span>
-        </ProfileHeader>
-      </Link>
-
+          <ProfileHeader isSidebarOpen={isSidebarOpen}>
+            {loggedInUser && loggedInUser.Image ? (
+              <ProfileImage src={loggedInUser.Image} alt={`${loggedInUser.firstName} ${loggedInUser.lastName}`} />
+            ) : (
+              <FaUserCircle className="profile-icon" />
+            )}
+            <span className="profile-name">{loggedInUser ? `${loggedInUser.firstName} ${loggedInUser.lastName}` : 'Guest'}</span>
+            <span className="profile-email" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
+              {loggedInUser ? loggedInUser.email : ''}
+            </span>
+            <span className="profile-position" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
+              {loggedInUser ? loggedInUser.position : ''}
+            </span>
+          </ProfileHeader>
+        </Link>
 
         <SearchBarContainer isSidebarOpen={isSidebarOpen}>
           <FaSearch />
           <SearchInput type="text" placeholder="Search..." />
         </SearchBarContainer>
-        
+
         <SidebarMenu>
-  <Link to="/dashboard" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faHome} className="icon" />
-      <span>Dashboard</span>
-    </SidebarItem>
-  </Link>
-  
-  <Link to="/list" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faShoppingCart} className="icon" />
-      <span>List of Vendors</span>
-    </SidebarItem>
-  </Link>
-  <Link to="/listofstalls" style={{ textDecoration: 'none' }}>
-  <SidebarItem isSidebarOpen={isSidebarOpen}>
-    <FontAwesomeIcon icon={faClipboard} className="icon" />
-    <span>List of Stalls</span>
-  </SidebarItem>
-</Link>
+          <Link to="/dashboard" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faHome} className="icon" />
+              <span>Dashboard</span>
+            </SidebarItem>
+          </Link>
 
-  <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faUser} className="icon" />
-    <span>User Management</span>
-  </SidebarItem>
+          <Link to="/list" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faShoppingCart} className="icon" />
+              <span>List of Vendors</span>
+            </SidebarItem>
+          </Link>
 
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/usermanagement" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span>View Users</span>
+          <Link to="/listofstalls" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faClipboard} className="icon" />
+              <span>List of Stalls</span>
+            </SidebarItem>
+          </Link>
+
+          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+            <FontAwesomeIcon icon={faUser} className="icon" />
+            <span>User Management</span>
           </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/newuser" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlus} className="icon" />
-            <span>Add User</span>
-          </SidebarItem>
-        </li>
-      </Link>
-    </ul>
-  )}
 
-  <Link to="/viewunit" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faPlus} className="icon" />
-      <span>Add New Unit</span>
-    </SidebarItem>
-  </Link>
+          {isDropdownOpen && (
+            <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+              <Link to="/usermanagement" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faSearch} className="icon" />
+                    <span>View Users</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+              <Link to="/newuser" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faPlus} className="icon" />
+                    <span>Add User</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+            </ul>
+          )}
 
-  <Link to="/appraise" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faUsers} className="icon" />
-      <span>Manage Appraisal</span>
-    </SidebarItem>
-  </Link>
-  <Link to="/contract" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faFileContract} className="icon" />
-      <span>Contract</span>
-    </SidebarItem>
-  </Link>
+          <Link to="/Addunit" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faPlus} className="icon" />
+              <span>Add New Unit</span>
+            </SidebarItem>
+          </Link>
 
-  <Link to="/ticket" style={{ textDecoration: 'none' }}>
-  <SidebarItem isSidebarOpen={isSidebarOpen}>
-    <FontAwesomeIcon icon={faTicketAlt} className="icon" />
-    <span>Manage Ticket</span>
-  </SidebarItem>
-</Link>
-<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faCogs} className="icon" />
-    <span>Manage Zone</span>
-  </SidebarItem>
+          <Link to="/appraise" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faUsers} className="icon" />
+              <span>Manage Appraisal</span>
+            </SidebarItem>
+          </Link>
 
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/addzone" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
-            <span> Add Zone</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/viewzone" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-          <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span> View Zone</span>
-          </SidebarItem>
-        </li>
-      </Link>
-    
-    </ul>
-  )}
-<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faUser} className="icon" />
-    <span>Manage Space</span>
-  </SidebarItem>
+          <Link to="/contract" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faFileContract} className="icon" />
+              <span>Contract</span>
+            </SidebarItem>
+          </Link>
 
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/addspace" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
-            <span> Add Space</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/viewspace" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-          <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span> View Space</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/addcollector" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlus} className="icon" />
-            <span>Add Ambulant Collector</span>
-          </SidebarItem>
-        </li>
-      </Link>
-    </ul>
-  )}
-</SidebarMenu>
+          <Link to="/ticket" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faTicketAlt} className="icon" />
+              <span>Manage Ticket</span>
+            </SidebarItem>
+          </Link>
 
-      <SidebarFooter isSidebarOpen={isSidebarOpen}>
+          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+            <FontAwesomeIcon icon={faCogs} className="icon" />
+            <span>Manage Zone</span>
+          </SidebarItem>
+
+          {isDropdownOpen && (
+            <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+              <Link to="/addzone" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+                    <span> Add Zone</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+              <Link to="/viewzone" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faSearch} className="icon" />
+                    <span> View Zone</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+            </ul>
+          )}
+
+          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+            <FontAwesomeIcon icon={faUser} className="icon" />
+            <span>Manage Space</span>
+          </SidebarItem>
+
+          {isDropdownOpen && (
+            <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+              <Link to="/addspace" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+                    <span> Add Space</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+              <Link to="/viewspace" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faSearch} className="icon" />
+                    <span> View Space</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+              <Link to="/addcollector" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faPlus} className="icon" />
+                    <span>Add Ambulant Collector</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+            </ul>
+          )}
+        </SidebarMenu>
+
+        <SidebarFooter isSidebarOpen={isSidebarOpen}>
           <LogoutButton isSidebarOpen={isSidebarOpen} onClick={handleLogout}>
             <span><FaSignOutAlt /></span>
             <span>Logout</span>
@@ -615,7 +645,6 @@ const Dashboard = () => {
                   ))}
                 </select>
               </div>
-              </div>
               <div className="form-group">
                 <label>Select Zone:</label>
                 <select
@@ -629,59 +658,147 @@ const Dashboard = () => {
                     </option>
                   ))}
                 </select>
-               </div>
+              </div>
               <button onClick={handleAssign} className="assign-btn">
                 Assign
               </button>
             </div>
 
-             
             <div className="assignment-table">
-        <h3>Current Assignments</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Collector</th>
-              <th>Zone</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentAssignments.map((collector) => (
-              <tr key={collector.id}>
-                <td>
-                  <div className="collector-info">
-                    {collector.Image && (
-                      <img 
-                        src={collector.Image} 
-                        alt={`${collector.firstName} ${collector.lastName}`}
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = 'path/to/fallback/image.png'; // Add a fallback image
-                        }}
-                      />
-                    )}
-                    <span className="collector-name">
-                      {`${collector.firstName} ${collector.lastName}`}
-                    </span>
-                  </div>
-                </td>
-                <td>{collector.zone}</td>
-              </tr>
-            ))}
-            {currentAssignments.length === 0 && (
+              <h3>Current Assignments</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Collector</th>
+                    <th>Zone</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentAssignments.map((collector) => (
+                    <tr key={collector.id}>
+                      <td>
+                        <div className="collector-info">
+                          {collector.Image && (
+                            <img
+                              src={collector.Image}
+                              alt={`${collector.firstName} ${collector.lastName}`}
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = 'path/to/fallback/image.png';
+                              }}
+                            />
+                          )}
+                          <span className="collector-name">
+                            {`${collector.firstName} ${collector.lastName}`}
+                          </span>
+                        </div>
+                      </td>
+                      <td>{collector.zone}</td>
+                    </tr>
+                  ))}
+                  {currentAssignments.length === 0 && (
+                    <tr>
+                      <td colSpan="2" style={{ textAlign: 'center', padding: '2rem' }}>
+                        No assignments found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </FormContainer>
+
+        <FormContainer>
+          <h3>Zone Assignments</h3>
+          <table>
+            <thead>
               <tr>
-                <td colSpan="2" style={{ textAlign: 'center', padding: '2rem' }}>
-                  No assignments found
-                </td>
+                <th>
+                  <input
+                    type="checkbox"
+                    onChange={(e) => handleSelectAll(e.target.checked)}
+                    checked={selectedRows.size === stallholders.length}
+                  />
+                </th>
+                <th>Email</th>
+                <th>Assigned Collector</th>
+                <th>Collector Number</th>
+                <th>Current Zone</th>
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-                </FormContainer>
-            </MainContent>
-        </DashboardContainer>
-    );
+            </thead>
+            <tbody>
+              {stallholders.map((holder) => (
+                <tr key={holder.id}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={selectedRows.has(holder.email)}
+                      onChange={() => handleRowSelect(holder.email)}
+                    />
+                  </td>
+                  <td>{holder.email}</td>
+                  <td>{holder.assignedCollector ? holder.assignedCollector : "N/A"}</td>
+                  <td>{holder.collectorNumber ? holder.collectorNumber : "N/A"}</td>
+                  <td>
+                    <select
+                      value={holder.currentZone || ''}
+                      onChange={(e) => handleZoneChange(holder.id, e.target.value)}
+                    >
+                      <option value="">Select Zone</option>
+                      <option value="Zone A">Zone A</option>
+                      <option value="Zone B"></option>
+                      <option value="Zone C">Zone C</option>
+                      <option value="Zone D">Zone D</option>
+                      {/* Add more zones as needed */}
+                    </select>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </FormContainer>
+
+        <FormContainer>
+          <h3>List of Collectors</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Collector Name</th>
+                <th>Collector First Name</th>
+                <th>Collector Last Name</th>
+                <th>Collector Number</th>
+                <th>Assigned Zone</th>
+              </tr>
+            </thead>
+            <tbody>
+              {collectors.map(collector => (
+                <tr key={collector.id}>
+                  <td>{collector.firstName && collector.lastName ? `${collector.firstName} ${collector.lastName}` : 'N/A'}</td>
+                  <td>{collector.firstName || 'N/A'}</td>
+                  <td>{collector.lastName || 'N/A'}</td>
+                  <td>{collector.collector || 'N/A'}</td>
+                  <td>
+                    <select
+                      value={collectorZones[collector.id] || ''}
+                      onChange={(e) => handleCollectorZoneChange(collector.id, e.target.value)}
+                    >
+                      <option value="">Select Zone</option>
+                      <option value="Zone A">Zone A</option>
+                      <option value="Zone B">Zone B</option>
+                      <option value="Zone C">Zone C</option>
+                      <option value="Zone D">Zone D</option>
+                      {/* Add more zones as needed */}
+                    </select>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </FormContainer>
+      </MainContent>
+    </DashboardContainer>
+  );
 };
 
 export default Dashboard;

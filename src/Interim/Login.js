@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Link, useNavigate } from 'react-router-dom';
 import { interimAuth, interimDb } from '../components/firebase.config';
+<<<<<<< HEAD
 import { signInWithEmailAndPassword, setPersistence, browserSessionPersistence } from 'firebase/auth';
+=======
+import { signInWithEmailAndPassword } from 'firebase/auth';
+>>>>>>> a8f5076 (main)
 import { collection, query, where, getDocs } from 'firebase/firestore';
 
 const LoginContainer = styled.div`
@@ -139,10 +143,13 @@ const Login = () => {
         return;
       }
 
+<<<<<<< HEAD
       // Set persistence
       await setPersistence(interimAuth, browserSessionPersistence);
 
       // Sign in
+=======
+>>>>>>> a8f5076 (main)
       await signInWithEmailAndPassword(interimAuth, username, password);
 
       const loggedInUserData = querySnapshot.docs[0].data();
@@ -151,7 +158,10 @@ const Login = () => {
         image: loggedInUserData.image,
       }));
 
+<<<<<<< HEAD
       console.log('Login successful, navigating to dashboard');
+=======
+>>>>>>> a8f5076 (main)
       navigate('/dashboard');
     } catch (error) {
       console.error('Login failed:', error);

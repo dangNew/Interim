@@ -4,15 +4,13 @@ import styled from 'styled-components';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCogs, faTicketAlt, faCheck, faClipboard , faPlusCircle} from '@fortawesome/free-solid-svg-icons';
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCogs, faTicketAlt, faCheck, faClipboard, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import { initializeApp } from 'firebase/app';
 import { rentmobileDb, rentmobileAuth } from '../components/firebase.config';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { collection, getDocs, deleteDoc, doc, addDoc } from 'firebase/firestore';
 import { interimDb } from '../components/firebase.config';
 import ConfirmationModal from './ConfirmationModal'; // Import the modal
-
-
 
 const DashboardContainer = styled.div`
   display: flex;
@@ -24,7 +22,7 @@ const Sidebar = styled.div`
   background-color: #f8f9fa;
   padding: 10px;
   display: flex;
-  border: 1px solid #ddd;  /* ADD THIS */
+  border: 1px solid #ddd;
   flex-direction: column;
   justify-content: space-between;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -63,7 +61,7 @@ const SidebarItem = styled.li`
   }
 
   .icon {
-    font-size: 1rem;  /* Increase the icon size */
+    font-size: 1rem;
     color: #000;
     transition: margin-left 0.2s ease;
   }
@@ -74,30 +72,29 @@ const SidebarItem = styled.li`
   }
 `;
 
-
 const SidebarFooter = styled.div`
   padding: 10px;
-  margin-top: auto; /* Pushes the footer to the bottom */
+  margin-top: auto;
   display: flex;
   align-items: center;
   justify-content: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
 `;
 
 const LogoutButton = styled(SidebarItem)`
-  margin-top: 5px; /* Add some margin */
-  background-color: #dc3545; /* Bootstrap danger color */
+  margin-top: 5px;
+  background-color: #dc3545;
   color: white;
   align-items: center;
   margin-left: 20px;
-  padding: 5px 15px; /* Add padding for a better button size */
-  border-radius: 5px; /* Rounded corners */
-  font-weight: bold; /* Make text bold */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-  transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transitions */
+  padding: 5px 15px;
+  border-radius: 5px;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease, transform 0.2s ease;
 
   &:hover {
-    background-color: #c82333; /* Darker red on hover */
-    transform: scale(1.05); /* Slightly scale up on hover */
+    background-color: #c82333;
+    transform: scale(1.05);
   }
 `;
 
@@ -132,13 +129,13 @@ const ProfileHeader = styled.div`
   .profile-icon {
     font-size: 3rem;
     margin-bottom: 15px;
-    color: #6c757d; // Subtle color for icon
+    color: #6c757d;
   }
 
   .profile-name {
     font-size: 1.2rem;
-    font-weight: 700; // Bolder text
-    color: black; // Darker gray for a professional look
+    font-weight: 700;
+    color: black;
     display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
   }
 
@@ -149,21 +146,20 @@ const ProfileHeader = styled.div`
   }
 
   .profile-position {
-    font-size: 1rem; /* Increase the font size */
-    font-weight: 600; /* Make it bold */
-    color: #007bff; /* Change color to blue for better visibility */
+    font-size: 1rem;
+    font-weight: 600;
+    color: #007bff;
     display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
-    margin-top: 5px; /* Add some margin for spacing */
+    margin-top: 5px;
   }
 `;
 
-
 const ProfileImage = styled.img`
   border-radius: 50%;
-  width: 60px; /* Adjusted for better visibility */
+  width: 60px;
   height: 60px;
   margin-bottom: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // Subtle shadow for a polished look
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
 
 const FormContainer = styled.form`
@@ -188,7 +184,7 @@ const FormContainer = styled.form`
     padding: 0.5rem;
     border-radius: 4px;
     border: 1px solid #ddd;
-    width:90%;
+    width: 90%;
   }
 
   .section-title {
@@ -265,22 +261,18 @@ const FormContainer = styled.form`
   }
 `;
 
-
-
 const AppBar = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 40px 50px;
-  background-color: #188423; /* Updated color */
+  background-color: #188423;
   color: white;
   box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
   font-size: 22px;
-  font-family: 'Inter', sans-serif; /* Use a professional font */
-  font-weight: bold; /* Apply bold weight */
+  font-family: 'Inter', sans-serif;
+  font-weight: bold;
 `;
-
-
 
 const SearchBarContainer = styled.div`
   display: flex;
@@ -305,9 +297,10 @@ const Divider = styled.hr`
   border: 2;
   height: 1px;
   background-color: #dee2e6;
-  margin: 10px 0; /* Adjust margin for spacing as needed */
-  width: 150%; /* Ensure the line spans the full width */
+  margin: 10px 0;
+  width: 150%;
 `;
+
 const ToggleSwitch = styled.div`
   display: flex;
   align-items: center;
@@ -360,112 +353,112 @@ const ToggleSwitch = styled.div`
 `;
 
 const Dashboard = () => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const sidebarRef = useRef(null);
-    const [isPositionActive, setIsPositionActive] = useState(false);
-    const [loggedInUser, setLoggedInUser] = useState(null);
-    const navigate = useNavigate();
-  
-    // Form state for storing the input values
-    const [formData, setFormData] = useState({
-      firstName: '',
-      lastName: '',
-      middleName: '',
-      contactNum: '',
-      email: '',
-      address: '',
-      password: '',
-      status: ''
-    });
-    const [isModalOpen, setIsModalOpen] = useState(false);
-  
-    // Handling form input changes
-    const handleChange = (e) => {
-      const { name, value } = e.target;
-      setFormData((prevState) => ({
-        ...prevState,
-        [name]: value
-      }));
-    };
-    
-    
-    // Submitting the form and adding data to Firestore
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-  
-      // Input validation
-      if (!formData.email || !formData.password) {
-          alert("Email and password are required!");
-          return;
-      }
-  
-      try {
-          // Create user in Firebase Authentication
-          const userCredential = await createUserWithEmailAndPassword(rentmobileAuth, formData.email, formData.password);
-          const user = userCredential.user;
-  
-          const collectorData = {
-              firstName: formData.firstName,
-              lastName: formData.lastName,
-              middleName: formData.middleName,
-              contactNum: formData.contactNum,
-              email: formData.email,
-              address: formData.address,
-              Image: null,
-              status: formData.status,
-              zone: '', // Initialize the zone field
-          };
-  
-          // Reference to the ambulant_collector collection
-          const collectorsCollection = collection(rentmobileDb, 'ambulant_collector');
-  
-          // Check if collector already exists
-          const collectorsSnapshot = await getDocs(collectorsCollection);
-          const existingCollector = collectorsSnapshot.docs.find(doc => doc.data().email === formData.email);
-  
-          if (!existingCollector) {
-              // Save the collector data to Firestore
-              await addDoc(collectorsCollection, collectorData);
-              alert('Collector added successfully!');
-          } else {
-              alert('Collector already exists!');
-          }
-  
-          // Reset the form after submission
-          setFormData({
-              firstName: '',
-              lastName: '',
-              middleName: '',
-              contactNum: '',
-              email: '',
-              address: '',
-              Image: null,
-              status: '',
-              password: '' // Reset password field
-          });
-      } catch (error) {
-          console.error('Error adding document: ', error.message);
-          alert('Failed to add collector or create user: ' + error.message);
-      }
-      setIsModalOpen(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const sidebarRef = useRef(null);
+  const [isPositionActive, setIsPositionActive] = useState(false);
+  const [loggedInUser, setLoggedInUser] = useState(null);
+  const navigate = useNavigate();
+
+  // Form state for storing the input values
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    middleName: '',
+    contactNum: '',
+    email: '',
+    address: '',
+    password: '',
+    status: ''
+  });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Handling form input changes
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevState) => ({
+      ...prevState,
+      [name]: value
+    }));
   };
-  
+
+  // Submitting the form and adding data to Firestore
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Input validation
+    if (!formData.email || !formData.password) {
+      alert("Email and password are required!");
+      return;
+    }
+
+    try {
+      // Create user in Firebase Authentication
+      const userCredential = await createUserWithEmailAndPassword(rentmobileAuth, formData.email, formData.password);
+      const user = userCredential.user;
+
+      const collectorData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        middleName: formData.middleName,
+        contactNum: formData.contactNum,
+        email: formData.email,
+        address: formData.address,
+        Image: null,
+        status: formData.status,
+        zone: '', // Initialize the zone field
+      };
+
+      // Reference to the ambulant_collector collection
+      const collectorsCollection = collection(rentmobileDb, 'ambulant_collector');
+
+      // Check if collector already exists
+      const collectorsSnapshot = await getDocs(collectorsCollection);
+      const existingCollector = collectorsSnapshot.docs.find(doc => doc.data().email === formData.email);
+
+      if (!existingCollector) {
+        // Save the collector data to Firestore
+        await addDoc(collectorsCollection, collectorData);
+        alert('Collector added successfully!');
+      } else {
+        alert('Collector already exists!');
+      }
+
+      // Reset the form after submission
+      setFormData({
+        firstName: '',
+        lastName: '',
+        middleName: '',
+        contactNum: '',
+        email: '',
+        address: '',
+        Image: null,
+        status: '',
+        password: '' // Reset password field
+      });
+    } catch (error) {
+      console.error('Error adding document: ', error.message);
+      alert('Failed to add collector or create user: ' + error.message);
+    }
+    setIsModalOpen(true);
+  };
+
   const handleModalClose = () => {
     setIsModalOpen(false);
     navigate('/some-route'); // Replace with your desired route
-};
-  
-  
+  };
+
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
   const togglePositionSwitch = () => {
-    setIsPositionActive(prevState => !prevState); 
+    setIsPositionActive(prevState => !prevState);
   };
 
   const handleClickOutside = (event) => {
-   
+    if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+      setIsSidebarOpen(false);
+    }
   };
 
   useEffect(() => {
@@ -475,7 +468,7 @@ const Dashboard = () => {
     };
   }, []);
 
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false); 
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -484,7 +477,7 @@ const Dashboard = () => {
         const usersCollection = collection(interimDb, 'users');
         const userDocs = await getDocs(usersCollection);
         const users = userDocs.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        
+
         const currentUser = users.find(user => user.email === loggedInUserData.email);
         setLoggedInUser(currentUser || loggedInUserData);
       }
@@ -492,185 +485,187 @@ const Dashboard = () => {
 
     fetchUserData();
   }, []);
-  
 
   const handleLogout = () => {
-   
-    localStorage.removeItem('formData'); 
+    localStorage.removeItem('formData');
     navigate('/login');
   };
-
 
   const handleDropdownToggle = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-    
   return (
-
-
     <DashboardContainer>
-         <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
+      <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
         <Link to="/profile" style={{ textDecoration: 'none' }}>
-        <ProfileHeader isSidebarOpen={isSidebarOpen}>
-          {loggedInUser && loggedInUser.Image ? (
-            <ProfileImage src={loggedInUser.Image} alt={`${loggedInUser.firstName} ${loggedInUser.lastName}`} />
-          ) : (
-            <FaUserCircle className="profile-icon" />
-          )}
-          <span className="profile-name">{loggedInUser ? `${loggedInUser.firstName} ${loggedInUser.lastName}` : 'Guest'}</span>
-          
-          <span className="profile-email" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
-            {loggedInUser ? loggedInUser.email : ''}
-          </span>
-          
-          {/* Add position below the email */}
-          <span className="profile-position" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
-            {loggedInUser ? loggedInUser.position : ''}
-          </span>
-        </ProfileHeader>
-      </Link>
+          <ProfileHeader isSidebarOpen={isSidebarOpen}>
+            {loggedInUser && loggedInUser.Image ? (
+              <ProfileImage src={loggedInUser.Image} alt={`${loggedInUser.firstName} ${loggedInUser.lastName}`} />
+            ) : (
+              <FaUserCircle className="profile-icon" />
+            )}
+            <span className="profile-name">{loggedInUser ? `${loggedInUser.firstName} ${loggedInUser.lastName}` : 'Guest'}</span>
+            <span className="profile-email" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
+              {loggedInUser ? loggedInUser.email : ''}
+            </span>
+            <span className="profile-position" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
+              {loggedInUser ? loggedInUser.position : ''}
+            </span>
+          </ProfileHeader>
+        </Link>
 
         <SearchBarContainer isSidebarOpen={isSidebarOpen}>
           <FaSearch />
           <SearchInput type="text" placeholder="Search..." />
         </SearchBarContainer>
-        
+
         <SidebarMenu>
-  <Link to="/dashboard" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faHome} className="icon" />
-      <span>Dashboard</span>
-    </SidebarItem>
-  </Link>
-  
-  <Link to="/list" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faShoppingCart} className="icon" />
-      <span>List of Vendors</span>
-    </SidebarItem>
-  </Link>
-  <Link to="/listofstalls" style={{ textDecoration: 'none' }}>
-  <SidebarItem isSidebarOpen={isSidebarOpen}>
-    <FontAwesomeIcon icon={faClipboard} className="icon" />
-    <span>List of Stalls</span>
-  </SidebarItem>
-</Link>
+          <Link to="/dashboard" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faHome} className="icon" />
+              <span>Dashboard</span>
+            </SidebarItem>
+          </Link>
 
-  <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faUser} className="icon" />
-    <span>User Management</span>
-  </SidebarItem>
+          <Link to="/list" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faShoppingCart} className="icon" />
+              <span>List of Vendors</span>
+            </SidebarItem>
+          </Link>
 
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/usermanagement" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span>View Users</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/newuser" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlus} className="icon" />
-            <span>Add User</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/addcollector" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlus} className="icon" />
-            <span>Add Ambulant Collector</span>
-          </SidebarItem>
-        </li>
-      </Link>
-    </ul>
-  )}
+          <Link to="/stalls" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faClipboard} className="icon" />
+              <span>List of Stalls</span>
+            </SidebarItem>
+          </Link>
 
-  <Link to="/viewspace" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faPlus} className="icon" />
-      <span>Add New Unit</span>
-    </SidebarItem>
-  </Link>
-  <Link to="/appraise" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faUsers} className="icon" />
-      <span>Manage Appraisal</span>
-    </SidebarItem>
-  </Link>
-  <Link to="/contract" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faFileContract} className="icon" />
-      <span>Contract</span>
-    </SidebarItem>
-  </Link>
-
-  <Link to="/ticket" style={{ textDecoration: 'none' }}>
-  <SidebarItem isSidebarOpen={isSidebarOpen}>
-    <FontAwesomeIcon icon={faTicketAlt} className="icon" />
-    <span>Manage Ticket</span>
-  </SidebarItem>
-</Link>
-<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faCogs} className="icon" />
-    <span>Manage Zone</span>
-  </SidebarItem>
-
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/addzone" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
-            <span> Add Zone</span>
+          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+            <FontAwesomeIcon icon={faUser} className="icon" />
+            <span>User Management</span>
           </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/viewzone" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-          <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span> View Zone</span>
-          </SidebarItem>
-        </li>
-      </Link>
-    
-    </ul>
-  )}
-<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faUser} className="icon" />
-    <span>Manage Space</span>
-  </SidebarItem>
 
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/addspace" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
-            <span> Add Space</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/viewspace" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-          <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span> View Space</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      
-    </ul>
-  )}
-</SidebarMenu>
+          {isDropdownOpen && (
+            <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+              <Link to="/usermanagement" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faSearch} className="icon" />
+                    <span>View Users</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+              <Link to="/newuser" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faPlus} className="icon" />
+                    <span>Add User</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+              <Link to="/addcollector" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faPlus} className="icon" />
+                    <span>Add Ambulant Collector</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+            </ul>
+          )}
 
-      <SidebarFooter isSidebarOpen={isSidebarOpen}>
+          <Link to="/Addunit" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faPlus} className="icon" />
+              <span>Add New Unit</span>
+            </SidebarItem>
+          </Link>
+
+          <Link to="/appraise" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faUsers} className="icon" />
+              <span>Manage Appraisal</span>
+            </SidebarItem>
+          </Link>
+
+          <Link to="/contract" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faFileContract} className="icon" />
+              <span>Contract</span>
+            </SidebarItem>
+          </Link>
+
+          <Link to="/ticket" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faTicketAlt} className="icon" />
+              <span>Manage Ticket</span>
+            </SidebarItem>
+          </Link>
+
+          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+            <FontAwesomeIcon icon={faCogs} className="icon" />
+            <span>Manage Zone</span>
+          </SidebarItem>
+
+          {isDropdownOpen && (
+            <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+              <Link to="/addzone" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+                    <span> Add Zone</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+              <Link to="/viewzone" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faSearch} className="icon" />
+                    <span> View Zone</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+            </ul>
+          )}
+
+          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+            <FontAwesomeIcon icon={faUser} className="icon" />
+            <span>Manage Space</span>
+          </SidebarItem>
+
+          {isDropdownOpen && (
+            <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+              <Link to="/addspace" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+                    <span> Add Space</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+              <Link to="/viewspace" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faSearch} className="icon" />
+                    <span> View Space</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+              <Link to="/addcollector" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faPlus} className="icon" />
+                    <span>Add Ambulant Collector</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+            </ul>
+          )}
+        </SidebarMenu>
+
+        <SidebarFooter isSidebarOpen={isSidebarOpen}>
           <LogoutButton isSidebarOpen={isSidebarOpen} onClick={handleLogout}>
             <span><FaSignOutAlt /></span>
             <span>Logout</span>
@@ -678,144 +673,136 @@ const Dashboard = () => {
         </SidebarFooter>
       </Sidebar>
 
+      <MainContent isSidebarOpen={isSidebarOpen}>
+        <ToggleButton onClick={toggleSidebar}>
+          <FaBars />
+        </ToggleButton>
 
-        <MainContent isSidebarOpen={isSidebarOpen}>
-        
-          <ToggleButton onClick={toggleSidebar}>
-            <FaBars />
-          </ToggleButton>
-          
-        
-          <AppBar>
-        <div className="title">INTERIM</div>
-      </AppBar>
-         
-          <ProfileHeader>
-            <h1>Add Ambulant Collector</h1>
-          </ProfileHeader>
+        <AppBar>
+          <div className="title">INTERIM</div>
+        </AppBar>
 
-          
-          <FormContainer onSubmit={handleSubmit}>
-  <div className="form-section">
-    <label htmlFor="firstName">First Name</label>
-    <input
-      type="text"
-      id="firstName"
-      name="firstName"
-      value={formData.firstName}
-      onChange={handleChange}
-      placeholder="Enter First Name" // Ensure the placeholder is present
-      required
-    />
-  </div>
-  <div className="form-section">
-    <label htmlFor="middleName">Middle Name</label>
-    <input
-      type="text"
-      id="middleName"
-      name="middleName"
-      value={formData.middleName}
-      onChange={handleChange}
-      placeholder="Enter Middle Name" // Ensure the placeholder is present
-      required
-    />
-  </div>
-  <div className="form-section">
-    <label htmlFor="lastName">Last Name</label>
-    <input
-      type="text"
-      id="lastName"
-      name="lastName"
-      value={formData.lastName}
-      onChange={handleChange}
-      placeholder="Enter Last Name" // Ensure the placeholder is present
-      required
-    />
-  </div>
-  <div className="form-section">
-    <label htmlFor="contactNum">Contact Number</label>
-    <input
-      type="text"
-      id="contactNum"
-      name="contactNum"
-      value={formData.contactNum}
-      onChange={handleChange}
-      placeholder="Enter Contact" // Ensure the placeholder is present
-      required
-    />
-  </div>
-            
-            <div className="section-title">Login Details</div>
-            <Divider /> {/* Add the horizontal line here */}<span></span>
-            <div className="form-section">
+        <ProfileHeader>
+          <h1>Add Ambulant Collector</h1>
+        </ProfileHeader>
+
+        <FormContainer onSubmit={handleSubmit}>
+          <div className="form-section">
+            <label htmlFor="firstName">First Name</label>
+            <input
+              type="text"
+              id="firstName"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+              placeholder="Enter First Name"
+              required
+            />
+          </div>
+          <div className="form-section">
+            <label htmlFor="middleName">Middle Name</label>
+            <input
+              type="text"
+              id="middleName"
+              name="middleName"
+              value={formData.middleName}
+              onChange={handleChange}
+              placeholder="Enter Middle Name"
+              required
+            />
+          </div>
+          <div className="form-section">
+            <label htmlFor="lastName">Last Name</label>
+            <input
+              type="text"
+              id="lastName"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              placeholder="Enter Last Name"
+              required
+            />
+          </div>
+          <div className="form-section">
+            <label htmlFor="contactNum">Contact Number</label>
+            <input
+              type="text"
+              id="contactNum"
+              name="contactNum"
+              value={formData.contactNum}
+              onChange={handleChange}
+              placeholder="Enter Contact"
+              required
+            />
+          </div>
+
+          <div className="section-title">Login Details</div>
+          <Divider />
+          <div className="form-section">
             <label htmlFor="email">Email </label>
             <input
-            type="text"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="Enter Email" // Ensure the placeholder is present
-            required
+              type="text"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Enter Email"
+              required
             />
-        </div>
-        <div className="form-section">
+          </div>
+          <div className="form-section">
             <label htmlFor="password">Password </label>
             <input
-            type="text"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Enter password" // Ensure the placeholder is present
-            required
+              type="text"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Enter password"
+              required
             />
-        </div>
-           
-            <div className="section-title">Other Details</div>
-            <Divider /> {/* Add the horizontal line here */}<span></span>
-        
-            <div className="form-section">
+          </div>
+
+          <div className="section-title">Other Details</div>
+          <Divider />
+          <div className="form-section">
             <label htmlFor="address">Address </label>
             <input
-            type="text"
-            id="address"
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-            placeholder="Enter address" // Ensure the placeholder is present
-            required
+              type="text"
+              id="address"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              placeholder="Enter address"
+              required
             />
-        </div>
-       
-        
+          </div>
 
-        <div>
+          <div>
             <label htmlFor="toggleSwitch">Active Status</label>
             <ToggleSwitch>
-            <span>Active</span>
-            <label className="switch">
-              <input type="checkbox" checked={isPositionActive} onChange={togglePositionSwitch} />
-              <span className="slider"></span>
-            </label>
-          </ToggleSwitch>
-                </div>
-    
+              <span>Active</span>
+              <label className="switch">
+                <input type="checkbox" checked={isPositionActive} onChange={togglePositionSwitch} />
+                <span className="slider"></span>
+              </label>
+            </ToggleSwitch>
+          </div>
 
-                <div className="button-group">
-    <button className="cancel" type="button" onClick={() => {/* Logic for cancel */}}>Cancel</button>
-    <button type="submit">Save</button> {/* This should trigger handleSubmit */}
-</div>
-  </FormContainer>
-  {/* Confirmation modal */}
-  <ConfirmationModal
-                    isOpen={isModalOpen}
-                    onClose={handleModalClose}
-                    message="User Created"
-                />
-            </MainContent>
-        </DashboardContainer>
-    );
+          <div className="button-group">
+            <button className="cancel" type="button" onClick={() => {/* Logic for cancel */}}>Cancel</button>
+            <button type="submit">Save</button>
+          </div>
+        </FormContainer>
+
+        <ConfirmationModal
+          isOpen={isModalOpen}
+          onClose={handleModalClose}
+          message="User Created"
+        />
+      </MainContent>
+    </DashboardContainer>
+  );
 };
 
 export default Dashboard;

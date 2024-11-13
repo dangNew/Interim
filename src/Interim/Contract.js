@@ -1,16 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { FaBars, FaSearch, FaUserCircle, FaFilter, FaPrint } from 'react-icons/fa';
+import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt, FaFilter, FaPrint } from 'react-icons/fa';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faCheck, faClipboard,faPlusCircle, faCogs } from '@fortawesome/free-solid-svg-icons';
-import { FaSignOutAlt } from 'react-icons/fa';
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faCheck, faClipboard, faPlusCircle, faCogs } from '@fortawesome/free-solid-svg-icons';
 import { collection, getDocs } from 'firebase/firestore';
 import { interimDb, stallholderDb } from '../components/firebase.config';
 import ContractForm from './ContractForm';
 
 const ContractContainer = styled.div`
-  display: flex; 
+  display: flex;
   height: 100vh;
 `;
 
@@ -19,7 +18,7 @@ const Sidebar = styled.div`
   background-color: #f8f9fa;
   padding: 10px;
   display: flex;
-  border: 1px solid #ddd;  /* ADD THIS */
+  border: 1px solid #ddd;
   flex-direction: column;
   justify-content: space-between;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -59,7 +58,7 @@ const SidebarItem = styled.li`
   }
 
   .icon {
-    font-size: 1rem;  /* Increase the icon size */
+    font-size: 1rem;
     color: #000;
     transition: margin-left 0.2s ease;
   }
@@ -70,6 +69,31 @@ const SidebarItem = styled.li`
   }
 `;
 
+const SidebarFooter = styled.div`
+  padding: 10px;
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
+`;
+
+const LogoutButton = styled(SidebarItem)`
+  margin-top: 5px;
+  background-color: #dc3545;
+  color: white;
+  align-items: center;
+  margin-left: 20px;
+  padding: 5px 15px;
+  border-radius: 5px;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+
+  &:hover {
+    background-color: #c82333;
+    transform: scale(1.05);
+  }
+`;
 
 const ToggleButton = styled.div`
   display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'none' : 'block')};
@@ -98,15 +122,13 @@ const AppBar = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 40px 50px;
-  background-color: #188423; /* Updated color */
+  background-color: #188423;
   color: white;
   box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
   font-size: 22px;
-  font-family: 'Inter', sans-serif; /* Use a professional font */
-  font-weight: bold; /* Apply bold weight */
+  font-family: 'Inter', sans-serif;
+  font-weight: bold;
 `;
-
-
 
 const ProfileHeader = styled.div`
   display: flex;
@@ -118,13 +140,13 @@ const ProfileHeader = styled.div`
   .profile-icon {
     font-size: 3rem;
     margin-bottom: 15px;
-    color: #6c757d; // Subtle color for icon
+    color: #6c757d;
   }
 
   .profile-name {
     font-size: 1.2rem;
-    font-weight: 700; // Bolder text
-    color: black; // Darker gray for a professional look
+    font-weight: 700;
+    color: black;
     display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
   }
 
@@ -135,28 +157,26 @@ const ProfileHeader = styled.div`
   }
 
   .profile-position {
-    font-size: 1rem; /* Increase the font size */
-    font-weight: 600; /* Make it bold */
-    color: #007bff; /* Change color to blue for better visibility */
+    font-size: 1rem;
+    font-weight: 600;
+    color: #007bff;
     display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
-    margin-top: 5px; /* Add some margin for spacing */
+    margin-top: 5px;
   }
 `;
 
-
 const ProfileImage = styled.img`
   border-radius: 50%;
-  width: 60px; /* Adjusted for better visibility */
+  width: 60px;
   height: 60px;
   margin-bottom: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // Subtle shadow for a polished look
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
-
 
 const StatsContainer = styled.div`
   display: flex;
   gap: 2rem;
-  margin-top: 50px; /* Added margin to avoid overlapping with AppBar */
+  margin-top: 50px;
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -236,6 +256,10 @@ const FormContainer = styled.div`
     tr:nth-child(even) {
       background-color: #f9f9f9;
     }
+
+    tr:hover {
+      background-color: #f1f3f5;
+    }
   }
 `;
 
@@ -258,28 +282,8 @@ const SearchInput = styled.input`
   width: 100%;
 `;
 
-
-const SearchBarCont = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 20px;
-  background-color: #e9ecef;
-  border-radius: 10px;
-  margin-bottom: 50px;
-   margin-top: 50px; /*sa babaw nga margin*/
-  /* Always display the search bar */
-`;
-
-const SearchIn = styled.input`
-  border: none;
-  background: none;
-  outline: none;
-  margin-left: 10px;
-  width: 100%;
-`;
-
 const PrintButton = styled.button`
-  background-color: #188423; /* Match the AppBar color */
+  background-color: #188423;
   color: white;
   border: none;
   border-radius: 5px;
@@ -290,14 +294,13 @@ const PrintButton = styled.button`
   margin-bottom: 1rem;
 
   &:hover {
-    background-color: #155724; /* Darker shade for hover */
+    background-color: #155724;
   }
 
   svg {
-    margin-right: 5px; /* Space between icon and text */
+    margin-right: 5px;
   }
 `;
-
 
 const FilterContainer = styled.div`
   display: flex;
@@ -311,16 +314,16 @@ const FilterButton = styled.button`
   background-color: #e9ecef;
   border: none;
   border-radius: 5px;
-  padding: 10px 15px; /* Match the padding of PrintButton */
+  padding: 10px 15px;
   cursor: pointer;
-  height: 40px; /* Set a fixed height if necessary */
+  height: 40px;
 
   &:hover {
     background-color: #d3d3d3;
   }
 
   svg {
-    margin-right: 5px; /* Space between icon and text */
+    margin-right: 5px;
   }
 `;
 
@@ -331,42 +334,16 @@ const ButtonContainer = styled.div`
   margin-bottom: 20px;
   padding: 10px 15px;
   height: 40px;
-  gap: 1rem; /* Space between buttons */
+  gap: 1rem;
 `;
 
-
-const SidebarFooter = styled.div`
-  padding: 10px;
-  margin-top: auto; /* Pushes the footer to the bottom */
-  display: flex;
-  align-items: center;
-  justify-content: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
-`;
-
-const LogoutButton = styled(SidebarItem)`
-  margin-top: 5px; /* Add some margin */
-  background-color: #dc3545; /* Bootstrap danger color */
-  color: white;
-  align-items: center;
-  margin-left: 20px;
-  padding: 5px 15px; /* Add padding for a better button size */
-  border-radius: 5px; /* Rounded corners */
-  font-weight: bold; /* Make text bold */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-  transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transitions */
-
-  &:hover {
-    background-color: #c82333; /* Darker red on hover */
-    transform: scale(1.05); /* Slightly scale up on hover */
-  }
-`;
 const DropdownContainer = styled.div`
   position: relative;
   display: inline-block;
 `;
 
 const DropdownButton = styled.button`
-  background-color: #007bff; /* Match the AppBar color */
+  background-color: #007bff;
   color: white;
   border: none;
   border-radius: 5px;
@@ -377,11 +354,11 @@ const DropdownButton = styled.button`
   margin-bottom: 1rem;
 
   &:hover {
-    background-color: #155724; /* Darker shade for hover */
+    background-color: #155724;
   }
 
   svg {
-    margin-right: 5px; /* Space between icon and text */
+    margin-right: 5px;
   }
 `;
 
@@ -405,8 +382,9 @@ const DropdownItem = styled.div`
     background-color: #ddd;
   }
 `;
+
 const ViewButton = styled.button`
-  background-color: #28a745; /* Green color */
+  background-color: #28a745;
   color: white;
   border: none;
   padding: 8px 12px;
@@ -414,13 +392,14 @@ const ViewButton = styled.button`
   cursor: pointer;
 
   &:hover {
-    background-color: #218838; /* Darker green on hover */
+    background-color: #218838;
   }
 `;
+
 const Contract = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [stallHolders, setStallHolders] = useState([]);
-  const [units, setUnits] = useState([]); // State for units
+  const [units, setUnits] = useState([]);
   const sidebarRef = useRef(null);
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [totalUsers, setTotalUsers] = useState(0);
@@ -430,33 +409,44 @@ const Contract = () => {
   const [selectedUnit, setSelectedUnit] = useState('Select Unit');
   const [dateFilter, setDateFilter] = useState('');
   const [stallNoFilter, setStallNoFilter] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
-    
   };
+
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
+
   const handleView = (stallHolder) => {
-    // Define what should happen when the view button is clicked
-    // For example, navigate to a detailed view page:
     navigate(`/view-stallholder/${stallHolder.id}`);
   };
+
   const handleUnitSelect = (unit) => {
     setSelectedUnit(unit);
     setIsDropdownOpen(false);
   };
+
   const handleClickOutside = (event) => {
-   
+    if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+      setIsSidebarOpen(false);
+    }
   };
- useEffect(() => {
-    // Fetch units from Firestore
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
     const fetchUnits = async () => {
       try {
         const querySnapshot = await getDocs(collection(interimDb, 'unit'));
-        const unitData = querySnapshot.docs.map(doc => doc.data().name); // Adjust the field based on your Firestore structure
+        const unitData = querySnapshot.docs.map(doc => doc.data().name);
         setUnits(unitData);
       } catch (error) {
         console.error("Error fetching units:", error);
@@ -467,24 +457,15 @@ const Contract = () => {
   }, []);
 
   useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  // Fetch total users and recent user data from Firestore
-  useEffect(() => {
     const fetchData = async () => {
       const querySnapshot = await getDocs(collection(stallholderDb, 'approvedVendors'));
-    
+
       const data = querySnapshot.docs.map((doc) => {
         const stallInfo = doc.data().stallInfo || {};
- // userData might be null here
         const dateOfRegistration = doc.data().dateOfRegistration
           ? doc.data().dateOfRegistration.toDate().toLocaleDateString()
           : '';
-    
+
         return {
           id: doc.id,
           stallId: doc.data().stallId || '',
@@ -494,16 +475,15 @@ const Contract = () => {
           areaMeters: stallInfo.stallSize || '',
           billing: stallInfo.ratePerMeter || '',
           date: dateOfRegistration,
-          status: doc.data().status || stallInfo.status || '', // Check both status fields
+          status: doc.data().status || stallInfo.status || '',
         };
       });
-  
-      console.log(data); // Inspect the fetched data
+
       const acceptedStallHolders = data.filter((stall) =>
         ['Accepted', 'accepted', 'ACCEPTED'].includes(stall.status)
       );
-  
-      setStallHolders(acceptedStallHolders); 
+
+      setStallHolders(acceptedStallHolders);
       setFilteredStallHolders(acceptedStallHolders);
       setTotalUsers(acceptedStallHolders.length);
       if (selectedUnit !== 'Select Unit') {
@@ -518,7 +498,6 @@ const Contract = () => {
   }, [selectedUnit]);
 
   useEffect(() => {
-    // Filter stall holders based on selected unit
     if (selectedUnit !== 'Select Unit') {
       const filteredData = stallHolders.filter(stall => stall.location === selectedUnit);
       setFilteredStallHolders(filteredData);
@@ -526,17 +505,54 @@ const Contract = () => {
       setFilteredStallHolders(stallHolders);
     }
   }, [selectedUnit, stallHolders]);
-  
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // State for dropdown
-  const handleLogout = () => {
-   
-    localStorage.removeItem('userData'); 
-    navigate('/login');
-  };
-  const handleDropdownToggle = () => {
-    setIsDropdownOpen(!isDropdownOpen);
+
+  useEffect(() => {
+    let filteredData = stallHolders.filter(stall =>
+      stall.firstName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    if (dateFilter) {
+      filteredData = filteredData.filter(stall => stall.date === dateFilter);
+    }
+
+    if (stallNoFilter) {
+      filteredData = filteredData.filter(stall => stall.stallNumber === stallNoFilter);
+    }
+    if (selectedUnit !== 'Select Unit') {
+      filteredData = filteredData.filter(stall => stall.location === selectedUnit);
+    }
+
+    setFilteredStallHolders(filteredData);
+  }, [searchTerm, stallHolders, dateFilter, stallNoFilter]);
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
   };
 
+  const handleDateFilterChange = (event) => {
+    setDateFilter(event.target.value);
+  };
+
+  const handleStallNoFilterChange = (event) => {
+    setStallNoFilter(event.target.value);
+  };
+
+  useEffect(() => {
+    try {
+      const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
+      if (loggedInUserData) {
+        const currentUser = stallHolders.find(user => user.email === loggedInUserData.email);
+        setLoggedInUser(currentUser || loggedInUserData);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  }, [stallHolders]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('userData');
+    navigate('/login');
+  };
 
   const handlePrint = () => {
     const printContent = `
@@ -583,7 +599,7 @@ const Contract = () => {
         </body>
       </html>
     `;
-  
+
     const newWindow = window.open('', '_blank');
     newWindow.document.write(printContent);
     newWindow.document.close();
@@ -591,228 +607,175 @@ const Contract = () => {
     newWindow.close();
   };
 
-  useEffect(() => {
-    let filteredData = stallHolders.filter(stall => 
-      stall.firstName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    // Filter by date if a date is selected
-    if (dateFilter) {
-      filteredData = filteredData.filter(stall => stall.date === dateFilter);
-    }
-
-    // Filter by stall number if a number is selected
-    if (stallNoFilter) {
-      filteredData = filteredData.filter(stall => stall.stallNumber === stallNoFilter);
-    }
-    if (selectedUnit !== 'Select Unit') {
-      filteredData = filteredData.filter(stall => stall.location === selectedUnit);
-    }
-
-    setFilteredStallHolders(filteredData);
-  }, [searchTerm, stallHolders, dateFilter, stallNoFilter]);
-
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
-  };
-
-  const handleDateFilterChange = (event) => {
-    setDateFilter(event.target.value);
-  };
-
-  const handleStallNoFilterChange = (event) => {
-    setStallNoFilter(event.target.value);
-  };
-  
-  // Moved this code outside of `handleStallNoFilterChange`
-  // Fetch the logged-in user data
-  useEffect(() => {
-    try {
-      const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
-      if (loggedInUserData) {
-        // Assuming you are fetching all users somewhere, otherwise fetch it
-        const currentUser = stallHolders.find(user => user.email === loggedInUserData.email);
-        setLoggedInUser(currentUser || loggedInUserData);
-      }
-    } catch (error) {
-      console.error('Error fetching users:', error);
-    }
-  }, [stallHolders]); 
-  
-
   return (
     <ContractContainer>
-     <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
+      <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
         <Link to="/profile" style={{ textDecoration: 'none' }}>
-        <ProfileHeader isSidebarOpen={isSidebarOpen}>
-          {loggedInUser && loggedInUser.Image ? (
-            <ProfileImage src={loggedInUser.Image} alt={`${loggedInUser.firstName} ${loggedInUser.lastName}`} />
-          ) : (
-            <FaUserCircle className="profile-icon" />
-          )}
-          <span className="profile-name">{loggedInUser ? `${loggedInUser.firstName} ${loggedInUser.lastName}` : 'Guest'}</span>
-          
-          <span className="profile-email" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
-            {loggedInUser ? loggedInUser.email : ''}
-          </span>
-          
-          {/* Add position below the email */}
-          <span className="profile-position" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
-            {loggedInUser ? loggedInUser.position : ''}
-          </span>
-        </ProfileHeader>
-      </Link>
-
+          <ProfileHeader isSidebarOpen={isSidebarOpen}>
+            {loggedInUser && loggedInUser.Image ? (
+              <ProfileImage src={loggedInUser.Image} alt={`${loggedInUser.firstName} ${loggedInUser.lastName}`} />
+            ) : (
+              <FaUserCircle className="profile-icon" />
+            )}
+            <span className="profile-name">{loggedInUser ? `${loggedInUser.firstName} ${loggedInUser.lastName}` : 'Guest'}</span>
+            <span className="profile-email" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
+              {loggedInUser ? loggedInUser.email : ''}
+            </span>
+            <span className="profile-position" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
+              {loggedInUser ? loggedInUser.position : ''}
+            </span>
+          </ProfileHeader>
+        </Link>
 
         <SearchBarContainer isSidebarOpen={isSidebarOpen}>
           <FaSearch />
           <SearchInput type="text" placeholder="Search..." />
         </SearchBarContainer>
-        
+
         <SidebarMenu>
-  <Link to="/dashboard" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faHome} className="icon" />
-      <span>Dashboard</span>
-    </SidebarItem>
-  </Link>
-  
-  <Link to="/list" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faShoppingCart} className="icon" />
-      <span>List of Vendors</span>
-    </SidebarItem>
-  </Link>
-  <Link to="/listofstalls" style={{ textDecoration: 'none' }}>
-  <SidebarItem isSidebarOpen={isSidebarOpen}>
-    <FontAwesomeIcon icon={faClipboard} className="icon" />
-    <span>List of Stalls</span>
-  </SidebarItem>
-</Link>
+          <Link to="/dashboard" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faHome} className="icon" />
+              <span>Dashboard</span>
+            </SidebarItem>
+          </Link>
 
-  <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faUser} className="icon" />
-    <span>User Management</span>
-  </SidebarItem>
+          <Link to="/list" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faShoppingCart} className="icon" />
+              <span>List of Vendors</span>
+            </SidebarItem>
+          </Link>
 
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/usermanagement" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span>View Users</span>
+          <Link to="/listofstalls" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faClipboard} className="icon" />
+              <span>List of Stalls</span>
+            </SidebarItem>
+          </Link>
+
+          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={toggleDropdown}>
+            <FontAwesomeIcon icon={faUser} className="icon" />
+            <span>User Management</span>
           </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/newuser" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlus} className="icon" />
-            <span>Add User</span>
+
+          {isDropdownOpen && (
+            <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+              <Link to="/usermanagement" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faSearch} className="icon" />
+                    <span>View Users</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+              <Link to="/newuser" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faPlus} className="icon" />
+                    <span>Add User</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+            </ul>
+          )}
+
+          <Link to="/viewunit" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faPlus} className="icon" />
+              <span>Add New Unit</span>
+            </SidebarItem>
+          </Link>
+
+          <Link to="/appraise" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faUsers} className="icon" />
+              <span>Manage Appraisal</span>
+            </SidebarItem>
+          </Link>
+
+          <Link to="/contract" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faFileContract} className="icon" />
+              <span>Contract</span>
+            </SidebarItem>
+          </Link>
+
+          <Link to="/ticket" style={{ textDecoration: 'none' }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faTicketAlt} className="icon" />
+              <span>Manage Ticket</span>
+            </SidebarItem>
+          </Link>
+
+          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={toggleDropdown}>
+            <FontAwesomeIcon icon={faCogs} className="icon" />
+            <span>Manage Zone</span>
           </SidebarItem>
-        </li>
-      </Link>
-    </ul>
-  )}
 
-  <Link to="/viewunit" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faPlus} className="icon" />
-      <span>Add New Unit</span>
-    </SidebarItem>
-  </Link>
+          {isDropdownOpen && (
+            <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+              <Link to="/addzone" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+                    <span> Add Zone</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+              <Link to="/viewzone" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faSearch} className="icon" />
+                    <span> View Zone</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+            </ul>
+          )}
 
-  <Link to="/appraise" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faUsers} className="icon" />
-      <span>Manage Appraisal</span>
-    </SidebarItem>
-  </Link>
-
-  <Link to="/contract" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faFileContract} className="icon" />
-      <span>Contract</span>
-    </SidebarItem>
-  </Link>
-
-  <Link to="/ticket" style={{ textDecoration: 'none' }}>
-  <SidebarItem isSidebarOpen={isSidebarOpen}>
-    <FontAwesomeIcon icon={faTicketAlt} className="icon" />
-    <span>Manage Ticket</span>
-  </SidebarItem>
-</Link>
-<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faCogs} className="icon" />
-    <span>Manage Zone</span>
-  </SidebarItem>
-
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/addzone" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
-            <span> Add Zone</span>
+          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={toggleDropdown}>
+            <FontAwesomeIcon icon={faUser} className="icon" />
+            <span>Manage Space</span>
           </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/viewzone" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-          <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span> View Zone</span>
-          </SidebarItem>
-        </li>
-      </Link>
-    
-    </ul>
-  )}
-<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faUser} className="icon" />
-    <span>Manage Space</span>
-  </SidebarItem>
 
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/addspace" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
-            <span> Add Space</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/viewspace" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-          <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span> View Space</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/addcollector" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlus} className="icon" />
-            <span>Add Ambulant Collector</span>
-          </SidebarItem>
-        </li>
-      </Link>
-    </ul>
-  )}
-</SidebarMenu>
+          {isDropdownOpen && (
+            <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
+              <Link to="/addspace" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faPlusCircle} className="icon" />
+                    <span> Add Space</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+              <Link to="/viewspace" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faSearch} className="icon" />
+                    <span> View Space</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+              <Link to="/addcollector" style={{ textDecoration: 'none' }}>
+                <li>
+                  <SidebarItem isSidebarOpen={isSidebarOpen}>
+                    <FontAwesomeIcon icon={faPlus} className="icon" />
+                    <span>Add Ambulant Collector</span>
+                  </SidebarItem>
+                </li>
+              </Link>
+            </ul>
+          )}
+        </SidebarMenu>
 
-      <SidebarFooter isSidebarOpen={isSidebarOpen}>
+        <SidebarFooter isSidebarOpen={isSidebarOpen}>
           <LogoutButton isSidebarOpen={isSidebarOpen} onClick={handleLogout}>
             <span><FaSignOutAlt /></span>
             <span>Logout</span>
           </LogoutButton>
         </SidebarFooter>
       </Sidebar>
-
-
 
       <MainContent isSidebarOpen={isSidebarOpen}>
         <AppBar>
@@ -836,27 +799,24 @@ const Contract = () => {
             <h3>Total Logins</h3>
             <p>{totalUsers}</p>
           </StatBox>
-        </StatsContainer><span>
-          
-        </span>
+        </StatsContainer>
 
-        
-       <SearchBarCont>
+        <SearchBarContainer>
           <FaSearch />
-          <SearchIn 
-            type="text" 
-            placeholder="Search Stall Holders..." 
-            value={searchTerm} // Bind the input value to searchTerm
-            onChange={handleSearchChange} // Call handleSearchChange on input change
+          <SearchInput
+            type="text"
+            placeholder="Search Stall Holders..."
+            value={searchTerm}
+            onChange={handleSearchChange}
           />
-        </SearchBarCont>
+        </SearchBarContainer>
 
         <ButtonContainer>
-        <PrintButton onClick={handlePrint}>
-              <FaPrint />
-              Print
-            </PrintButton>
-            <DropdownContainer>
+          <PrintButton onClick={handlePrint}>
+            <FaPrint />
+            Print
+          </PrintButton>
+          <DropdownContainer>
             <DropdownButton onClick={toggleDropdown}>
               {selectedUnit}
             </DropdownButton>
@@ -868,18 +828,17 @@ const Contract = () => {
               ))}
             </DropdownContent>
           </DropdownContainer>
-            <FilterContainer>
-              <FilterButton onClick={handleDateFilterChange}>
-                <FaFilter />
-                Filter by Date
-              </FilterButton>
-              <FilterButton onClick={handleStallNoFilterChange}>
-                <FaFilter />
-                Filter by Stall No.
-              </FilterButton>
-            </FilterContainer>
-
-          </ButtonContainer>
+          <FilterContainer>
+            <FilterButton onClick={handleDateFilterChange}>
+              <FaFilter />
+              Filter by Date
+            </FilterButton>
+            <FilterButton onClick={handleStallNoFilterChange}>
+              <FaFilter />
+              Filter by Stall No.
+            </FilterButton>
+          </FilterContainer>
+        </ButtonContainer>
 
         <FormContainer>
           <h3>Stall Information</h3>
@@ -907,14 +866,14 @@ const Contract = () => {
                   <td>{stall.date}</td>
                   <td>{stall.status}</td>
                   <td>
-                  <ViewButton onClick={() => handleView(stall)}>View</ViewButton>
+                    <ViewButton onClick={() => handleView(stall)}>View</ViewButton>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </FormContainer>
-        {/* Add the ContractForm here */}
+
         <ContractForm />
       </MainContent>
     </ContractContainer>

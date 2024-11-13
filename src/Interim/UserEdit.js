@@ -4,8 +4,18 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { FaBars, FaSearch, FaUserCircle } from 'react-icons/fa';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+<<<<<<< HEAD
 import { FaSignOutAlt } from 'react-icons/fa';
+<<<<<<< HEAD
 import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faCheck, faClipboard,faPlusCircle, faCogs} from '@fortawesome/free-solid-svg-icons';
+=======
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faCheck, faClipboard} from '@fortawesome/free-solid-svg-icons';
+=======
+import { faCircleUser } from '@fortawesome/free-solid-svg-icons';
+import { FaSignOutAlt } from 'react-icons/fa';
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCog, faTicketAlt, faCheck} from '@fortawesome/free-solid-svg-icons';
+>>>>>>> a8f5076 (main)
+>>>>>>> d5d5483c3510cc4b45805bc196150e569b84e8be
 import { interimDb } from '../components/firebase.config';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore'; // Import Firestore functions
 
@@ -677,12 +687,19 @@ const Dashboard = () => {
       <span>List of Vendors</span>
     </SidebarItem>
   </Link>
+<<<<<<< HEAD
   <Link to="/listofstalls" style={{ textDecoration: 'none' }}>
+=======
+<<<<<<< HEAD
+  <Link to="/stalls" style={{ textDecoration: 'none' }}>
+>>>>>>> d5d5483c3510cc4b45805bc196150e569b84e8be
   <SidebarItem isSidebarOpen={isSidebarOpen}>
     <FontAwesomeIcon icon={faClipboard} className="icon" />
     <span>List of Stalls</span>
   </SidebarItem>
 </Link>
+=======
+>>>>>>> a8f5076 (main)
 
   <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
     <FontAwesomeIcon icon={faUser} className="icon" />
@@ -710,7 +727,11 @@ const Dashboard = () => {
     </ul>
   )}
 
+<<<<<<< HEAD
   <Link to="/viewunit" style={{ textDecoration: 'none' }}>
+=======
+  <Link to="/Addunit" style={{ textDecoration: 'none' }}>
+>>>>>>> a8f5076 (main)
     <SidebarItem isSidebarOpen={isSidebarOpen}>
       <FontAwesomeIcon icon={faPlus} className="icon" />
       <span>Add New Unit</span>
@@ -752,7 +773,12 @@ const Dashboard = () => {
           </SidebarItem>
         </li>
       </Link>
+<<<<<<< HEAD
       <Link to="/viewzone" style={{ textDecoration: 'none' }}>
+=======
+<<<<<<< HEAD
+      <Link to="/View" style={{ textDecoration: 'none' }}>
+>>>>>>> d5d5483c3510cc4b45805bc196150e569b84e8be
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
           <FontAwesomeIcon icon={faSearch} className="icon" />
@@ -786,6 +812,8 @@ const Dashboard = () => {
           </SidebarItem>
         </li>
       </Link>
+=======
+>>>>>>> a8f5076 (main)
       <Link to="/addcollector" style={{ textDecoration: 'none' }}>
         <li>
           <SidebarItem isSidebarOpen={isSidebarOpen}>
