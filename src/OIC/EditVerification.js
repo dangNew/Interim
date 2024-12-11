@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { FaBars,FaCheckCircle, FaRegCircle, FaClock, FaUserCircle } from 'react-icons/fa';
-import { getDoc, doc, setDoc, Timestamp, updateDoc } from 'firebase/firestore';
-import { stallholderDb } from '../components/firebase.config';
+import { FaBars, FaCheckCircle, FaRegCircle, FaClock, FaUserCircle } from 'react-icons/fa';
+import { Button } from '@mui/material';
+import { getDoc, doc, setDoc, Timestamp, updateDoc, getDocs, collection, addDoc } from 'firebase/firestore';
+import { rentmobileDb } from '../components/firebase.config';
 import SideNav from './side_nav';
 
+// Styled components (unchanged)
 const DashboardContainer = styled.div`
   display: flex;
   height: 100vh;
@@ -44,21 +46,11 @@ const ToggleButton = styled.div`
   z-index: 200;
 `;
 
-const BackButton = styled.button`
-  background-color: #ccc;
-  color: black;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-right: 10px;
-`;
-
 const HorizontalLine = styled.hr`
   border: none;
   height: 1px;
   background-color: #ccc;
-  margin: 5px 0; 
+  margin: 5px 0;
 `;
 
 const VendorProfile = styled.div`
@@ -87,22 +79,22 @@ const VendorImage = styled.img`
 `;
 
 const DetailsContainer = styled.div`
-  display: flex; 
-  gap: 20px; 
+  display: flex;
+  gap: 20px;
 `;
 
 const PersonalInfoContainer = styled.div`
   flex: 1;
-  background-color: #f9f9f9; 
-  border-radius: 10px; 
-  padding: 20px; 
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  padding: 20px;
 `;
 
 const StallContainer = styled.div`
-  flex: 1; 
-  background-color: #f9f9f9; 
-  border-radius: 10px; 
-  padding: 20px; 
+  flex: 1;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  padding: 20px;
 `;
 
 const VendorIcon = styled(FaUserCircle)`
@@ -135,12 +127,14 @@ const ActionButton = styled.button`
   cursor: pointer;
   font-weight: bold;
 
-  ${({ type }) =>
-    type === 'approve'
-      ? 'background-color: yellowgreen;'
+  ${({ type, disabled }) =>
+    disabled
+      ? 'background-color: lightgrey;'
+      : type === 'approve'
+      ? 'background-color: blue;'
       : type === 'decline'
       ? 'background-color: red;'
-      : 'background-color: blue;'}
+      : 'background-color: lightgreen;'} // Yellow for send request
 `;
 
 const Status = styled.div`
@@ -148,6 +142,12 @@ const Status = styled.div`
   padding: 5px 10px;
   border-radius: 5px;
   margin-top: 5px;
+  background-color: ${({ status }) =>
+    status === 'accepted'
+      ? 'green'
+      : status === 'declined'
+      ? 'red'
+      : 'yellow'};
 `;
 
 const VendorDetailsContainer = styled.div`
@@ -156,11 +156,11 @@ const VendorDetailsContainer = styled.div`
 
 const VendorInfo = styled.div`
   margin-bottom: 10px;
-  color: black; 
-  
+  color: black;
+
   strong {
     color: gray;
-    font-weight: normal; 
+    font-weight: normal;
     font-size: 14px;
   }
 `;
@@ -188,7 +188,6 @@ const StallTitle = styled.div`
   margin-bottom: 30px;
   color: #188423;
 `;
-
 
 const TimelineContainer = styled.div`
   background-color: #f9f9f9;
@@ -248,42 +247,41 @@ const Modal = styled.div`
 
 const ModalContent = styled.div`
   background-color: white;
-  padding: 20px;  
+  padding: 20px;
   border-radius: 10px;
   text-align: center;
   position: relative;
-  max-height: 80vh; 
-  overflow-y: auto; 
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 `;
 
 const DownloadButton = styled.button`
-  background-color: #28a745;  
+  background-color: #28a745;
   color: white;
-  padding: 10px 20px; 
+  padding: 10px 20px;
   border: none;
-  border-radius: 5px; 
+  border-radius: 5px;
   cursor: pointer;
-  font-size: 16px; 
+  font-size: 16px;
   font-weight: bold;
-  margin-top: 15px; 
+  margin-top: 15px;
 
   &:hover {
-    background-color: #218838; 
-    transition: background-color 0.3s; 
+    background-color: #218838;
+    transition: background-color 0.3s;
   }
 `;
 
 const ButtonContainer1 = styled.div`
   display: flex;
-  justify-content: space-between; 
-  width: 100%; 
-  margin-top: 10px; 
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 10px;
 `;
 
-
 const PreviewedImage = styled.img`
-  max-width: 40%; 
+  max-width: 40%;
   height: auto; /* Maintain aspect ratio */
 `;
 
@@ -370,6 +368,7 @@ const MessageButton = styled.button`
     background-color: #ccc;
   }
 `;
+
 const AlertModal = styled.div`
   position: fixed;
   top: 0;
@@ -406,6 +405,7 @@ const AlertButton = styled.button`
   cursor: pointer;
   font-weight: bold;
 `;
+
 const SuccessAlertModal = styled(AlertModal)`
   display: flex;
   align-items: center;
@@ -435,6 +435,66 @@ const SuccessAlertMessage = styled.div`
   color: black;
   font-size: 16px;
 `;
+const FormContainer = styled.div`
+  margin-top: 2rem;
+  padding: 1rem;
+  border-radius: 20px;
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
+
+  h3 {
+    margin-bottom: 1rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+
+    th, td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 2px solid #dee2e6;
+    }
+
+    th {
+      background-color: #e9ecef;
+    }
+
+    // Striped rows
+    tr:nth-child(even) {
+      background-color: #f2f2f2; // Light gray for even rows
+    }
+
+    tr:nth-child(odd) {
+      background-color: #ffffff; // White for odd rows
+    }
+
+    .actions {
+      display: flex;
+      gap: 5px; /* Space between the buttons */
+    }
+
+    .action-button {
+      display: flex;
+      align-items: center;
+      border: none;
+      background: none;
+      cursor: pointer;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: #0056b3; /* Darken on hover */
+      }
+
+      .icon {
+        font-size: 24px; /* Increase icon size */
+        color: black;
+      }
+    }
+  }
+`;
 
 const CloseSuccessAlertButton = styled.button`
   background-color: #188423;
@@ -449,7 +509,46 @@ const CloseSuccessAlertButton = styled.button`
   &:hover {
     background-color: #218838;
   }
-`; 
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+`;
+
+const ModalContainer = styled.div`
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  position: relative;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+`;
+
+const ModalButton = styled.button`
+  background-color: #188423;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 15px;
+
+  &:hover {
+    background-color: #218838;
+  }
+`;
 
 const EditVerification = () => {
   const { vendorId } = useParams();
@@ -459,7 +558,7 @@ const EditVerification = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [requestMessage, setRequestMessage] = useState('');
-  const [isAlertOpen, setIsAlertOpen] = useState(false); 
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [isSuccessAlertOpen, setIsSuccessAlertOpen] = useState(false);
   const [filteredVendors, setFilteredVendors] = useState([]); // Filtered vendors
   const [vendors, setVendors] = useState([]); // Vendors list
@@ -468,6 +567,8 @@ const EditVerification = () => {
   const [showDeclineModal, setShowDeclineModal] = useState(false);
   const [isSuccessModal, setIsSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [actionType, setActionType] = useState('');
 
   const navigate = useNavigate();
 
@@ -480,10 +581,10 @@ const EditVerification = () => {
     if (loggedInUserData) {
       setLoggedInUser(loggedInUserData);
     }
-  
+
     const fetchVendorDetails = async () => {
       try {
-        const vendorRef = doc(stallholderDb, 'users', vendorId);
+        const vendorRef = doc(rentmobileDb, 'Vendorusers', vendorId);
         const vendorDoc = await getDoc(vendorRef);
         if (vendorDoc.exists()) {
           const vendorData = { id: vendorDoc.id, ...vendorDoc.data() };
@@ -499,10 +600,9 @@ const EditVerification = () => {
         console.error('Error fetching vendor details:', error);
       }
     };
-  
+
     fetchVendorDetails();
   }, [vendorId]);
-  
 
   const handleBack = () => {
     navigate(-1);
@@ -527,51 +627,50 @@ const EditVerification = () => {
 
   const handleRequestInfoOpen = () => setIsDialogOpen(true);
   const handleRequestInfoClose = () => setIsDialogOpen(false);
-  
-    // Predefined messages
-    const messageTemplates = [
-      'Upload Government ID',
-      'Submit Business Registration',
-    ];
 
-    const handleSelectMessage = (message) => {
-      setRequestMessage(message);
+  // Predefined messages
+  const messageTemplates = [
+    'Upload Government ID',
+    'Submit Business Registration',
+  ];
+
+  const handleSelectMessage = (message) => {
+    setRequestMessage(message);
+  };
+
+  const handleRequestSubmit = async () => {
+    const wordCount = requestMessage.trim().split(/\s+/).length;
+    if (wordCount > 150) {
+      alert('Request message exceeds 150 words. Please shorten your message.');
+      return;
+    }
+
+    const currentUser = JSON.parse(localStorage.getItem('userData'));
+    const requestCount = vendor.timeline
+      ? vendor.timeline.filter(item => item.isSubmitted1 || item.isSubmitted2 || item.isSubmitted3).length + 1
+      : 1;
+
+    const requestInfo = {
+      [`isSubmitted${requestCount}`]: false,
+      message: requestMessage,
+      status: 'requested',
+      timestamp: Timestamp.now(),
+      email: currentUser.email,
+      uploadedImageUrl: '',
     };
 
-    const handleRequestSubmit = async () => {
-      const wordCount = requestMessage.trim().split(/\s+/).length;
-      if (wordCount > 150) {
-        alert('Request message exceeds 150 words. Please shorten your message.');
-        return;
-      }
-    
-      const currentUser = JSON.parse(localStorage.getItem('userData'));
-      const requestCount = vendor.timeline
-        ? vendor.timeline.filter(item => item.isSubmitted1 || item.isSubmitted2 || item.isSubmitted3).length + 1
-        : 1;
-    
-      const requestInfo = {
-        [`isSubmitted${requestCount}`]: false,
-        message: requestMessage,
-        status: 'requested',
-        timestamp: Timestamp.now(),
-        email: currentUser.email,
-        uploadedImageUrl: '',
-      };
-    
-      const vendorRef = doc(stallholderDb, 'users', vendorId);
-      await setDoc(vendorRef, {
-        timeline: [...(vendor.timeline || []), requestInfo],
-      }, { merge: true });
-    
-      setRequestMessage('');
-      setIsDialogOpen(false);
-      setIsSuccessAlertOpen(true); 
+    const vendorRef = doc(rentmobileDb, 'Vendorusers', vendorId);
+    await setDoc(vendorRef, {
+      timeline: [...(vendor.timeline || []), requestInfo],
+    }, { merge: true });
 
-      const updatedTimeline = [...(vendor.timeline || []), requestInfo];
-      setVendor({ ...vendor, timeline: updatedTimeline });
-    };
-    
+    setRequestMessage('');
+    setIsDialogOpen(false);
+    setIsSuccessAlertOpen(true);
+
+    const updatedTimeline = [...(vendor.timeline || []), requestInfo];
+    setVendor({ ...vendor, timeline: updatedTimeline });
+  };
 
   const handleSubmit = () => {
     // Check the latest request status
@@ -582,7 +681,7 @@ const EditVerification = () => {
         setIsAlertOpen(true); // Show the alert dialog
         return;
       }
-      
+
       if (latestRequest.status === 'requested sent' && latestRequest[`isSubmitted${vendor.timeline.length}`]) {
         handleRequestSubmit(); // Call the function to handle the submission
       }
@@ -590,32 +689,143 @@ const EditVerification = () => {
       handleRequestSubmit(); // Proceed if no requests exist yet
     }
   };
+
   const handleCloseSuccessAlert = () => {
     setIsSuccessAlertOpen(false);
   };
-  
+
   const handleApprove = async (vendorId) => {
     try {
-      const vendorRef = doc(stallholderDb, 'users', vendorId);
+      // Reference to the vendor's document in 'Vendorusers' collection
+      const vendorRef = doc(rentmobileDb, 'Vendorusers', vendorId);
+  
+      // Update the vendor's status and stall info status
       await updateDoc(vendorRef, {
         status: 'accepted',
-        'stallInfo.status': 'Occupied',
+        'stallInfo.status': 'Occupied'
       });
   
+      // Fetch vendor data to access the associated stall ID
       const vendorSnapshot = await getDoc(vendorRef);
       const vendorData = vendorSnapshot.data();
+      const stallId = vendorData.stallId;
   
-      await setDoc(doc(stallholderDb, 'approvedVendors', vendorId), {
+      // Reference to the vendor's stall document in 'Stall' collection
+      const stallDocRef = doc(rentmobileDb, 'Stall', stallId);
+  
+      // Update the stall status to 'Occupied'
+      await updateDoc(stallDocRef, { status: 'Occupied' });
+  
+      // Log the approved vendor to a new 'approvedVendors' collection
+      await setDoc(doc(rentmobileDb, 'approvedVendors', vendorId), {
         ...vendorData,
         approvedBy: loggedInUser.email,
-        approvedAt: new Date(),
+        approvedAt: new Date()
       });
   
-      setVendors(vendors.filter((vendor) => vendor.id !== vendorId));
-      setFilteredVendors(filteredVendors.filter((vendor) => vendor.id !== vendorId));
+      // Update the vendor lists to remove the approved vendor from pending list
+      setVendors(vendors.filter(vendor => vendor.id !== vendorId));
+      setFilteredVendors(filteredVendors.filter(vendor => vendor.id !== vendorId));
   
-      setIsSuccessModal(true); // Open success modal
+      // Fetch billing configuration
+      const billingConfigSnapshot = await getDocs(collection(rentmobileDb, 'billingconfig'));
+      const billingConfig = billingConfigSnapshot.docs.reduce((acc, doc) => {
+        acc[doc.data().title] = doc.data();
+        return acc;
+      }, {});
+  
+      // Calculate the due date and start date based on the current date and billing cycle
+      const approvedAtDate = new Date();
+      const billingCycle = vendorData.billingCycle;
+      let dueDate, startDate;
+  
+      // Set the start date to the next day after the approvedAt date
+      startDate = new Date(approvedAtDate);
+      startDate.setDate(approvedAtDate.getDate() + 1);
+      startDate.setHours(0, 0, 0, 0);
+  
+      if (billingCycle === 'Daily') {
+        dueDate = new Date(startDate);
+        dueDate.setHours(23, 59, 59, 999);
+      } else if (billingCycle === 'Weekly') {
+        dueDate = new Date(startDate);
+        dueDate.setDate(startDate.getDate() + ((1 + 7 - startDate.getDay()) % 7));
+        dueDate.setHours(23, 59, 59, 999);
+      } else if (billingCycle === 'Monthly') {
+        const nextMonth = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 7);
+        dueDate = new Date(nextMonth.getFullYear(), nextMonth.getMonth(), 7);
+        dueDate.setHours(23, 59, 59, 999);
+      }
+  
+      // Calculate the number of days
+      const noOfDays = Math.ceil((dueDate - startDate) / (1000 * 60 * 60 * 24));
+  
+      // Calculate the daily payment
+      const ratePerMeter = billingConfig['RateperMeter'].value1;
+      const stallSize = vendorData.stallInfo.stallSize;
+      const dailyPayment = ratePerMeter * stallSize;
+  
+      // Calculate the amount
+      const amount = dailyPayment * noOfDays;
+  
+      // Calculate the garbage fee
+      const garbageFee = billingConfig['Garbage Fee'].value1 * noOfDays;
+  
+      // Calculate the total
+      let total = amount + garbageFee;
+  
+      // Initialize penalty, surcharge, interestRate, and amountIntRate
+      let penalty = 0;
+      let surcharge = 0;
+      let interestRate = 0;
+      let amountIntRate = 0;
+  
+      // Calculate the penalty if the vendor status is overdue
+      if (vendorData.status === 'Overdue') {
+        const penaltyPercentage = billingConfig['Penalty'][`value${billingCycle === 'Daily' ? 3 : billingCycle === 'Weekly' ? 2 : 1}`];
+        penalty = penaltyPercentage;
+        surcharge = (amount + garbageFee) * (penaltyPercentage / 100);
+        total += surcharge;
+      }
+  
+      // Calculate the interest rate if the payment is overdue
+      if (vendorData.status === 'Overdue') {
+        interestRate = billingConfig['Interest Rate'][`value${billingCycle === 'Daily' ? 3 : billingCycle === 'Weekly' ? 2 : 1}`] / 100;
+        amountIntRate = total * interestRate;
+        total += amountIntRate;
+      }
+  
+      // Store the current payment in the stall_payment collection with an auto ID
+      const paymentDocRef = await addDoc(collection(rentmobileDb, 'stall_payment'), {
+        vendorId,
+        firstName: vendorData.firstName,
+        middleName: vendorData.middleName,
+        lastName: vendorData.lastName,
+        status: 'Pending',
+        currentDate: new Date(),
+        startDate,
+        dueDate,
+        noOfDays,
+        dailyPayment,
+        amount,
+        garbageFee,
+        penalty,
+        surcharge,
+        total,
+        interestRate,
+        amountIntRate,
+        billingCycle // Store the billing cycle
+      });
+  
+      setIsSuccessModal(true);
       setSuccessMessage('Vendor approved successfully!');
+  
+      // Update the vendor status in the state
+      setVendor((prevVendor) => ({
+        ...prevVendor,
+        status: 'accepted',
+      }));
+  
     } catch (error) {
       console.error('Error approving vendor:', error);
     }
@@ -625,19 +835,36 @@ const EditVerification = () => {
   // handleDecline function
   const handleDecline = async () => {
     try {
-      const vendorRef = doc(stallholderDb, 'users', vendorId);
+      const vendorRef = doc(rentmobileDb, 'Vendorusers', vendorId);
 
       await updateDoc(vendorRef, { status: 'declined' });
 
       const vendorSnapshot = await getDoc(vendorRef);
       const vendorData = vendorSnapshot.data();
 
-      await setDoc(doc(stallholderDb, 'declinedVendors', vendorId), {
-        ...vendorData,
-        reason: selectedDeclineReason || declineReason,
-        declinedBy: loggedInUser.email,
-        declinedAt: new Date(),
-      });
+      // Check if the declinedVendors collection exists, if not, create it
+      const declinedVendorsCollection = collection(rentmobileDb, 'declinedVendors');
+      const declinedVendorsSnapshot = await getDocs(declinedVendorsCollection);
+      if (declinedVendorsSnapshot.empty) {
+        await setDoc(doc(rentmobileDb, 'declinedVendors', vendorId), {
+          ...vendorData,
+          reason: selectedDeclineReason || declineReason,
+          declinedBy: loggedInUser.email,
+          declinedAt: new Date(),
+        });
+      } else {
+        await setDoc(doc(rentmobileDb, 'declinedVendors', vendorId), {
+          ...vendorData,
+          reason: selectedDeclineReason || declineReason,
+          declinedBy: loggedInUser.email,
+          declinedAt: new Date(),
+        });
+      }
+
+      // Update the stall status to 'Available'
+      const stallId = vendorData.stallId;
+      const stallDocRef = doc(rentmobileDb, 'Stall', stallId);
+      await updateDoc(stallDocRef, { status: 'Available' });
 
       setVendors(vendors.filter((vendor) => vendor.id !== vendorId));
       setFilteredVendors(filteredVendors.filter((vendor) => vendor.id !== vendorId));
@@ -648,6 +875,13 @@ const EditVerification = () => {
 
       setIsSuccessModal(true);
       setSuccessMessage('Vendor declined successfully!');
+
+      // Update the vendor status in the state
+      setVendor((prevVendor) => ({
+        ...prevVendor,
+        status: 'declined',
+      }));
+
     } catch (error) {
       console.error('Error declining vendor:', error);
     }
@@ -655,13 +889,25 @@ const EditVerification = () => {
 
   const handleAction = (action) => {
     if (action === 'approve') {
-      handleApprove(vendorId);
+      setActionType('approve');
+      setShowModal(true);
     } else if (action === 'decline') {
-      handleDecline();
+      setActionType('decline');
+      setShowDeclineModal(true);
+    } else if (action === 'request') {
+      handleRequestInfoOpen(); // Open the request dialog
     }
     // Close modal logic, if needed
   };
-  
+
+  const declineReasons = [
+    'Document requested not uploaded',
+    'Uploaded fake ID',
+    'Incomplete application',
+    'Incorrect information provided',
+    'Application does not meet criteria',
+    'Fake Information'
+  ];
 
   return (
     <DashboardContainer>
@@ -672,115 +918,125 @@ const EditVerification = () => {
       <MainContent isSidebarOpen={isSidebarOpen}>
         <AppBar>
           <div>Edit Vendor Verification</div>
-          <BackButton onClick={handleBack}>Back</BackButton>
+          <Button onClick={() => navigate(-1)} sx={{ color: 'white' }}>
+            Back
+          </Button>
         </AppBar>
 
-        <VendorDetailsContainer>
-          {vendor ? (
-            <>
-              <VendorProfile>
-                <VendorInfoContainer>
-                  {vendor.profileImageUrls?.[0] ? (
-                    <VendorImage
-                    src={vendor.profileImageUrls[0]}
-                    alt="Profile"
-                    onClick={() => handleUploadImageClick(vendor.profileImageUrls[0])} // Click to preview
-                  />
-                  ) : (
-                    <VendorIcon />
-                  )}
-                  <VendorNameAndStatus>
-                    <VendorName>
-                      {vendor.firstName} {vendor.middleName} {vendor.lastName}
-                    </VendorName>
-                    <Status>{vendor.status}</Status>
-                  </VendorNameAndStatus>
-                </VendorInfoContainer>
+        <FormContainer>
+          <VendorDetailsContainer>
+            {vendor ? (
+              <>
+                <VendorProfile>
+                  <VendorInfoContainer>
+                    {vendor.profileImageUrls?.[0] ? (
+                      <VendorImage
+                        src={vendor.profileImageUrls[0]}
+                        alt="Profile"
+                        onClick={() => handleUploadImageClick(vendor.profileImageUrls[0])} // Click to preview
+                      />
+                    ) : (
+                      <VendorIcon />
+                    )}
+                    <VendorNameAndStatus>
+                      <VendorName>
+                        {vendor.firstName} {vendor.middleName} {vendor.lastName}
+                      </VendorName>
+                      <Status status={vendor.status}>{vendor.status}</Status>
+                    </VendorNameAndStatus>
+                  </VendorInfoContainer>
 
-                <ButtonContainer>
-                <ActionButton onClick={() => handleAction('approve')}>APPROVE</ActionButton>
-                <ActionButton onClick={() => handleAction('decline')}>DECLINE</ActionButton>
-                  <ActionButton onClick={handleRequestInfoOpen}>SEND REQUEST</ActionButton>
-                </ButtonContainer>
-              </VendorProfile>
+                  <ButtonContainer>
+                    <ActionButton type="approve" onClick={() => handleAction('approve')} disabled={vendor.status === 'accepted'}>
+                      Approve
+                    </ActionButton>
+                    <ActionButton type="decline" onClick={() => handleAction('decline')} disabled={vendor.status === 'accepted'}>
+                      Decline
+                    </ActionButton>
+                    <ActionButton type="request" onClick={() => handleAction('request')} disabled={vendor.status === 'accepted'}>
+                      Send Request
+                    </ActionButton>
+                  </ButtonContainer>
+                </VendorProfile>
 
-              <HorizontalLine />
+                <HorizontalLine />
 
-              <DetailsContainer>
-                <PersonalInfoContainer>
-                  <VendorTitle>Personal Information</VendorTitle>
-                  <VendorInfo><strong>Full Name:</strong> {vendor.firstName} {vendor.middleName} {vendor.lastName}</VendorInfo>
-                  <VendorInfo><strong>Email:</strong> {vendor.email}</VendorInfo>
-                  <VendorInfo><strong>Contact Number:</strong> {vendor.contactNumber}</VendorInfo>
-                  <VendorInfo><strong>Billing Cycle:</strong> {vendor.billingCycle}</VendorInfo>
-                  <VendorInfo><strong>Date of Registration:</strong> {new Date(vendor.dateOfRegistration).toLocaleDateString()}</VendorInfo>
-                </PersonalInfoContainer>
+                <DetailsContainer>
+                  <PersonalInfoContainer>
+                    <VendorTitle>Personal Information</VendorTitle>
+                    <VendorInfo><strong>Full Name:</strong> {vendor.firstName} {vendor.middleName} {vendor.lastName}</VendorInfo>
+                    <VendorInfo><strong>Email:</strong> {vendor.email}</VendorInfo>
+                    <VendorInfo><strong>Contact Number:</strong> {vendor.contactNumber}</VendorInfo>
+                    <VendorInfo><strong>Billing Cycle:</strong> {vendor.billingCycle}</VendorInfo>
+                    <VendorInfo><strong>Date of Registration:</strong> {new Date(vendor.dateOfRegistration).toLocaleDateString()}</VendorInfo>
+                  </PersonalInfoContainer>
 
-                <StallContainer>
-                  <StallTitle>Stall Information</StallTitle>
-                  <VendorInfo><strong>Stall Number:</strong> {vendor.stallInfo?.stallNumber}</VendorInfo>
-                  <VendorInfo><strong>Stall Size:</strong> {vendor.stallInfo?.stallSize}</VendorInfo>
-                  <VendorInfo><strong>Location:</strong> {vendor.stallInfo?.location}</VendorInfo>
-                </StallContainer>
-              </DetailsContainer>
+                  <StallContainer>
+                    <StallTitle>Stall Information</StallTitle>
+                    <VendorInfo><strong>Stall Number:</strong> {vendor.stallInfo?.stallNumber}</VendorInfo>
+                    <VendorInfo><strong>Stall Size:</strong> {vendor.stallInfo?.stallSize}</VendorInfo>
+                    <VendorInfo><strong>Location:</strong> {vendor.stallInfo?.location}</VendorInfo>
+                  </StallContainer>
+                </DetailsContainer>
 
-              <HorizontalLine />
+                <HorizontalLine />
 
-              <TimelineTitle>Timeline</TimelineTitle>
-              <TimelineContainer>
-                {vendor.timeline && vendor.timeline.map((timelineItem, index) => (
-                  <RequestItem key={index}>
-                    <StatusIcons>
-                      {timelineItem.status === 'requested' || timelineItem.status === 'requested sent' ? (
-                        <FaCheckCircle color="green" />
-                      ) : (
-                        <FaRegCircle color="gray" />
-                      )}
-                      <Divider />
-                      {timelineItem.status === 'requested sent' ? (
-                        <FaCheckCircle color="green" />
-                      ) : (
-                        <FaRegCircle color="gray" />
-                      )}
-                    </StatusIcons>
-                    <RequestInfo>
-                      <h4>Request {index + 1}</h4>
-                      <p>Request Message: {timelineItem.message}</p>
-                      {timelineItem.isSubmitted1 && timelineItem.uploadFile?.length > 0 && (
-                        <UploadedImage
-                          src={timelineItem.uploadFile[0]}
-                          alt={`Uploaded Request ${index + 1}`}
-                          onClick={() => handleUploadImageClick(timelineItem.uploadFile[0])}
-                        />
-                      )}
-                      <RequestTimestamp>
-                      <FaClock style={{ verticalAlign: 'middle', marginRight: '5px' }} />
-                      {new Date(timelineItem.timestamp.seconds * 1000).toLocaleString()}
-                    </RequestTimestamp>
-                    </RequestInfo>
-                  </RequestItem>
-                ))}
-              </TimelineContainer>
+                <TimelineTitle>Timeline</TimelineTitle>
+                <TimelineContainer>
+                  {vendor.timeline && vendor.timeline.map((timelineItem, index) => (
+                    <RequestItem key={index}>
+                      <StatusIcons>
+                        {timelineItem.status === 'requested' || timelineItem.status === 'requested sent' ? (
+                          <FaCheckCircle color="green" />
+                        ) : (
+                          <FaRegCircle color="gray" />
+                        )}
+                        <Divider />
+                        {timelineItem.status === 'requested sent' ? (
+                          <FaCheckCircle color="green" />
+                        ) : (
+                          <FaRegCircle color="gray" />
+                        )}
+                      </StatusIcons>
+                      <RequestInfo>
+                        <h4>Request {index + 1}</h4>
+                        <p>Request Message: {timelineItem.message}</p>
+                        {timelineItem.isSubmitted1 && timelineItem.uploadFile?.length > 0 && (
+                          <UploadedImage
+                            src={timelineItem.uploadFile[0]}
+                            alt={`Uploaded Request ${index + 1}`}
+                            onClick={() => handleUploadImageClick(timelineItem.uploadFile[0])}
+                          />
+                        )}
+                        <RequestTimestamp>
+                          <FaClock style={{ verticalAlign: 'middle', marginRight: '5px' }} />
+                          {new Date(timelineItem.timestamp.seconds * 1000).toLocaleString()}
+                        </RequestTimestamp>
+                      </RequestInfo>
+                    </RequestItem>
+                  ))}
+                </TimelineContainer>
+              </>
+            ) : (
+              <div>Loading vendor details...</div>
+            )}
+          </VendorDetailsContainer>
+        </FormContainer>
 
-            </>
-          ) : (
-            <div>Loading vendor details...</div>
-          )}
-        </VendorDetailsContainer>
         {imagePreview && (
-        <Modal>
-        <ModalContent>
-          <PreviewedImage src={imagePreview} alt="Preview" />
-          <ButtonContainer1>
-            <CloseButton onClick={closeModal}>✖</CloseButton>
-            <DownloadButton onClick={handleDownloadImage}>Download Image</DownloadButton>
-          </ButtonContainer1>
-        </ModalContent>
-      </Modal>
-      )}
+          <Modal>
+            <ModalContent>
+              <PreviewedImage src={imagePreview} alt="Preview" />
+              <ButtonContainer1>
+                <CloseButton onClick={closeModal}>✖</CloseButton>
+                <DownloadButton onClick={handleDownloadImage}>Download Image</DownloadButton>
+              </ButtonContainer1>
+            </ModalContent>
+          </Modal>
+        )}
 
-          {/* Request Info Dialog */}
-          {isDialogOpen && (
+        {/* Request Info Dialog */}
+        {isDialogOpen && (
           <RequestInfoDialog>
             <DialogContent>
               <DialogTitle>Send Request Info</DialogTitle>
@@ -831,16 +1087,72 @@ const EditVerification = () => {
           </SuccessAlertModal>
         )}
 
-        {isSuccessModal && (
-          <SuccessAlertModal>
-            <SuccessAlertContent>
-              <SuccessAlertTitle>Success!</SuccessAlertTitle>
-              <SuccessAlertMessage>{successMessage}</SuccessAlertMessage>
-              <CloseSuccessAlertButton onClick={() => setIsSuccessModal(false)}>Close</CloseSuccessAlertButton>
-            </SuccessAlertContent>
-          </SuccessAlertModal>
+        {showModal && (
+          <ModalOverlay>
+            <ModalContainer>
+              <h2>{actionType === 'approve' ? 'Approve Vendor' : 'Decline Vendor'}</h2>
+              <p>Are you sure you want to {actionType} this vendor?</p>
+              <ModalButton onClick={() => {
+                if (actionType === 'approve') {
+                  handleApprove(vendorId);
+                }
+                setShowModal(false);
+              }}>
+                Confirm
+              </ModalButton>
+              <CancelButton onClick={() => setShowModal(false)} style={{ marginLeft: '10px' }}>
+                Cancel
+              </CancelButton>
+            </ModalContainer>
+          </ModalOverlay>
         )}
 
+        {showDeclineModal && (
+          <ModalOverlay>
+            <ModalContainer>
+              <h2>Decline Vendor</h2>
+              <p>Select a reason for declining:</p>
+              <select
+                value={selectedDeclineReason}
+                onChange={(e) => setSelectedDeclineReason(e.target.value)}
+                style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc', marginBottom: '10px' }}
+              >
+                <option value="">Select a reason</option>
+                {declineReasons.map((reason, index) => (
+                  <option key={index} value={reason}>{reason}</option>
+                ))}
+              </select>
+              <textarea
+                rows="4"
+                value={declineReason}
+                onChange={(e) => {
+                  if (e.target.value.split(/\s+/).length <= 100) {
+                    setDeclineReason(e.target.value);
+                  }
+                }}
+                placeholder="Optional: Enter additional reason here (max 100 words)"
+                style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
+              />
+              <ModalButton onClick={handleDecline} disabled={!selectedDeclineReason && !declineReason}>
+                Confirm Decline
+              </ModalButton>
+              <CancelButton onClick={() => setShowDeclineModal(false)}>
+                Cancel
+              </CancelButton>
+            </ModalContainer>
+          </ModalOverlay>
+        )}
+
+        {isSuccessModal && (
+          <ModalOverlay>
+            <ModalContainer>
+              <h2>{successMessage}</h2>
+              <ModalButton onClick={() => setIsSuccessModal(false)}>
+                OK
+              </ModalButton>
+            </ModalContainer>
+          </ModalOverlay>
+        )}
 
       </MainContent>
     </DashboardContainer>

@@ -45,7 +45,7 @@ const CloseButton = styled.button`
   color: #888;
   cursor: pointer;
   transition: color 0.2s;
-  
+
   &:hover {
     color: #555;
   }
@@ -83,7 +83,7 @@ const CloseButtonStyled = styled.button`
   margin-top: 20px;
   width: 100%;
   transition: background-color 0.2s;
-  
+
   &:hover {
     background-color: #218838; /* Darker green on hover */
   }
@@ -125,6 +125,18 @@ const ConfirmationModal = ({ isOpen, onClose, message, stallHolder }) => {
               <ModalField>
                 <ModalLabel>Date:</ModalLabel>
                 <ModalValue>{stallHolder.date}</ModalValue>
+              </ModalField>
+              <ModalField>
+                <ModalLabel>Approved By:</ModalLabel>
+                <ModalValue>{stallHolder.approvedBy}</ModalValue>
+              </ModalField>
+              <ModalField>
+                <ModalLabel>Contact Number:</ModalLabel>
+                <ModalValue>{stallHolder.contactNumber}</ModalValue>
+              </ModalField>
+              <ModalField>
+                <ModalLabel>Email:</ModalLabel>
+                <ModalValue>{stallHolder.email}</ModalValue>
               </ModalField>
             </>
           )}

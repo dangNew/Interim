@@ -1,4 +1,3 @@
-// StyledComponents.js
 import styled from 'styled-components';
 
 // Sidebar component
@@ -7,7 +6,7 @@ export const Sidebar = styled.div`
   background-color: #f8f9fa;
   padding: 10px;
   display: flex;
-  border: 1px solid #ddd;  /* ADD THIS */
+  border: 1px solid #ddd; /* ADD THIS */
   flex-direction: column;
   justify-content: space-between;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -15,7 +14,7 @@ export const Sidebar = styled.div`
   position: fixed;
   height: 100vh;
   z-index: 100;
-   overflow-y: auto;
+  overflow-y: auto;
 `;
 
 // Profile Header component
@@ -25,7 +24,7 @@ export const ProfileHeader = styled.div`
   padding: 40px 10px;
   position: relative;
   flex-direction: column;
-  text-align: center;  // Add this line to center text
+  text-align: center; // Add this line to center text
 
   .profile-icon {
     font-size: 3rem;
@@ -55,6 +54,7 @@ export const ProfileHeader = styled.div`
     margin-top: 5px; /* Add some margin for spacing */
   }
 `;
+
 // Profile Image component
 export const ProfileImage = styled.img`
   border-radius: 50%;
@@ -84,6 +84,7 @@ export const SearchInput = styled.input`
   margin-left: 10px;
   width: 100%;
 `;
+
 // Sidebar Menu component
 export const SidebarMenu = styled.div`
   list-style-type: none;
@@ -103,7 +104,7 @@ export const SidebarItem = styled.div`
   margin-bottom: 10px;
   margin-top: -10px;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 13px;
   color: ${({ active }) => (active ? 'white' : '#333')};
   background-color: ${({ active }) => (active ? '#007bff' : 'transparent')};
   cursor: pointer;
@@ -114,7 +115,7 @@ export const SidebarItem = styled.div`
   }
 
   .icon {
-    font-size: 1.2rem;  /* Adjust the icon size */
+    font-size: 1.2rem; /* Adjust the icon size */
     color: #000;
     transition: margin-left 0.2s ease;
     width: 30px; /* Fixed width for consistent spacing */
@@ -126,7 +127,6 @@ export const SidebarItem = styled.div`
   }
 `;
 
-
 // Sidebar Footer component
 export const SidebarFooter = styled.div`
   padding: 10px;
@@ -136,3 +136,50 @@ export const SidebarFooter = styled.div`
   justify-content: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
 `;
 
+// New Styled Components for UpdatePayment
+export const FormContainer = styled.div`
+  max-width: 600px; /* Maximum width for the form */
+  margin: 0 auto; /* Center the form */
+  padding: 20px; /* Padding around the form */
+  background-color: #ffffff; /* White background for the form */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+`;
+
+export const StyledInput = styled.input`
+  width: 100%; /* Full width */
+  padding: 12px 15px; /* Padding for input */
+  margin-bottom: 15px; /* Space between inputs */
+  border: 1px solid #ccc; /* Light gray border */
+  border-radius: 4px; /* Rounded corners */
+  font-size: 16px; /* Font size */
+  transition: border-color 0.3s; /* Transition for border color */
+
+  &:focus {
+    border-color: #007bff; /* Change border color on focus */
+    outline: none; /* Remove outline */
+  }
+`;
+
+export const ErrorText = styled.span`
+  color: red; /* Red color for error messages */
+  font-size: 14px; /* Font size for error messages */
+  margin-top: -10px; /* Space above error messages */
+  margin-bottom: 15px; /* Space below error messages */
+`;
+
+export const StyledButton = styled.button`
+  width: 100%; /* Full width */
+  padding: 12px; /* Padding for button */
+  background-color: #007bff; /* Blue background */
+  color: white; /* White text */
+  border: none; /* Remove border */
+  border-radius: 4px; /* Rounded corners */
+  font-size: 16px; /* Font size */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background-color 0.3s; /* Transition for background color */
+
+  &:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+  }
+`;

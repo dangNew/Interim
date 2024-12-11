@@ -1,114 +1,34 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import styled from 'styled-components';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt,FaPlus } from 'react-icons/fa';
-<<<<<<< HEAD
-import { faHome, faShoppingCart, faUser, faUsers, faPlus, faFileContract, faSearch, faTicketAlt, faPen, faTrash, faCheck, faClipboard,faPlusCircle, faCogs} from '@fortawesome/free-solid-svg-icons';
-=======
-<<<<<<< HEAD
-import { faHome, faShoppingCart, faUser, faUsers, faPlus, faFileContract, faSearch, faTicketAlt, faPen, faTrash, faCheck, faClipboard} from '@fortawesome/free-solid-svg-icons';
-=======
-import { faHome, faShoppingCart, faUser, faUsers, faPlus, faFileContract, faSearch, faTicketAlt, faCog, faPen, faTrash, faCheck} from '@fortawesome/free-solid-svg-icons';
->>>>>>> a8f5076 (main)
->>>>>>> d5d5483c3510cc4b45805bc196150e569b84e8be
-import { rentmobileDb } from '../components/firebase.config';
-import { collection, getDocs, doc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import styled from "styled-components";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faSearch,
+  faPen,
+  faTrash
 
+} from "@fortawesome/free-solid-svg-icons";
+import { rentmobileDb } from "../components/firebase.config";
+import {
+  collection,
+  getDocs,
+  doc,
+  updateDoc,
+  deleteDoc,
+  getDoc,
+  setDoc,
+  query,
+  where,
+} from "firebase/firestore";
+import IntSidenav from "./IntSidenav";
 
 const DashboardContainer = styled.div`
   display: flex;
   height: 100vh;
 `;
 
-const Sidebar = styled.div`
-  width: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')};
-  background-color: #f8f9fa;
-  padding: 10px;
-  display: flex;
-  border: 1px solid #ddd;  /* ADD THIS */
-  flex-direction: column;
-  justify-content: space-between;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  transition: width 0.3s ease;
-  position: fixed;
-  height: 100vh;
-  z-index: 100;
-<<<<<<< HEAD
-  overflow: auto  ;
-=======
-  overflow: hidden;
->>>>>>> a8f5076 (main)
-`;
-
-const SidebarMenu = styled.ul`
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-`;
-
-const SidebarItem = styled.li`
-  display: flex;
-  align-items: center;
-  justify-content: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
-  padding: 10px;
-  margin-bottom: 10px;
-  margin-top: -10px;
-  border-radius: 8px;
-  font-size: 14px;
-  color: ${({ active }) => (active ? 'white' : '#333')};
-  background-color: ${({ active }) => (active ? '#007bff' : 'transparent')};
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: ${({ active }) => (active ? '#007bff' : '#f1f3f5')};
-  }
-
-  .icon {
-    font-size: 1rem;  /* Increase the icon size */
-    color: #000;
-    transition: margin-left 0.2s ease;
-  }
-
-  span:last-child {
-    margin-left: 10px;
-    display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'inline' : 'none')};
-  }
-`;
-
-
-const SidebarFooter = styled.div`
-  padding: 10px;
-  margin-top: auto; /* Pushes the footer to the bottom */
-  display: flex;
-  align-items: center;
-  justify-content: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
-`;
-
-const LogoutButton = styled(SidebarItem)`
-  margin-top: 5px; /* Add some margin */
-  background-color: #dc3545; /* Bootstrap danger color */
-  color: white;
-  align-items: center;
-  margin-left: 20px;
-  padding: 5px 15px; /* Add padding for a better button size */
-  border-radius: 5px; /* Rounded corners */
-  font-weight: bold; /* Make text bold */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-  transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transitions */
-
-  &:hover {
-    background-color: #c82333; /* Darker red on hover */
-    transform: scale(1.05); /* Slightly scale up on hover */
-  }
-`;
-
 const ToggleButton = styled.div`
-  display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'none' : 'block')};
+  display: ${({ isSidebarOpen }) => (isSidebarOpen ? "none" : "block")};
   position: absolute;
   top: 5px;
   left: 15px;
@@ -119,145 +39,96 @@ const ToggleButton = styled.div`
 `;
 
 const MainContent = styled.div`
-  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '70px')};
-  padding-left: 40px;
+  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")};
+  padding-left: 10px;
   background-color: #fff;
   padding: 2rem;
-  width: 100%;
-  transition: margin-left 0.3s ease;
+  width: calc(
+    100% - ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")}
+  );
+  transition: margin-left 0.3s ease, width 0.3s ease;
   overflow-y: auto;
 `;
-
-const ProfileHeader = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 40px 10px;
-  position: relative;
-  flex-direction: column;
-
-  .profile-icon {
-    font-size: 3rem;
-    margin-bottom: 15px;
-    color: #6c757d; // Subtle color for icon
-  }
-
-  .profile-name {
-    font-size: 1.2rem;
-    font-weight: 700; // Bolder text
-    color: black; // Darker gray for a professional look
-    display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
-  }
-
-  hr {
-    width: 100%;
-    border: 0.5px solid #ccc;
-    margin-top: 15px;
-  }
-
-  .profile-position {
-    font-size: 1rem; /* Increase the font size */
-    font-weight: 600; /* Make it bold */
-    color: #007bff; /* Change color to blue for better visibility */
-    display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
-    margin-top: 5px; /* Add some margin for spacing */
-  }
-`;
-
-
-const ProfileImage = styled.img`
-  border-radius: 50%;
-  width: 60px; /* Adjusted for better visibility */
-  height: 60px;
-  margin-bottom: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // Subtle shadow for a polished look
-`;
-
 
 const FormContainer = styled.div`
   margin-top: 2rem;
   padding: 1.5rem;
-  border-radius: 10px; /* Less rounded for a more professional look */
+  border-radius: 10px;
   background-color: #ffffff;
   border: 1px solid #ddd;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
-  
+
   h3 {
-    margin-bottom: 1.5rem;
-    font-size: 1.8rem;
-    font-weight: bold;
-    text-align: center;
-    color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.6rem;
   }
 
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 16px;
-    color: #495057; /* Darker text for better contrast */
-    margin-top: 20px;
-    
+    font-size: 14px;
+    border: 1px solid #ddd;
+
     th, td {
-      padding: 12px 15px; /* More padding for better readability */
+      padding: 15px;
       text-align: left;
-      border-bottom: 1px solid #e2e6ea; /* Light border for separation */
-      vertical-align: middle;
+      border-bottom: 2px solid #dee2e6;
+      transition: background-color 0.2s ease;
     }
 
     th {
-      background-color: #f8f9fa; /* Subtle header background */
+      background-color: #e9ecef;
+      font-weight: bold;
       color: #495057;
-      font-weight: 600;
+    }
+
+    td {
+      background-color: #fff;
     }
 
     tr:nth-child(even) {
-      background-color: #f9f9f9; /* Alternating row colors */
+      background-color: #f9f9f9;
     }
 
     tr:hover {
-      background-color: #e9ecef; /* Highlight on hover */
+      background-color: #f1f3f5;
     }
 
     .actions {
-     margin-left: 0px;
+      margin-left: 0px;
       display: flex;
       justify-content: left;
-      gap: 15px; /* Consistent spacing */
+      gap: 15px;
     }
 
     .icon {
-     margin-left: 10px;
+      margin-left: 10px;
       font-size: 20px;
-      color: #007bff; /* Blue icons for better visibility */
+      color: #007bff;
       justify-content: left;
       cursor: pointer;
       transition: color 0.3s ease;
 
       &:hover {
-        color: #0056b3; /* Darker blue on hover */
+        color: #0056b3;
       }
     }
   }
 `;
 
-
-
 const AppBar = styled.div`
-  background-color: #188423; // Set the desired color
-  padding: 40px 50px;
-  color: white;
-  font-size: 1.5rem;
-  font-weight: bold;
-  display: flex;
+  display: left;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+  padding: 40px 50px;
+  background-color: #188423;
+  color: white;
+  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+  font-size: 22px;
+  font-family: "Inter", sans-serif;
+  font-weight: bold;
 `;
-
-
 
 const SearchBarContainer = styled.div`
   display: flex;
@@ -267,7 +138,7 @@ const SearchBarContainer = styled.div`
   border-radius: 20px;
   margin-bottom: 20px;
   margin-top: -25px;
-  display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex' : 'none')};
+  display: ${({ isSidebarOpen }) => (isSidebarOpen ? "flex" : "none")};
 `;
 
 const SearchInput = styled.input`
@@ -277,11 +148,27 @@ const SearchInput = styled.input`
   margin-left: 10px;
   width: 100%;
 `;
+
+const SearchButton = styled.button`
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+`;
+
 const AddTicketButton = styled.button`
   display: inline-flex;
   align-items: center;
   padding: 10px 20px;
-  background-color: #28a745; /* Green color */
+  background-color: #28a745;
   color: white;
   border: none;
   border-radius: 5px;
@@ -292,7 +179,7 @@ const AddTicketButton = styled.button`
   transition: background-color 0.3s ease;
 
   &:hover {
-    background-color: #218838; /* Darker green on hover */
+    background-color: #218838;
   }
 
   .icon {
@@ -342,7 +229,6 @@ const CancelButton = styled(ModalButton)`
   }
 `;
 
-
 const EditButton = styled.button`
   background-color: #28a745;
   color: white;
@@ -374,332 +260,248 @@ const DeleteButton = styled.button`
   }
 `;
 
+const ButtonDelete = styled.button`
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #c82333;
+  }
+`;
+
+const ButtonCancel = styled.button`
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #5a6268;
+  }
+`;
+
 const Dashboard = () => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const sidebarRef = useRef(null);
-    const [loggedInUser, setLoggedInUser] = useState(null);
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const navigate = useNavigate();
-    const [rates, setRates] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedRateId, setSelectedRateId] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const sidebarRef = useRef(null);
+  const [loggedInUser, setLoggedInUser] = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const navigate = useNavigate();
+  const [rates, setRates] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRateId, setSelectedRateId] = useState(null);
 
-    useEffect(() => {
-      const fetchRates = async () => {
-        try {
-          const ratesCollection = collection(rentmobileDb, 'rate');
-          const ratesSnapshot = await getDocs(ratesCollection);
-          const ratesList = ratesSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          setRates(ratesList);
-        } catch (error) {
-          console.error('Error fetching rates: ', error);
+  useEffect(() => {
+    const checkAndCreateRateCollection = async () => {
+      try {
+        const ratesCollection = collection(rentmobileDb, "rate");
+        const ratesSnapshot = await getDocs(ratesCollection);
+
+        if (ratesSnapshot.empty) {
+          await setDoc(doc(ratesCollection), {});
         }
-      };
-  
-      fetchRates();
-    }, [])
-    
-      const handleEdit = (id) => {
-        // Navigate to the /ticketEdit route with the ticket ID as a parameter
-        navigate(`/ticketEdit/${id}`);
-      };
-      
-    
-      
 
+        const ratesList = ratesSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setRates(ratesList);
+      } catch (error) {
+        console.error("Error checking/creating rate collection: ", error);
+      }
+    };
 
-    const fetchRates = async () => {
-        try {
-          const ratesCollection = collection(rentmobileDb, 'rate');
-          const ratesSnapshot = await getDocs(ratesCollection);
-          const ratesList = ratesSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          setRates(ratesList);
-        } catch (error) {
-          console.error('Error fetching rates: ', error);
-        }
-      };
-    
-      useEffect(() => {
-        fetchRates();
-      }, []);
+    checkAndCreateRateCollection();
+  }, []);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      console.log("Fetching user data");
+      const loggedInUserData = JSON.parse(localStorage.getItem("userData"));
+      if (loggedInUserData) {
+        const usersCollection = collection(rentmobileDb, "admin_users");
+        const userDocs = await getDocs(usersCollection);
+        const users = userDocs.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        const currentUser = users.find(
+          (user) => user.email === loggedInUserData.email
+        );
+        setLoggedInUser(currentUser || loggedInUserData);
+        console.log("User data fetched:", currentUser || loggedInUserData);
+      } else {
+        console.log("No user data found in localStorage");
+        navigate("/login");
+      }
+    };
+
+    fetchUserData();
+  }, [navigate]);
+
+  const handleEdit = (id) => {
+    navigate(`/ticketEdit/${id}`);
+  };
+
+  const fetchRates = async () => {
+    try {
+      const ratesCollection = collection(rentmobileDb, "rate");
+      const ratesSnapshot = await getDocs(ratesCollection);
+      const ratesList = ratesSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setRates(ratesList);
+    } catch (error) {
+      console.error("Error fetching rates: ", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchRates();
+  }, []);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
   const handleAddTicket = () => {
     setLoading(true);
-    navigate('/newticket');
+    navigate("/newticket");
   };
 
   const handleClickOutside = (event) => {
-    
+    if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+      setIsSidebarOpen(false);
+    }
   };
 
   useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
-  
+  const handleMainContentClick = () => {
+    setIsSidebarOpen(false);
+  };
+
   const handleLogout = () => {
-   
-    localStorage.removeItem('userData'); 
-    navigate('/login');
+    console.log("handleLogout called");
+    localStorage.removeItem("userData");
+    navigate("/login");
   };
 
   const openModal = (id) => {
     setSelectedRateId(id);
     setIsModalOpen(true);
   };
-  
+
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedRateId(null);
   };
 
-
   const handleDelete = async (id) => {
     try {
-      const rateDocRef = doc(rentmobileDb, 'rate', id);
+      const rateDocRef = doc(rentmobileDb, "rate", id);
       await deleteDoc(rateDocRef);
-      setRates(rates.filter(rate => rate.id !== id)); // Update the state to remove the deleted item
-      closeModal(); // Close the modal after deletion
+      setRates(rates.filter((rate) => rate.id !== id));
+      closeModal();
     } catch (error) {
-      console.error('Error deleting rate: ', error); // You can keep this if needed for error handling
+      console.error("Error deleting rate: ", error);
     }
   };
-  
-
 
   const handleDropdownToggle = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-    
+  const handleSearch = async () => {
+    setLoading(true);
+    try {
+      const querySnapshot = await getDocs(
+        query(collection(rentmobileDb, "rate"), where("name", ">=", searchTerm), where("name", "<=", searchTerm + "\uf8ff"))
+      );
+
+      const filteredRates = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      setRates(filteredRates);
+    } catch (error) {
+      console.error("Error searching rates:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (searchTerm) {
+        handleSearch();
+      } else {
+        fetchRates();
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
+
   return (
-
-
     <DashboardContainer>
-        <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
-        <Link to="/profile" style={{ textDecoration: 'none' }}>
-        <ProfileHeader isSidebarOpen={isSidebarOpen}>
-          {loggedInUser && loggedInUser.Image ? (
-            <ProfileImage src={loggedInUser.Image} alt={`${loggedInUser.firstName} ${loggedInUser.lastName}`} />
-          ) : (
-            <FaUserCircle className="profile-icon" />
-          )}
-          <span className="profile-name">{loggedInUser ? `${loggedInUser.firstName} ${loggedInUser.lastName}` : 'Guest'}</span>
-          
-          <span className="profile-email" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
-            {loggedInUser ? loggedInUser.email : ''}
-          </span>
-          
-          {/* Add position below the email */}
-          <span className="profile-position" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
-            {loggedInUser ? loggedInUser.position : ''}
-          </span>
-        </ProfileHeader>
-      </Link>
+      <div ref={sidebarRef}>
+        <IntSidenav
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
+          loggedInUser={loggedInUser}
+        />
+      </div>
+      <MainContent
+        isSidebarOpen={isSidebarOpen}
+        onClick={handleMainContentClick}
+      >
+        <AppBar>
+          <div className="title">OFFICE OF THE CITY MARKETS</div>
+        </AppBar>
 
-
-        <SearchBarContainer isSidebarOpen={isSidebarOpen}>
-          <FaSearch />
-          <SearchInput type="text" placeholder="Search..." />
-        </SearchBarContainer>
-        
-        <SidebarMenu>
-  <Link to="/dashboard" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faHome} className="icon" />
-      <span>Dashboard</span>
-    </SidebarItem>
-  </Link>
-  
-  <Link to="/list" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faShoppingCart} className="icon" />
-      <span>List of Vendors</span>
-    </SidebarItem>
-  </Link>
-<<<<<<< HEAD
-  <Link to="/listofstalls" style={{ textDecoration: 'none' }}>
-=======
-<<<<<<< HEAD
-  <Link to="/stalls" style={{ textDecoration: 'none' }}>
->>>>>>> d5d5483c3510cc4b45805bc196150e569b84e8be
-  <SidebarItem isSidebarOpen={isSidebarOpen}>
-    <FontAwesomeIcon icon={faClipboard} className="icon" />
-    <span>List of Stalls</span>
-  </SidebarItem>
-</Link>
-=======
->>>>>>> a8f5076 (main)
-
-  <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faUser} className="icon" />
-    <span>User Management</span>
-  </SidebarItem>
-
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/usermanagement" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span>View Users</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/newuser" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlus} className="icon" />
-            <span>Add User</span>
-          </SidebarItem>
-        </li>
-      </Link>
-    </ul>
-  )}
-
-<<<<<<< HEAD
-  <Link to="/viewunit" style={{ textDecoration: 'none' }}>
-=======
-  <Link to="/Addunit" style={{ textDecoration: 'none' }}>
->>>>>>> a8f5076 (main)
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faPlus} className="icon" />
-      <span>Add New Unit</span>
-    </SidebarItem>
-  </Link>
-
-  <Link to="/appraise" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faUsers} className="icon" />
-      <span>Manage Appraisal</span>
-    </SidebarItem>
-  </Link>
-
-  <Link to="/contract" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faFileContract} className="icon" />
-      <span>Contract</span>
-    </SidebarItem>
-  </Link>
-
-  <Link to="/ticket" style={{ textDecoration: 'none' }}>
-  <SidebarItem isSidebarOpen={isSidebarOpen}>
-    <FontAwesomeIcon icon={faTicketAlt} className="icon" />
-    <span>Manage Ticket</span>
-  </SidebarItem>
-</Link>
-<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faCogs} className="icon" />
-    <span>Manage Zone</span>
-  </SidebarItem>
-
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/addzone" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
-            <span> Add Zone</span>
-          </SidebarItem>
-        </li>
-      </Link>
-<<<<<<< HEAD
-      <Link to="/viewzone" style={{ textDecoration: 'none' }}>
-=======
-<<<<<<< HEAD
-      <Link to="/View" style={{ textDecoration: 'none' }}>
->>>>>>> d5d5483c3510cc4b45805bc196150e569b84e8be
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-          <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span> View Zone</span>
-          </SidebarItem>
-        </li>
-      </Link>
-    
-    </ul>
-  )}
-<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faUser} className="icon" />
-    <span>Manage Space</span>
-  </SidebarItem>
-
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/addspace" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
-            <span> Add Space</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/viewspace" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-          <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span> View Space</span>
-          </SidebarItem>
-        </li>
-      </Link>
-=======
->>>>>>> a8f5076 (main)
-      <Link to="/addcollector" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlus} className="icon" />
-            <span>Add Ambulant Collector</span>
-          </SidebarItem>
-        </li>
-      </Link>
-    </ul>
-  )}
-</SidebarMenu>
-<<<<<<< HEAD
-=======
-
->>>>>>> a8f5076 (main)
-      <SidebarFooter isSidebarOpen={isSidebarOpen}>
-          <LogoutButton isSidebarOpen={isSidebarOpen} onClick={handleLogout}>
-            <span><FaSignOutAlt /></span>
-            <span>Logout</span>
-          </LogoutButton>
-        </SidebarFooter>
-      </Sidebar>
-
-        <MainContent isSidebarOpen={isSidebarOpen}>
-        
-          <ToggleButton onClick={toggleSidebar}>
-            <FaBars />
-          </ToggleButton>
-          
-        
-          <AppBar>
-        <div className="title">INTERIM</div>
-      </AppBar>
-         
-          <ProfileHeader>
-            <h1>Manage Ticket</h1>
-          </ProfileHeader>
+        <FormContainer>
+          <h3>Manage Rates</h3>
+          {/* Search Input and Button */}
+          <div style={{ display: "flex", marginBottom: "20px" }}>
+            <input
+              type="text"
+              placeholder="Search by Ticket Name"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                padding: "10px",
+                flex: "1",
+                marginRight: "10px",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+              }}
+            />
+            <SearchButton onClick={handleSearch} disabled={loading}>
+              <FontAwesomeIcon icon={faSearch} />
+            </SearchButton>
+          </div>
           <AddTicketButton onClick={handleAddTicket} disabled={loading}>
-  {loading ? 'Loading...' : 'Add New Ticket'}
-</AddTicketButton>
-
-          <FormContainer>
-          
+            {loading ? "Loading..." : "Add New Ticket"}
+          </AddTicketButton>
           <table>
             <thead>
               <tr>
@@ -710,41 +512,52 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody>
-  {rates.map(rate => (
-    <tr key={rate.id}>
-      <td>{rate.fee_name}</td>
-      <td>{rate.fee_rate}</td>
-      <td>{new Date(rate.dateIssued).toLocaleDateString()}</td>
-      <td className="actions">
+              {rates.map((rate) => (
+                <tr key={rate.id}>
+                  <td>{rate.name || "N/A"}</td>
+                  <td>{rate.rate || "N/A"}</td>
+                  <td>
+                    {rate.dateIssued && rate.dateIssued.seconds
+                      ? new Date(
+                          rate.dateIssued.seconds * 1000
+                        ).toLocaleDateString()
+                      : "N/A"}
+                  </td>
+                  <td className="actions">
                     <EditButton onClick={() => handleEdit(rate.id)}>
-                      <FontAwesomeIcon icon={faPen} style={{ marginRight: '5px' }} />
+                      <FontAwesomeIcon
+                        icon={faPen}
+                        style={{ marginRight: "5px" }}
+                      />
                       Edit
                     </EditButton>
                     <DeleteButton onClick={() => openModal(rate.id)}>
-                      <FontAwesomeIcon icon={faTrash} style={{ marginRight: '5px' }} />
+                      <FontAwesomeIcon
+                        icon={faTrash}
+                        style={{ marginRight: "5px" }}
+                      />
                       Delete
                     </DeleteButton>
                   </td>
-    </tr>
-  ))}
-</tbody>
+                </tr>
+              ))}
+            </tbody>
           </table>
 
           {isModalOpen && (
-  <ModalOverlay>
-    <ModalContainer>
-  <h3>Are you sure you want to delete this rate?</h3>
-  <DeleteButton onClick={() => handleDelete(selectedRateId)}>Delete</DeleteButton>
-  <CancelButton onClick={closeModal}>Cancel</CancelButton>
-</ModalContainer>
-
-  </ModalOverlay>
-)}
-
+            <ModalOverlay>
+              <ModalContainer>
+                <h3>Are you sure you want to delete this rate?</h3>
+                <ButtonDelete onClick={() => handleDelete(selectedRateId)}>
+                  Delete
+                </ButtonDelete>
+                <ButtonCancel onClick={closeModal}>Cancel</ButtonCancel>
+              </ModalContainer>
+            </ModalOverlay>
+          )}
         </FormContainer>
-
       </MainContent>
-      </DashboardContainer>
+    </DashboardContainer>
   );
 };
 

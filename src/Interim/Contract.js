@@ -782,7 +782,7 @@ const Contract = () => {
           <ToggleButton onClick={toggleSidebar}>
             <FaBars />
           </ToggleButton>
-          <div>LIST OF VENDORS</div>
+          <div>OFFICE OF THE CITY MARKETS</div>
         </AppBar>
 
         <ToggleButton isSidebarOpen={isSidebarOpen} onClick={toggleSidebar}>

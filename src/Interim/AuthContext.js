@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Firebase listener to track auth state changes
     const unsubscribe = onAuthStateChanged(interimAuth, (user) => {
+      console.log("Auth state changed:", user); // Log the auth state change
       setCurrentUser(user);
       setLoading(false);
     });

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { FaSearch, FaBars, FaPencilAlt, FaTrash } from 'react-icons/fa';
+import { FaSearch, FaBars, FaPencilAlt } from 'react-icons/fa';
 import styled from 'styled-components';
-import { collection, getDocs, doc, getDoc, deleteDoc } from 'firebase/firestore';
-import { interimAuth, stallholderDb, interimDb } from '../components/firebase.config'; 
-import SideNav from './side_nav'; 
-import { useNavigate } from 'react-router-dom'; 
+import { collection, getDocs, doc, updateDoc, query, where } from 'firebase/firestore';
+import { rentmobileDb } from '../components/firebase.config';
+import SideNav from './side_nav';
+import { useNavigate } from 'react-router-dom';
+import ReactSwitch from 'react-switch';
 
 const DashboardContainer = styled.div`
   display: flex;
@@ -49,7 +50,6 @@ const ToggleButton = styled.div`
   z-index: 200;
 `;
 
-
 const TableContainer = styled.div`
   width: 100%;
   overflow-x: auto;
@@ -58,34 +58,47 @@ const TableContainer = styled.div`
   table {
     width: 100%;
     border-collapse: collapse;
-    background-color: #fff;
+    font-size: 14px;
 
     th, td {
       padding: 15px;
       text-align: left;
-      border-bottom: 1px solid #ddd;
-      font-family: 'Inter', sans-serif; // Use a consistent font
-
-      &:first-child {
-        border-top-left-radius: 8px;
-        border-bottom-left-radius: 8px;
-      }
-
-      &:last-child {
-        border-top-right-radius: 8px;
-        border-bottom-right-radius: 8px;
-      }
+      border-bottom: 2px solid #dee2e6;
     }
 
     th {
-      background-color: #188423;
-      color: white;
-      font-weight: bold;
-      font-size: 16px;
+      background-color: #e9ecef;
     }
 
-    tr:hover {
-      background-color: #f5f5f5;
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    tr:nth-child(odd) {
+      background-color: #ffffff;
+    }
+
+    .actions {
+      display: flex;
+      gap: 5px;
+    }
+
+    .action-button {
+      display: flex;
+      align-items: center;
+      border: none;
+      background: none;
+      cursor: pointer;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: #0056b3;
+      }
+
+      .icon {
+        font-size: 24px;
+        color: black;
+      }
     }
   }
 `;
@@ -94,99 +107,57 @@ const SummaryContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #e9f7e3;
-  padding: 15px;
-  border-radius: 8px;
-  font-size: 18px;
-  font-weight: bold;
-  color: #188423;
-  margin-bottom: 20px;
-  border: 2px solid #188423;
-`;
-
-const ActionIcon = styled.button`
-  background: none; /* No background */
-  border: none; /* No border */
-  cursor: pointer; /* Pointer cursor */
-  color: ${({ isDelete }) => (isDelete ? '#d9534f' : '#188423')}; /* Red for delete, green for edit */
-  font-size: 1.5rem; /* Font size for icons */
-  transition: transform 0.2s;
-
-  &:hover {
-    transform: scale(1.1); /* Slightly enlarge the icon on hover */
-  }
-
-  &:focus {
-    outline: none; /* Remove focus outline */
-  }
-`;
-
-
-
-const SummaryText = styled.div`
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-  color: #188423;
+  margin-bottom: 30px;
 
   h3 {
     margin: 0;
     font-size: 22px;
     font-weight: bold;
+    color: #188423;
   }
 
   p {
     margin: 0;
     color: #888;
-    font-size: 14px;
+    font-size: 18px;
+    margin-right: 5px;
   }
 `;
 
-const FilterButton = styled.div`
-  position: relative;
-  display: inline-block;
+const ControlsContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
 `;
 
-const DropdownButton = styled.button`
-  background-color: #188423;
+const AddVendorButton = styled.button`
+  background-color: blue;
   color: white;
   border: none;
   padding: 10px 20px;
-  font-size: 16px;
-  border-radius: 8px;
+  border-radius: 15px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
 
   &:hover {
-    background-color: #145c17;
+    background-color: #146c1f;
   }
 `;
 
-const DropdownMenu = styled.div`
-  position: absolute;
-  top: 40px;
-  right: 0;
-  background-color: white;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  width: 200px;
+const DeclinedVendorsButton = styled.button`
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
 
-  ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-
-    li {
-      padding: 10px;
-      cursor: pointer;
-
-      &:hover {
-        background-color: #f0f0f0;
-      }
-    }
+  &:hover {
+    background-color: #e53935;
   }
 `;
 
@@ -196,8 +167,69 @@ const SearchBarContainer = styled.div`
   padding: 10px;
   background-color: #e9ecef;
   border-radius: 20px;
-  width: 100%;
+  width: 250px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+`;
+
+const FormContainer = styled.div`
+  margin-top: 2rem;
+  padding: 1rem;
+  border-radius: 20px;
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
+
+  h3 {
+    margin-bottom: 1rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+
+    th, td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 2px solid #dee2e6;
+    }
+
+    th {
+      background-color: #e9ecef;
+    }
+
+    // Striped rows
+    tr:nth-child(even) {
+      background-color: #f2f2f2; // Light gray for even rows
+    }
+
+    tr:nth-child(odd) {
+      background-color: #ffffff; // White for odd rows
+    }
+
+    .actions {
+      display: flex;
+      gap: 5px; /* Space between the buttons */
+    }
+
+    .action-button {
+      display: flex;
+      align-items: center;
+      border: none;
+      background: none;
+      cursor: pointer;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: #0056b3; /* Darken on hover */
+      }
+
+      .icon {
+        font-size: 24px; /* Increase icon size */
+        color: black;
+      }
+    }
+  }
 `;
 
 const SearchInput = styled.input`
@@ -205,7 +237,7 @@ const SearchInput = styled.input`
   background: none;
   outline: none;
   margin-left: 10px;
-  width: 100%;
+  width: calc(100% - 30px);
   font-size: 16px;
   color: #333;
 `;
@@ -239,29 +271,10 @@ const OICListOfVendors = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [loggedInUser, setLoggedInUser] = useState(null);
-  const [selectedLocation, setSelectedLocation] = useState('All Locations');
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [unitNames, setUnitNames] = useState([]); // New state for unit names
   const navigate = useNavigate();
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen);
-  };
-
-  const handleLocationSelect = (location) => {
-    setSelectedLocation(location);
-    setIsDropdownOpen(false);
-
-    if (location === 'All Locations') {
-      setFilteredStallHolders(stallHolders);
-    } else {
-      const filtered = stallHolders.filter(stall => stall.location === location);
-      setFilteredStallHolders(filtered);
-    }
   };
 
   const handleSearch = (term) => {
@@ -269,8 +282,7 @@ const OICListOfVendors = () => {
     const filtered = stallHolders.filter(stall =>
       (stall.firstName.toLowerCase().includes(term.toLowerCase()) ||
       stall.lastName.toLowerCase().includes(term.toLowerCase()) ||
-      stall.stallNumber.includes(term)) &&
-      (selectedLocation === 'All Locations' || stall.location === selectedLocation)
+      stall.stallNumber.includes(term))
     );
     setFilteredStallHolders(filtered);
   };
@@ -281,12 +293,9 @@ const OICListOfVendors = () => {
 
   useEffect(() => {
     const fetchLoggedInUser = async () => {
-      const user = interimAuth.currentUser;
-      if (user) {
-        const userDoc = await getDoc(doc(interimDb, 'users', user.uid));
-        if (userDoc.exists()) {
-          setLoggedInUser(userDoc.data());
-        }
+      const userData = JSON.parse(localStorage.getItem('userData'));
+      if (userData) {
+        setLoggedInUser(userData);
       }
     };
 
@@ -294,123 +303,117 @@ const OICListOfVendors = () => {
   }, []);
 
   useEffect(() => {
-    const fetchUnitNames = async () => {
-      const unitSnapshot = await getDocs(collection(stallholderDb, 'units'));
-      const units = unitSnapshot.docs.map(doc => doc.data().unitName);
-      setUnitNames(units);
-    };
-
     const fetchData = async () => {
-      const querySnapshot = await getDocs(collection(stallholderDb, 'approvedVendors'));
+      const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
+      const userLocation = loggedInUserData?.location || '';
+
+      const querySnapshot = await getDocs(query(
+        collection(rentmobileDb, 'approvedVendors'),
+        where('stallInfo.location', '==', userLocation)
+      ));
       const data = querySnapshot.docs.map((doc) => {
         const stallInfo = doc.data().stallInfo || {};
         const dateOfRegistration = doc.data().dateOfRegistration
           ? doc.data().dateOfRegistration.toDate().toLocaleDateString()
           : '';
-
         return {
           id: doc.id,
+          firstName: doc.data().firstName,
+          lastName: doc.data().lastName,
           stallNumber: stallInfo.stallNumber || '',
-          firstName: doc.data().firstName || '',
-          lastName: doc.data().lastName || '',
-          dateOfRegistration,
           location: stallInfo.location || '',
+          dateOfRegistration,
+          status: doc.data().status || 'accepted' // Include the status field
         };
       });
-
       setStallHolders(data);
-      setFilteredStallHolders(data); // Initialize filtered list
+      setFilteredStallHolders(data);
     };
 
-    fetchUnitNames();
     fetchData();
   }, []);
 
-  const handleDelete = async (stallId) => {
-    const confirmDelete = window.confirm('Are you sure you want to delete this vendor?');
-    if (confirmDelete) {
-      try {
-        await deleteDoc(doc(stallholderDb, 'approvedVendors', stallId));
-        setFilteredStallHolders(filteredStallHolders.filter(stall => stall.id !== stallId));
-        setStallHolders(stallHolders.filter(stall => stall.id !== stallId)); // Update the original list too
-      } catch (error) {
-        console.error('Error deleting vendor:', error);
-      }
-    }
+  const handleStatusChange = async (stallId, isActive) => {
+    const status = isActive ? 'accepted' : 'inactive';
+    const stallRef = doc(rentmobileDb, 'approvedVendors', stallId);
+    await updateDoc(stallRef, { status });
+    setStallHolders(prevStallHolders =>
+      prevStallHolders.map(stall =>
+        stall.id === stallId ? { ...stall, status } : stall
+      )
+    );
+    setFilteredStallHolders(prevStallHolders =>
+      prevStallHolders.map(stall =>
+        stall.id === stallId ? { ...stall, status } : stall
+      )
+    );
   };
-  
 
   return (
     <DashboardContainer>
       <SideNav isSidebarOpen={isSidebarOpen} loggedInUser={loggedInUser} />
       <ToggleButton onClick={toggleSidebar}>
-          <FaBars />
-        </ToggleButton>
+        <FaBars />
+      </ToggleButton>
       <MainContent isSidebarOpen={isSidebarOpen}>
         <AppBar>
           <ToggleButton isSidebarOpen={isSidebarOpen} onClick={toggleSidebar}>
             <FaBars />
           </ToggleButton>
-          <div>{loggedInUser?.name || 'User'}</div>
+          <div>{loggedInUser?.name || 'Manage Stall Holders'}</div>
         </AppBar>
+        <FormContainer>
+          <SummaryContainer>
+            <ControlsContainer>
+              <p>{filteredStallHolders.length} Vendors</p>
+              <SearchBar onSearch={handleSearch} />
+              <AddVendorButton onClick={() => navigate('/available')}>
+                Add New Vendor
+              </AddVendorButton>
+              <DeclinedVendorsButton onClick={() => navigate('/declined-vendors')}>
+                Declined Vendors
+              </DeclinedVendorsButton>
+            </ControlsContainer>
+          </SummaryContainer>
 
-        <SummaryContainer>
-          <SummaryText>
-            <h3>Stall Holders List</h3>
-            <p>Total: {filteredStallHolders.length}</p>
-          </SummaryText>
-          <FilterButton>
-            <DropdownButton onClick={toggleDropdown}>
-              {selectedLocation} <span style={{ marginLeft: '10px' }}>▼</span>
-            </DropdownButton>
-            {isDropdownOpen && (
-              <DropdownMenu>
-                <ul>
-                  <li onClick={() => handleLocationSelect('All Locations')}>All Locations</li>
-                  {unitNames.map((unitName, index) => (
-                    <li key={index} onClick={() => handleLocationSelect(unitName)}>
-                      {unitName}
-                    </li>
-                  ))}
-                </ul>
-              </DropdownMenu>
-            )}
-          </FilterButton>
-        </SummaryContainer>
-
-        <SearchBar onSearch={handleSearch} />
-
-        <TableContainer>
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Stall Number</th>
-                <th>Date of Registration</th>
-                <th>Location</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredStallHolders.map((stallHolder) => (
-                <tr key={stallHolder.id}>
-                  <td>{`${stallHolder.firstName} ${stallHolder.lastName}`}</td>
-                  <td>{stallHolder.stallNumber}</td>
-                  <td>{stallHolder.dateOfRegistration}</td>
-                  <td>{stallHolder.location}</td>
-                  <td>
-                  <ActionIcon onClick={() => handleEditClick(stallHolder.id)}>
-                    <FaPencilAlt />
-                  </ActionIcon>
-                  <ActionIcon isDelete onClick={() => handleDelete(stallHolder.id)}>
-                    <FaTrash />
-                  </ActionIcon>
-                </td>
+          <TableContainer>
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Stall Number</th>
+                  <th>Date of Registration</th>
+                  <th>Location</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </TableContainer>
+              </thead>
+              <tbody>
+                {filteredStallHolders.map((stallHolder) => (
+                  <tr key={stallHolder.id}>
+                    <td>{`${stallHolder.firstName} ${stallHolder.lastName}`}</td>
+                    <td>{stallHolder.stallNumber}</td>
+                    <td>{stallHolder.dateOfRegistration}</td>
+                    <td>{stallHolder.location}</td>
+                    <td className="actions">
+                      <div className="action-button">
+                        <ReactSwitch
+                          onChange={(checked) => handleStatusChange(stallHolder.id, checked)}
+                          checked={stallHolder.status === 'accepted'}
+                          uncheckedIcon={false}
+                          checkedIcon={false}
+                          handleDiameter={20}
+                        />
+                      </div>
+                      <div className="action-button" onClick={() => handleEditClick(stallHolder.id)}>
+                        <FaPencilAlt className="icon" style={{ color: 'green' }} />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </TableContainer>
+        </FormContainer>
       </MainContent>
     </DashboardContainer>
   );

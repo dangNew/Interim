@@ -1,313 +1,353 @@
-import React, { useState, useRef, useEffect } from 'react';
-import './Profile.css';  
-import { Link } from 'react-router-dom';
-import { FaBars, FaSearch, FaUserCircle } from 'react-icons/fa';
-import styled from 'styled-components';
-import { getDownloadURL, ref } from 'firebase/storage';
-import { collection, addDoc, setDoc, doc, getDoc } from 'firebase/firestore';
-import { interimDb, interimStorage } from '../components/firebase.config';
+import React, { useEffect, useState } from "react";
+import styled, { keyframes } from "styled-components";
+import {
+  stallholderDb,
+  stallholderStorage,
+  stallholderAuth,
+} from "../components/firebase.config"; // Import the Firebase configuration
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { updateEmail, updatePassword } from "firebase/auth";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import eye icons
 
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+`;
 
-// Styled components for Sidebar and Main Content
 const ProfileContainer = styled.div`
-  display: flex;
-  height: 100vh;
-  background: #f4f7f9; /* Light gray background for a modern look */
-  font-family: 'Inter', sans-serif; /* Use Inter font */
-`;
-
-const Sidebar = styled.div`
-  width: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')};
-  background-color: #f8f9fa;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  transition: width 0.3s ease;
-  position: fixed;
-  height: 100vh;
-  z-index: 100;
-  overflow: hidden;
-`;
-
-const SidebarMenu = styled.ul`
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-`;
-
-const SidebarItem = styled.li`
-  display: flex;
-  align-items: center;
-  justify-content: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 8px;
-  font-size: 14px;
-  color: ${({ active }) => (active ? 'white' : '#333')};
-  background-color: ${({ active }) => (active ? '#007bff' : 'transparent')};
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: ${({ active }) => (active ? '#007bff' : '#f1f3f5')};
-  }
-
-  span:first-child {
-    margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? '10px' : '0px')};
-    font-size: 1.2rem;
-    color: #000;
-    transition: margin-left 0.2s ease;
-  }
-
-  span:last-child {
-    margin-left: 10px;
-    display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'inline' : 'none')};
-  }
-`;
-
-const ToggleButton = styled.div`
-  display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'none' : 'block')};
-  position: absolute;
-  top: 5px;
-  left: 15px;
-  font-size: 1.8rem;
-  color: #333;
-  cursor: pointer;
-  z-index: 200;
-`;
-
-const MainContent = styled.div`
-  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '70px')};
-  padding-left: 40px;
-  background-color: #fff;
-  padding: 2rem;
-  width: 100%;
-  transition: margin-left 0.3s ease;
-  overflow-y: auto;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 700px;
+  margin: 50px auto;
+  animation: ${fadeIn} 0.5s ease-in-out;
 `;
 
 const ProfileHeader = styled.div`
   display: flex;
   align-items: center;
-  padding: 40px 10px;
-  border-bottom: 1px solid #dee2e6;
-  position: relative;
-
-  .profile-icon {
-    font-size: 2rem;
-    margin-right: 10px;
-  }
-
-  .profile-name {
-    font-size: 1rem;
-    font-weight: 600;
-    display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
-  }
-`;
-
-const Divider = styled.hr`
-  border: 0;
-  height: 1px;
-  background-color: #dee2e6;
-  margin: 10px 0;
-`;
-
-const SearchBarContainer = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  background-color: #e9ecef;
-  border-radius: 20px;
-  margin-bottom: 20px;
-  display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex' : 'none')};
-`;
-
-const SearchInput = styled.input`
-  border: none;
-  background: none;
-  outline: none;
-  margin-left: 10px;
-  width: 100%;
+  margin-bottom: 30px;
 `;
 
 const ProfileImage = styled.img`
-  width: 150px;
-  height: 150px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
-  object-fit: cover;
+  margin-right: 30px;
+  border: 2px solid #ddd;
+`;
+
+const ProfileInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const ProfileName = styled.h2`
+  margin: 0;
+  font-size: 1.8rem;
+  color: #333;
+`;
+
+const ProfileEmail = styled.p`
+  margin: 5px 0;
+  color: #6c757d;
+  font-size: 1rem;
+`;
+
+const ProfilePosition = styled.p`
+  margin: 5px 0;
+  color: #6c757d;
+  font-size: 1rem;
+`;
+
+const ProfileDetails = styled.div`
+  margin-top: 30px;
+`;
+
+const ProfileDetailItem = styled.div`
   margin-bottom: 20px;
 `;
 
-const Profile = () => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const [profileData, setProfileData] = useState({});
-    const [profileImageURL, setProfileImageURL] = useState(null);
-    const sidebarRef = useRef(null);
+const ProfileLabel = styled.span`
+  font-weight: bold;
+  margin-right: 10px;
+  color: #333;
+`;
 
-    const userId = 'user-id'; // Replace with dynamic user ID if available
-    const profileImagePath = 'path/to/profile-image.jpg'; // Replace with dynamic image path if needed
+const ProfileValue = styled.span`
+  color: #6c757d;
+  font-size: 1rem;
+`;
 
-    useEffect(() => {
-        // Fetch user data from Firestore
-        const fetchUserData = async () => {
-            try {
-                const docRef = doc(interimDb, 'users', userId); // Use the appropriate user ID
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    setProfileData(docSnap.data());
-                } else {
-                    console.log('No such document!');
-                }
-            } catch (error) {
-                console.error('Error fetching user data:', error);
-            }
-        };
+const EditButton = styled.button`
+  background-color: #28a745; /* Green color */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 12px 24px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background-color 0.3s ease;
 
-        // Fetch profile image URL from Storage
-        const fetchProfileImage = async () => {
-            try {
-                const imageRef = ref(interimStorage, profileImagePath); // Adjust the path
-                const url = await getDownloadURL(imageRef);
-                setProfileImageURL(url);
-            } catch (error) {
-                console.error('Error fetching profile image URL:', error);
-            }
-        };
+  &:hover {
+    background-color: #218838; /* Darker green on hover */
+  }
+`;
 
-        fetchUserData();
-        fetchProfileImage();
+const InputField = styled.input`
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  position: relative;
+  font-size: 1rem;
+`;
 
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
+const FileInput = styled.input`
+  margin-top: 10px;
+`;
 
-    const toggleSidebar = () => {
-        setIsSidebarOpen(!isSidebarOpen);
-    };
+const Message = styled.div`
+  margin-top: 20px;
+  color: #28a745; /* Green color for messages */
+  font-weight: bold;
+`;
 
-    const handleClickOutside = (event) => {
-        if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
-            setIsSidebarOpen(false);
+const ToggleIcon = styled.div`
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+`;
+
+const Pprofile = () => {
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [editedData, setEditedData] = useState({});
+  const [imageFile, setImageFile] = useState(null);
+  const [signatureFile, setSignatureFile] = useState(null);
+  const [message, setMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        setMessage("Loading...");
+        const storedUserData = JSON.parse(localStorage.getItem("userData"));
+        if (storedUserData && storedUserData.email) {
+          const usersRef = collection(stallholderDb, "admin_users");
+          const q = query(usersRef, where("email", "==", storedUserData.email));
+          const querySnapshot = await getDocs(q);
+          if (!querySnapshot.empty) {
+            querySnapshot.forEach((doc) => {
+              setUserData({ ...doc.data(), id: doc.id });
+              setEditedData({ ...doc.data(), id: doc.id });
+            });
+          }
         }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      } finally {
+        setLoading(false);
+        setMessage("");
+      }
     };
 
-    return (
-        <ProfileContainer>
-            <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
-                <ProfileHeader isSidebarOpen={isSidebarOpen}>
-                    {profileImageURL && <ProfileImage src={profileImageURL} alt="Profile" />}
-                    <FaUserCircle className="profile-icon" />
-                    <span className="profile-name">{profileData.firstName} {profileData.lastName}</span>
-                </ProfileHeader>
+    fetchUserData();
+  }, []);
 
-                <Divider />
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setEditedData({ ...editedData, [name]: value });
+  };
 
-                <SearchBarContainer isSidebarOpen={isSidebarOpen}>
-                    <FaSearch />
-                    <SearchInput type="text" placeholder="Search..." />
-                </SearchBarContainer>
+  const handleImageChange = (e) => {
+    setImageFile(e.target.files[0]);
+  };
 
-                <SidebarMenu>
-                    <Link to="/dashboard" style={{ textDecoration: 'none' }}>
-                        <SidebarItem isSidebarOpen={isSidebarOpen}>
-                            <span>🏠</span>
-                            <span>Dashboard</span>
-                        </SidebarItem>
-                    </Link>
-                    <Link to="/list-of-vendors" style={{ textDecoration: 'none' }}>
-                        <SidebarItem isSidebarOpen={isSidebarOpen}>
-                            <span>🛍️</span>
-                            <span>List of Vendors</span>
-                        </SidebarItem>
-                    </Link>
-                    <Link to="/Addunit" style={{ textDecoration: 'none' }}>
-                        <SidebarItem isSidebarOpen={isSidebarOpen}>
-                            <span>➕</span>
-                            <span>Add New Unit</span>
-                        </SidebarItem>
-                    </Link>
-                    <Link to="/manage-roles" style={{ textDecoration: 'none' }}>
-                        <SidebarItem isSidebarOpen={isSidebarOpen}>
-                            <span>👥</span>
-                            <span>Manage Roles</span>
-                        </SidebarItem>
-                    </Link>
-                    <Link to="/UserManagement" style={{ textDecoration: 'none' }}>
-                        <SidebarItem isSidebarOpen={isSidebarOpen}>
-                            <span>👤</span>
-                            <span>User Management</span>
-                        </SidebarItem>
-                    </Link>
-                    <Link to="/contract" style={{ textDecoration: 'none' }}>
-                        <SidebarItem isSidebarOpen={isSidebarOpen}>
-                            <span>📄</span>
-                            <span>Contract</span>
-                        </SidebarItem>
-                    </Link>
-                    <Link to="/settings" style={{ textDecoration: 'none' }}>
-                        <SidebarItem isSidebarOpen={isSidebarOpen}>
-                            <span>⚙️</span>
-                            <span>Settings</span>
-                        </SidebarItem>
-                    </Link>
-                </SidebarMenu>
-            </Sidebar>
+  const handleSignatureChange = (e) => {
+    setSignatureFile(e.target.files[0]);
+  };
 
-            <MainContent isSidebarOpen={isSidebarOpen}>
-                <ToggleButton isSidebarOpen={isSidebarOpen} onClick={toggleSidebar}>
-                    <FaBars />
-                </ToggleButton>
+  const handleSave = async () => {
+    try {
+      setMessage("Saving...");
+      const userRef = doc(stallholderDb, "admin_users", userData.id);
 
-                <h2>Profile</h2>
+      // Update Firestore data
+      await updateDoc(userRef, editedData);
 
-                <div className="profile-right">
-                    <form>
-                        <div className="form-group">
-                            <label>First Name</label>
-                            <input type="text" placeholder="John" />
-                        </div>
-                        <div className="form-group">
-                            <label>Last Name</label>
-                            <input type="text" placeholder="Doe" />
-                        </div>
-                        <div className="form-group">
-                            <label>Middle Name</label>
-                            <input type="text" placeholder="Edward" />
-                        </div>
-                        <div className="form-group">
-                            <label>Contact Number</label>
-                            <input type="text" placeholder="(239) 816-9029" />
-                        </div>
-                        <div className="form-group">
-                            <label>Email Address</label>
-                            <input type="email" placeholder="john@example.com" />
-                        </div>
-                        <div className="form-group">
-                            <label>Address</label>
-                            <input type="text" placeholder="Bay Area, San Francisco, CA" />
-                        </div>
-                        <div className="form-group">
-                            <label>Position</label>
-                            <input type="text" placeholder="Full Stack Developer" />
-                        </div>
-                        <div className="form-group">
-                            <label>Location</label>
-                            <input type="text" placeholder="San Francisco, CA" />
-                        </div>
+      if (imageFile) {
+        setMessage("Uploading image...");
+        const storageRef = ref(stallholderStorage, `images/${imageFile.name}`);
+        await uploadBytes(storageRef, imageFile);
+        const imageUrl = await getDownloadURL(storageRef);
+        await updateDoc(userRef, { Image: imageUrl });
+        setEditedData({ ...editedData, Image: imageUrl });
+        setMessage("Successfully uploaded image.");
+      }
 
-                        <button type="submit" className="btn-save">Save Changes</button>
-                    </form>
-                </div>
-            </MainContent>
-        </ProfileContainer>
-    );
+      if (signatureFile) {
+        setMessage("Uploading signature...");
+        const storageRef = ref(
+          stallholderStorage,
+          `signatures/${signatureFile.name}`
+        );
+        await uploadBytes(storageRef, signatureFile);
+        const signatureUrl = await getDownloadURL(storageRef);
+        await updateDoc(userRef, { Signature: signatureUrl });
+        setEditedData({ ...editedData, Signature: signatureUrl });
+        setMessage("Successfully uploaded signature.");
+      }
+
+      // Update Firebase Authentication email if changed
+      if (editedData.email !== userData.email) {
+        await updateEmail(stallholderAuth.currentUser, editedData.email);
+        // Update the email in Firestore as well
+        await updateDoc(userRef, { email: editedData.email });
+      }
+
+      // Update Firebase Authentication password if changed
+      if (editedData.password && editedData.password !== userData.password) {
+        await updatePassword(stallholderAuth.currentUser, editedData.password);
+      }
+
+      setUserData(editedData);
+      setEditing(false);
+      setMessage("Successfully saved.");
+    } catch (error) {
+      console.error("Error updating user data:", error);
+      setMessage("Error saving data.");
+    }
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!userData) {
+    return <div>No user data found.</div>;
+  }
+
+  return (
+    <ProfileContainer>
+      <ProfileHeader>
+        {userData.Image ? (
+          <ProfileImage
+            src={userData.Image}
+            alt={`${userData.firstName} ${userData.lastName}`}
+          />
+        ) : (
+          <div
+            style={{
+              width: "120px",
+              height: "120px",
+              borderRadius: "50%",
+              backgroundColor: "#ddd",
+            }}
+          />
+        )}
+        <ProfileInfo>
+          <ProfileName>{`${userData.firstName} ${userData.middleName} ${userData.lastName}`}</ProfileName>
+          <ProfileEmail>{userData.email}</ProfileEmail>
+          <ProfilePosition>{`${userData.position}, ${userData.location}`}</ProfilePosition>
+        </ProfileInfo>
+      </ProfileHeader>
+      <ProfileDetails>
+        {editing ? (
+          <>
+            <ProfileDetailItem>
+              <ProfileLabel>Image:</ProfileLabel>
+              <FileInput type="file" onChange={handleImageChange} />
+            </ProfileDetailItem>
+            <ProfileDetailItem>
+              <ProfileLabel>Signature:</ProfileLabel>
+              <FileInput type="file" onChange={handleSignatureChange} />
+            </ProfileDetailItem>
+            <ProfileDetailItem>
+              <ProfileLabel>Email:</ProfileLabel>
+              <InputField
+                type="email"
+                name="email"
+                value={editedData.email}
+                onChange={handleChange}
+              />
+            </ProfileDetailItem>
+            <ProfileDetailItem style={{ position: "relative" }}>
+              <ProfileLabel>Password:</ProfileLabel>
+              <InputField
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={editedData.password || ""}
+                onChange={handleChange}
+              />
+              <ToggleIcon onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </ToggleIcon>
+            </ProfileDetailItem>
+            <ProfileDetailItem>
+              <ProfileLabel>Address:</ProfileLabel>
+              <InputField
+                type="text"
+                name="address"
+                value={editedData.address}
+                onChange={handleChange}
+              />
+            </ProfileDetailItem>
+            <ProfileDetailItem>
+              <ProfileLabel>Contact Number:</ProfileLabel>
+              <InputField
+                type="text"
+                name="contactNum"
+                value={editedData.contactNum}
+                onChange={handleChange}
+              />
+            </ProfileDetailItem>
+            <ProfileDetailItem>
+              <ProfileLabel>Status:</ProfileLabel>
+              <ProfileValue>{userData.status}</ProfileValue>
+            </ProfileDetailItem>
+            <EditButton onClick={handleSave}>Save</EditButton>
+          </>
+        ) : (
+          <>
+            <ProfileDetailItem>
+              <ProfileLabel>Address:</ProfileLabel>
+              <ProfileValue>{userData.address}</ProfileValue>
+            </ProfileDetailItem>
+            <ProfileDetailItem>
+              <ProfileLabel>Contact Number:</ProfileLabel>
+              <ProfileValue>{userData.contactNum}</ProfileValue>
+            </ProfileDetailItem>
+            <ProfileDetailItem>
+              <ProfileLabel>Status:</ProfileLabel>
+              <ProfileValue>{userData.status}</ProfileValue>
+            </ProfileDetailItem>
+            <EditButton onClick={() => setEditing(true)}>
+              Edit Profile
+            </EditButton>
+          </>
+        )}
+        {message && <Message>{message}</Message>}
+      </ProfileDetails>
+    </ProfileContainer>
+  );
 };
 
-export default Profile;
+export default Pprofile;

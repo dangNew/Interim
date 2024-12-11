@@ -1,141 +1,68 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars, faList, faPlus, faIdBadge, faMagnifyingGlass, faHouseChimney, faUsers, faTriangleExclamation, faEye, faCircleUser, faPlusCircle, faStore, faTicketAlt, faCheck, faClipboard, faFileContract, faCogs } from '@fortawesome/free-solid-svg-icons';
-import { FaSignOutAlt, FaSearch, FaUserCircle, FaBars } from 'react-icons/fa';
-import { collection, addDoc, setDoc, doc, getDocs } from 'firebase/firestore';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { interimStorage as storage } from '../components/firebase.config';
-import { interimDb, interimAuth, rentmobileDb, rentmobileAuth } from '../components/firebase.config';
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faBars,
+  faList,
+  faPlus,
+  faIdBadge,
+  faMagnifyingGlass,
+  faHouseChimney,
+  faUsers,
+  faUser,
+  faTriangleExclamation,
+  faEye,
+  faCircleUser
+} from "@fortawesome/free-solid-svg-icons";
+import { FaSignOutAlt} from "react-icons/fa";
+import {
+  collection,
+  addDoc,
+  setDoc,
+  doc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { interimStorage as storage } from "../components/firebase.config";
+import { rentmobileDb, rentmobileAuth } from "../components/firebase.config";
 import { serverTimestamp } from "firebase/firestore";
+import IntSidenav from "./IntSidenav";
 
-library.add(faList, faPlus, faUser, faIdBadge, faMagnifyingGlass, faHouseChimney, faUsers, faTriangleExclamation, faEye, faCircleUser, faBars, FaSignOutAlt);
+library.add(
+  faList,
+  faPlus,
+  faUser,
+  faIdBadge,
+  faMagnifyingGlass,
+  faHouseChimney,
+  faUsers,
+  faTriangleExclamation,
+  faEye,
+  faCircleUser,
+  faBars,
+  FaSignOutAlt
+);
 
 const AddUser = styled.div`
   display: flex;
   height: 100vh;
 `;
 
-const Sidebar = styled.div`
-  width: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')};
-  background-color: #f8f9fa;
-  padding: 10px;
-  display: flex;
-  border: 1px solid #ddd;
-  flex-direction: column;
-  justify-content: space-between;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  transition: width 0.3s ease;
-  position: fixed;
-  height: 100vh;
-  z-index: 100;
-  overflow: auto;
-`;
-
-const SidebarMenu = styled.ul`
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-`;
-
-const SidebarItem = styled.li`
-  display: flex;
-  align-items: center;
-  justify-content: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
-  padding: 10px;
-  margin-bottom: 10px;
-  margin-top: -10px;
-  border-radius: 8px;
-  font-size: 14px;
-  color: ${({ active }) => (active ? 'white' : '#333')};
-  background-color: ${({ active }) => (active ? '#007bff' : 'transparent')};
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: ${({ active }) => (active ? '#007bff' : '#f1f3f5')};
-  }
-
-  .icon {
-    font-size: 1rem;
-    color: #000;
-    transition: margin-left 0.2s ease;
-  }
-
-  span:last-child {
-    margin-left: 10px;
-    display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'inline' : 'none')};
-  }
-`;
-
-const ToggleButton = styled.div`
-  display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'none' : 'block')};
-  position: absolute;
-  top: 5px;
-  left: 15px;
-  font-size: 1.8rem;
-  color: #333;
-  cursor: pointer;
-  z-index: 200;
-`;
-
 const MainContent = styled.div`
-  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '70px')};
-  padding-left: 40px;
+  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")};
+  padding-left: 10px;
   background-color: #fff;
   padding: 2rem;
-  width: 100%;
-  transition: margin-left 0.3s ease;
+  width: calc(
+    100% - ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")}
+  );
+  transition: margin-left 0.3s ease, width 0.3s ease;
   overflow-y: auto;
-`;
-
-const ProfileHeader = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 40px 10px;
-  position: relative;
-  flex-direction: column;
-
-  .profile-icon {
-    font-size: 3rem;
-    margin-bottom: 15px;
-    color: #6c757d;
-  }
-
-  .profile-name {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: black;
-    display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
-  }
-
-  hr {
-    width: 100%;
-    border: 0.5px solid #ccc;
-    margin-top: 15px;
-  }
-
-  .profile-position {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #007bff;
-    display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
-    margin-top: 5px;
-  }
-`;
-
-const ProfileImage = styled.img`
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  margin-bottom: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
 
 const Divider = styled.hr`
@@ -164,7 +91,9 @@ const FormContainer = styled.form`
     margin-bottom: 5px;
   }
 
-  input, select, textarea {
+  input,
+  select,
+  textarea {
     padding: 0.5rem;
     border-radius: 4px;
     border: 1px solid #ddd;
@@ -284,7 +213,7 @@ const SearchBarContainer = styled.div`
   border-radius: 20px;
   margin-bottom: 20px;
   margin-top: -25px;
-  display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex' : 'none')};
+  display: ${({ isSidebarOpen }) => (isSidebarOpen ? "flex" : "none")};
 `;
 
 const SearchInput = styled.input`
@@ -347,41 +276,36 @@ const ToggleSwitch = styled.div`
 `;
 
 const AppBar = styled.div`
-  display: flex;
+  display: left;
   align-items: center;
   justify-content: space-between;
   padding: 40px 50px;
-  background-color: #188423;
+  background-color: #188423; /* Updated color */
   color: white;
   box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
   font-size: 22px;
-  font-family: 'Inter', sans-serif;
-  font-weight: bold;
+  font-family: "Inter", sans-serif; /* Use a professional font */
+  font-weight: bold; /* Apply bold weight */
 `;
 
-const SidebarFooter = styled.div`
-  padding: 10px;
-  margin-top: auto;
+const ContactNumberInput = styled.div`
   display: flex;
   align-items: center;
-  justify-content: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
-`;
 
-const LogoutButton = styled(SidebarItem)`
-  margin-top: 5px;
-  background-color: #dc3545;
-  color: white;
-  align-items: center;
-  margin-left: 20px;
-  padding: 5px 15px;
-  border-radius: 5px;
-  font-weight: bold;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  .country-code {
+    padding: 0.5rem;
+    border-radius: 4px 0 0 4px;
+    border: 1px solid #ddd;
+    border-right: none;
+    background-color: #f0f0f0;
+    color: #333;
+  }
 
-  &:hover {
-    background-color: #c82333;
-    transform: scale(1.05);
+  input {
+    padding: 0.5rem;
+    border-radius: 0 4px 4px 0;
+    border: 1px solid #ddd;
+    width: calc(100% - 60px); /* Adjust width to accommodate country code */
   }
 `;
 
@@ -389,27 +313,37 @@ const NewUnit = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
   const sidebarRef = useRef(null);
-  const [isPositionActive, setIsPositionActive] = useState(false);
-  const [contactNumWarning, setContactNumWarning] = useState('');
+  const [isPositionActive, setIsPositionActive] = useState(false); // State for Toggle Switch
+  const [contactNumWarning, setContactNumWarning] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState({
+    userManagement: false,
+    addUnit: false,
+    appraise: false,
+    contract: false,
+    ticket: false,
+    manageZone: false,
+    manageSpace: false,
+  });
   const [loggedInUser, setLoggedInUser] = useState(null);
   const navigate = useNavigate();
   const [userData, setUserData] = useState({
-    firstName: '',
-    lastName: '',
-    middleName: '',
-    contactNum: '',
-    email: '',
-    password: '',
-    address: '',
-    position: '',
-    location: '',
+    firstName: "",
+    lastName: "",
+    middleName: "",
+    contactNum: "",
+    email: "",
+    password: "",
+    address: "",
+    position: "",
+    location: "",
     Image: null,
-    status: 'Active'
+    status: "Active",
   });
+
   const [locations, setLocations] = useState([]);
 
   const togglePositionSwitch = () => {
-    setIsPositionActive(prevState => !prevState);
+    setIsPositionActive((prevState) => !prevState);
   };
 
   const toggleSidebar = () => {
@@ -418,10 +352,11 @@ const NewUnit = () => {
 
   useEffect(() => {
     const checkAndCreateCollection = async () => {
-      const collectionName = 'admin_users';
+      const collectionName = "admin_users"; // Replace with your desired collection name
       const usersCollection = collection(rentmobileDb, collectionName);
       const userDocs = await getDocs(usersCollection);
 
+      // If the collection is empty, we can assume it doesn't exist
       if (userDocs.empty) {
         console.log(`Collection '${collectionName}' was created.`);
       } else {
@@ -429,18 +364,23 @@ const NewUnit = () => {
       }
     };
 
-    checkAndCreateCollection();
+    checkAndCreateCollection(); // Call the function
   }, []);
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
+      const loggedInUserData = JSON.parse(localStorage.getItem("userData"));
       if (loggedInUserData) {
-        const usersCollection = collection(interimDb, 'users');
+        const usersCollection = collection(rentmobileDb, "admin_users");
         const userDocs = await getDocs(usersCollection);
-        const users = userDocs.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const users = userDocs.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
 
-        const currentUser = users.find(user => user.email === loggedInUserData.email);
+        const currentUser = users.find(
+          (user) => user.email === loggedInUserData.email
+        );
         setLoggedInUser(currentUser || loggedInUserData);
       }
     };
@@ -450,14 +390,21 @@ const NewUnit = () => {
 
   useEffect(() => {
     const fetchLocations = async () => {
-      const unitsCollection = collection(rentmobileDb, 'unit');
+      const unitsCollection = collection(rentmobileDb, "unit");
       const unitDocs = await getDocs(unitsCollection);
-      const unitNames = unitDocs.docs.map(doc => doc.data().name);
+      const unitNames = unitDocs.docs.map((doc) => doc.data().name);
       setLocations(unitNames);
     };
 
     fetchLocations();
   }, []);
+
+  const handleDropdownToggle = (dropdown) => {
+    setIsDropdownOpen((prevState) => ({
+      ...prevState,
+      [dropdown]: !prevState[dropdown],
+    }));
+  };
 
   const handleClickOutside = (event) => {
     if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
@@ -466,44 +413,46 @@ const NewUnit = () => {
   };
 
   useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  const handleLogout = () => {
-    localStorage.removeItem('userData');
-    navigate('/login');
+  const handleMainContentClick = () => {
+    setIsSidebarOpen(false);
   };
 
-  const handleDropdownToggle = () => {
-    setIsDropdownOpen(!isDropdownOpen);
+  const handleLogout = () => {
+    localStorage.removeItem("userData");
+    navigate("/login");
   };
 
   const handleChange = (e) => {
     const { id, value } = e.target;
 
-    if (id === 'contactNum') {
-      const numericValue = value.replace(/\D/g, '');
-      if (numericValue.length <= 11) {
-        setUserData(prevState => ({
+    if (id === "contactNum") {
+      // Only allow digits and limit to 10 characters (excluding country code)
+      const numericValue = value.replace(/\D/g, ""); // Remove any non-numeric characters
+      if (numericValue.length <= 10) {
+        setUserData((prevState) => ({
           ...prevState,
-          [id]: numericValue
+          [id]: `+63${numericValue}`,
         }));
 
-        if (numericValue.length !== 11 && numericValue.length > 0) {
-          setContactNumWarning('Contact number must be exactly 11 digits.');
+        // Set warning if contactNum is not exactly 10 digits (excluding country code)
+        if (numericValue.length !== 10) {
+          setContactNumWarning(
+            "Contact number must be exactly 10 digits (excluding country code)."
+          );
         } else {
-          setContactNumWarning('');
+          setContactNumWarning(""); // Clear warning if length is valid
         }
       }
     } else {
-      setUserData(prevState => ({
+      setUserData((prevState) => ({
         ...prevState,
-        [id]: value
+        [id]: value,
       }));
     }
   };
@@ -513,9 +462,9 @@ const NewUnit = () => {
     if (file) {
       const previewUrl = URL.createObjectURL(file);
       setImagePreviewUrl(previewUrl);
-      setUserData(prevState => ({
+      setUserData((prevState) => ({
         ...prevState,
-        Image: file
+        Image: file,
       }));
     }
   };
@@ -523,312 +472,219 @@ const NewUnit = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!userData.email || !userData.password || !/\S+@\S+\.\S+/.test(userData.email)) {
-      alert('Please provide a valid email and password.');
+    if (
+      !userData.email ||
+      !userData.password ||
+      !/\S+@\S+\.\S+/.test(userData.email)
+    ) {
+      alert("Please provide a valid email and password.");
       return;
     }
-    if (!userData.firstName || !userData.lastName || !userData.contactNum || !userData.address) {
-      alert('Please fill in all required fields.');
+    if (
+      !userData.firstName ||
+      !userData.lastName ||
+      !userData.contactNum ||
+      !userData.address
+    ) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    // Check if the password is unique
+    const usersCollection = collection(rentmobileDb, "admin_users");
+    const passwordQuery = query(
+      usersCollection,
+      where("password", "==", userData.password)
+    );
+    const passwordDocs = await getDocs(passwordQuery);
+    if (!passwordDocs.empty) {
+      alert("The password must be unique.");
+      return;
+    }
+
+    // Check if the contact number starts with the Philippines country code and is exactly 11 digits
+    if (
+      !userData.contactNum.startsWith("+63") ||
+      userData.contactNum.length !== 13
+    ) {
+      alert(
+        "The contact number must start with the Philippines country code (+63) and be exactly 11 digits long."
+      );
       return;
     }
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(rentmobileAuth, userData.email, userData.password);
+      const userCredential = await createUserWithEmailAndPassword(
+        rentmobileAuth,
+        userData.email,
+        userData.password
+      );
       const user = userCredential.user;
 
       const { password, ...userWithoutPassword } = userData;
 
-      let imageUrl = '';
+      let imageUrl = "";
       if (userData.Image) {
         try {
-          const imageRef = ref(storage, 'images/' + userData.Image.name);
+          const imageRef = ref(storage, "images/" + userData.Image.name);
           await uploadBytes(imageRef, userData.Image);
           imageUrl = await getDownloadURL(imageRef);
         } catch (error) {
-          console.error('Error uploading image:', error);
-          alert('Failed to upload image. Please try again.');
+          console.error("Error uploading image:", error);
+          alert("Failed to upload image. Please try again.");
           return;
         }
       }
 
-      await setDoc(doc(rentmobileDb, 'admin_users', user.uid), {
+      await setDoc(doc(rentmobileDb, "admin_users", user.uid), {
         ...userWithoutPassword,
         Image: imageUrl,
-        status: userData.status || 'Active',
-        createdAt: serverTimestamp()
+        status: userData.status || "Active",
+        createdAt: serverTimestamp(),
       });
 
-      alert('User added successfully!');
+      alert("User added successfully!");
       setUserData({
-        firstName: '',
-        lastName: '',
-        middleName: '',
-        contactNum: '',
-        email: '',
-        password: '',
-        address: '',
-        position: '',
-        location: '',
+        firstName: "",
+        lastName: "",
+        middleName: "",
+        contactNum: "",
+        email: "",
+        password: "",
+        address: "",
+        position: "",
+        location: "",
         Image: null,
-        status: 'Active'
+        status: "Active",
       });
       setImagePreviewUrl(null);
     } catch (error) {
-      console.error('Error adding user: ', error);
-      if (error.code === 'auth/email-already-in-use') {
-        alert('The email address is already in use.');
-      } else if (error.code === 'auth/weak-password') {
-        alert('The password is too weak.');
+      console.error("Error adding user: ", error);
+      if (error.code === "auth/email-already-in-use") {
+        alert("The email address is already in use.");
+      } else if (error.code === "auth/weak-password") {
+        alert("The password is too weak.");
       } else {
-        alert('Failed to add user. Please try again.');
+        alert("Failed to add user. Please try again.");
       }
     }
   };
 
   return (
     <>
-      <ToggleButton onClick={toggleSidebar}>
-        <FaBars />
-      </ToggleButton>
-
       <AddUser>
-        <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
-          <Link to="/profile" style={{ textDecoration: 'none' }}>
-            <ProfileHeader isSidebarOpen={isSidebarOpen}>
-              {loggedInUser && loggedInUser.Image ? (
-                <ProfileImage src={loggedInUser.Image} alt={`${loggedInUser.firstName} ${loggedInUser.lastName}`} />
-              ) : (
-                <FaUserCircle className="profile-icon" />
-              )}
-              <span className="profile-name">{loggedInUser ? `${loggedInUser.firstName} ${loggedInUser.lastName}` : 'Guest'}</span>
-
-              <span className="profile-email" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
-                {loggedInUser ? loggedInUser.email : ''}
-              </span>
-
-              <span className="profile-position" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
-                {loggedInUser ? loggedInUser.position : ''}
-              </span>
-            </ProfileHeader>
-          </Link>
-
-          <SearchBarContainer isSidebarOpen={isSidebarOpen}>
-            <FaSearch />
-            <SearchInput type="text" placeholder="Search..." />
-          </SearchBarContainer>
-
-          <SidebarMenu>
-            <Link to="/dashboard" style={{ textDecoration: 'none' }}>
-              <SidebarItem isSidebarOpen={isSidebarOpen}>
-                <FontAwesomeIcon icon={faHome} className="icon" />
-                <span>Dashboard</span>
-              </SidebarItem>
-            </Link>
-
-            <Link to="/list" style={{ textDecoration: 'none' }}>
-              <SidebarItem isSidebarOpen={isSidebarOpen}>
-                <FontAwesomeIcon icon={faShoppingCart} className="icon" />
-                <span>List of Vendors</span>
-              </SidebarItem>
-            </Link>
-
-            <Link to="/stalls" style={{ textDecoration: 'none' }}>
-              <SidebarItem isSidebarOpen={isSidebarOpen}>
-                <FontAwesomeIcon icon={faClipboard} className="icon" />
-                <span>List of Stalls</span>
-              </SidebarItem>
-            </Link>
-
-            <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-              <FontAwesomeIcon icon={faUser} className="icon" />
-              <span>User Management</span>
-            </SidebarItem>
-
-            {isDropdownOpen && (
-              <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-                <Link to="/usermanagement" style={{ textDecoration: 'none' }}>
-                  <li>
-                    <SidebarItem isSidebarOpen={isSidebarOpen}>
-                      <FontAwesomeIcon icon={faSearch} className="icon" />
-                      <span>View Users</span>
-                    </SidebarItem>
-                  </li>
-                </Link>
-                <Link to="/newuser" style={{ textDecoration: 'none' }}>
-                  <li>
-                    <SidebarItem isSidebarOpen={isSidebarOpen}>
-                      <FontAwesomeIcon icon={faPlus} className="icon" />
-                      <span>Add User</span>
-                    </SidebarItem>
-                  </li>
-                </Link>
-                <Link to="/addcollector" style={{ textDecoration: 'none' }}>
-                  <li>
-                    <SidebarItem isSidebarOpen={isSidebarOpen}>
-                      <FontAwesomeIcon icon={faPlus} className="icon" />
-                      <span>Add Ambulant Collector</span>
-                    </SidebarItem>
-                  </li>
-                </Link>
-              </ul>
-            )}
-
-            <Link to="/Addunit" style={{ textDecoration: 'none' }}>
-              <SidebarItem isSidebarOpen={isSidebarOpen}>
-                <FontAwesomeIcon icon={faPlus} className="icon" />
-                <span>Add New Unit</span>
-              </SidebarItem>
-            </Link>
-
-            <Link to="/appraise" style={{ textDecoration: 'none' }}>
-              <SidebarItem isSidebarOpen={isSidebarOpen}>
-                <FontAwesomeIcon icon={faUsers} className="icon" />
-                <span>Manage Appraisal</span>
-              </SidebarItem>
-            </Link>
-
-            <Link to="/contract" style={{ textDecoration: 'none' }}>
-              <SidebarItem isSidebarOpen={isSidebarOpen}>
-                <FontAwesomeIcon icon={faFileContract} className="icon" />
-                <span>Contract</span>
-              </SidebarItem>
-            </Link>
-
-            <Link to="/ticket" style={{ textDecoration: 'none' }}>
-              <SidebarItem isSidebarOpen={isSidebarOpen}>
-                <FontAwesomeIcon icon={faTicketAlt} className="icon" />
-                <span>Manage Ticket</span>
-              </SidebarItem>
-            </Link>
-
-            <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-              <FontAwesomeIcon icon={faCogs} className="icon" />
-              <span>Manage Zone</span>
-            </SidebarItem>
-
-            {isDropdownOpen && (
-              <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-                <Link to="/addzone" style={{ textDecoration: 'none' }}>
-                  <li>
-                    <SidebarItem isSidebarOpen={isSidebarOpen}>
-                      <FontAwesomeIcon icon={faPlusCircle} className="icon" />
-                      <span> Add Zone</span>
-                    </SidebarItem>
-                  </li>
-                </Link>
-                <Link to="/viewzone" style={{ textDecoration: 'none' }}>
-                  <li>
-                    <SidebarItem isSidebarOpen={isSidebarOpen}>
-                      <FontAwesomeIcon icon={faSearch} className="icon" />
-                      <span> View Zone</span>
-                    </SidebarItem>
-                  </li>
-                </Link>
-              </ul>
-            )}
-
-            <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-              <FontAwesomeIcon icon={faUser} className="icon" />
-              <span>Manage Space</span>
-            </SidebarItem>
-
-            {isDropdownOpen && (
-              <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-                <Link to="/addspace" style={{ textDecoration: 'none' }}>
-                  <li>
-                    <SidebarItem isSidebarOpen={isSidebarOpen}>
-                      <FontAwesomeIcon icon={faPlusCircle} className="icon" />
-                      <span> Add Space</span>
-                    </SidebarItem>
-                  </li>
-                </Link>
-                <Link to="/viewspace" style={{ textDecoration: 'none' }}>
-                  <li>
-                    <SidebarItem isSidebarOpen={isSidebarOpen}>
-                      <FontAwesomeIcon icon={faSearch} className="icon" />
-                      <span> View Space</span>
-                    </SidebarItem>
-                  </li>
-                </Link>
-                <Link to="/addcollector" style={{ textDecoration: 'none' }}>
-                  <li>
-                    <SidebarItem isSidebarOpen={isSidebarOpen}>
-                      <FontAwesomeIcon icon={faPlus} className="icon" />
-                      <span>Add Ambulant Collector</span>
-                    </SidebarItem>
-                  </li>
-                </Link>
-              </ul>
-            )}
-          </SidebarMenu>
-
-          <SidebarFooter isSidebarOpen={isSidebarOpen}>
-            <LogoutButton isSidebarOpen={isSidebarOpen} onClick={handleLogout}>
-              <span><FaSignOutAlt /></span>
-              <span>Logout</span>
-            </LogoutButton>
-          </SidebarFooter>
-        </Sidebar>
-
-        <MainContent isSidebarOpen={isSidebarOpen}>
+        <div ref={sidebarRef}>
+          <IntSidenav
+            isSidebarOpen={isSidebarOpen}
+            setIsSidebarOpen={setIsSidebarOpen}
+            loggedInUser={loggedInUser}
+          />
+        </div>
+        <MainContent
+          isSidebarOpen={isSidebarOpen}
+          onClick={handleMainContentClick}
+        >
           <AppBar>
-            <div className="title">INTERIM</div>
+            <div className="title">OFFICE OF THE CITY MARKETS</div>
           </AppBar>
-
-          <ProfileHeader>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <FontAwesomeIcon icon={faPlusCircle} style={{ color: 'green', marginRight: '10px' }} size="3x" />
-              <h1 style={{ margin: 0 }}>NEW USER</h1>
-            </div>
-          </ProfileHeader>
 
           <FormContainer onSubmit={handleSubmit}>
             <div className="section-title">Basic Details</div>
-            <Divider />
+            <Divider /> {/* Full-width horizontal line */}
+            <span></span>
             <div className="form-section">
               <label htmlFor="firstName">First Name</label>
-              <input id="firstName" type="text" value={userData.firstName} onChange={handleChange} placeholder="Enter First Name" />
+              <input
+                id="firstName"
+                type="text"
+                value={userData.firstName}
+                onChange={handleChange}
+                placeholder="Enter First Name"
+              />
             </div>
             <div className="form-section">
               <label htmlFor="middleName">Middle Name</label>
-              <input id="middleName" type="text" value={userData.middleName} onChange={handleChange} placeholder="Enter Middle Name" />
+              <input
+                id="middleName"
+                type="text"
+                value={userData.middleName}
+                onChange={handleChange}
+                placeholder="Enter Middle Name"
+              />
             </div>
             <div className="form-section">
               <label htmlFor="lastName">Last Name</label>
-              <input id="lastName" type="text" value={userData.lastName} onChange={handleChange} placeholder="Enter Last Name" />
+              <input
+                id="lastName"
+                type="text"
+                value={userData.lastName}
+                onChange={handleChange}
+                placeholder="Enter Last Name"
+              />
             </div>
             <div className="form-section">
               <label htmlFor="contactNum">Contact Number</label>
-              <input
-                type="text"
-                id="contactNum"
-                value={userData.contactNum}
-                onChange={handleChange}
-                placeholder="Enter 11-digit contact number"
-              />
-              {contactNumWarning && <p style={{ color: 'red' }}>{contactNumWarning}</p>}
+              <ContactNumberInput>
+                <span className="country-code">+63</span>
+                <input
+                  type="text"
+                  id="contactNum"
+                  value={userData.contactNum.replace("+63", "")}
+                  onChange={handleChange}
+                  placeholder="Enter 10-digit contact number"
+                />
+              </ContactNumberInput>
+              {contactNumWarning && (
+                <p style={{ color: "red" }}>{contactNumWarning}</p>
+              )}
+              {/* Other form elements */}
             </div>
-
+            <span></span>
             <div className="section-title">Login Details</div>
-            <Divider />
+            <Divider /> {/* Add the horizontal line here */}
+            <span></span>
             <div className="form-section">
               <label htmlFor="email">Email</label>
-              <input id="email" type="email" value={userData.email} onChange={handleChange} placeholder="Enter Email" />
+              <input
+                id="email"
+                type="email"
+                value={userData.email}
+                onChange={handleChange}
+                placeholder="Enter Email"
+              />
             </div>
             <div className="form-section">
               <label htmlFor="password">Password</label>
-              <input id="password" type="password" value={userData.password} onChange={handleChange} placeholder="Enter Password" />
+              <input
+                id="password"
+                type="password"
+                value={userData.password}
+                onChange={handleChange}
+                placeholder="Enter Password"
+              />
             </div>
-
+            <span></span>
+            <span></span>
             <div className="section-title">Other Details</div>
-            <Divider />
+            <Divider /> {/* Add the horizontal line here */}
+            <span></span>
             <div className="form-section">
               <label htmlFor="address">Address</label>
-              <input id="address" type="text" value={userData.address} onChange={handleChange} placeholder="Enter Address" />
+              <input
+                id="address"
+                type="text"
+                value={userData.address}
+                onChange={handleChange}
+                placeholder="Enter Address"
+              />
             </div>
             <div className="form-section">
-              <label htmlFor="location">Location</label>
-              <select id="location" value={userData.location} onChange={handleChange}>
+              <label htmlFor="location">Assign Unit</label>
+              <select
+                id="location"
+                value={userData.location}
+                onChange={handleChange}
+              >
                 <option value="">Select Location</option>
                 {locations.map((location, index) => (
                   <option key={index} value={location}>
@@ -839,36 +695,56 @@ const NewUnit = () => {
             </div>
             <div className="form-section">
               <label htmlFor="position">Position</label>
-              <select id="position" value={userData.position} onChange={handleChange}>
+              <select
+                id="position"
+                value={userData.position}
+                onChange={handleChange}
+              >
                 <option value="Admin">Admin</option>
                 <option value="Collector">Collector</option>
                 <option value="Office In Charge">Office In Charge</option>
+                <option value="Enforcer">Enforcer</option>
                 <option value="CTO">CTO</option>
                 <option value="Interim">Interim</option>
               </select>
             </div>
-
             <div>
               <label htmlFor="toggleSwitch">Active Status</label>
               <ToggleSwitch>
                 <span>Active</span>
                 <label className="switch">
-                  <input type="checkbox" checked={isPositionActive} onChange={togglePositionSwitch} />
+                  <input
+                    type="checkbox"
+                    checked={isPositionActive}
+                    onChange={togglePositionSwitch}
+                  />
                   <span className="slider"></span>
                 </label>
               </ToggleSwitch>
             </div>
-
             <div className="form-section">
               <label htmlFor="Image">Upload Image:</label>
               <input type="file" id="Image" onChange={handleFileChange} />
               <div className="image-preview">
-                {imagePreviewUrl ? <img src={imagePreviewUrl} alt="Preview" style={{ width: '100px', height: '100px', objectFit: 'cover' }} /> : 'No file chosen'}
+                {imagePreviewUrl ? (
+                  <img
+                    src={imagePreviewUrl}
+                    alt="Preview"
+                    style={{
+                      width: "100px",
+                      height: "100px",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : (
+                  "No file chosen"
+                )}
               </div>
             </div>
-
             <div className="button-group">
-              <button className="cancel" type="button">Cancel</button>
+              <button className="cancel" type="button">
+                Cancel
+              </button>
               <button type="submit">Save</button>
             </div>
           </FormContainer>

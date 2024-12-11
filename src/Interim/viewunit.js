@@ -1,93 +1,26 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt,FaTrash,FaEdit, FaEye  } from 'react-icons/fa';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faClipboard, faCheck,faPlusCircle, faCogs } from '@fortawesome/free-solid-svg-icons';
-import { collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
-import { interimDb } from '../components/firebase.config'; // Import the correct firestore instance
+import { faHome, faPlus, faUsers, faFileContract, faTicketAlt, faClipboard, faCheck, faPlusCircle, faCogs } from '@fortawesome/free-solid-svg-icons';
+import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { rentmobileDb } from '../components/firebase.config'; // Import the correct firestore instance
+import IntSidenav from './IntSidenav';
+import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt, FaTrash, FaEdit, FaEye } from 'react-icons/fa';
 
 const DashboardContainer = styled.div`
   display: flex;
   height: 100vh;
 `;
 
-const Sidebar = styled.div`
-  width: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')};
-  background-color: #f8f9fa;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid #ddd;  /* ADD THIS */
-  justify-content: space-between;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  transition: width 0.3s ease;
-  position: fixed;
-  height: 100vh;
-  z-index: 100;
-  overflow: auto;
-`;
-
-const SidebarMenu = styled.ul`
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-`;
-
-const SidebarItem = styled.li`
-  display: flex;
-  align-items: center;
-  justify-content: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
-  padding: 10px;
-  margin-bottom: 10px;
-  margin-top: -10px;
-  border-radius: 8px;
-  font-size: 14px;
-  color: ${({ active }) => (active ? 'white' : '#333')};
-  background-color: ${({ active }) => (active ? '#007bff' : 'transparent')};
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: ${({ active }) => (active ? '#007bff' : '#f1f3f5')};
-  }
-
-  .icon {
-    font-size: 1rem;  /* Increase the icon size */
-    color: #000;
-    transition: margin-left 0.2s ease;
-  }
-
-  span:last-child {
-    margin-left: 10px;
-    display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'inline' : 'none')};
-  }
-`;
-
-
-const ToggleButton = styled.div`
-  display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'none' : 'block')};
-  position: absolute;
-  top: 5px;
-  left: 15px;
-  font-size: 1.8rem;
-  color: #333;
-  cursor: pointer;
-  z-index: 200;
-`;
-
 const MainContent = styled.div`
   margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')};
-  padding-left: 40px;
+  padding-left: 10px;
   background-color: #fff;
   padding: 2rem;
-  width: 100%;
-  transition: margin-left 0.3s ease;
+  width: calc(100% - ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')});
+  transition: margin-left 0.3s ease, width 0.3s ease;
   overflow-y: auto;
-  flex: 1;
 `;
 
 const AppBar = styled.div`
@@ -95,49 +28,12 @@ const AppBar = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 40px 50px;
-  background-color: #188423; /* Updated color */
+  background-color: #188423;
   color: white;
   box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
   font-size: 22px;
-  font-family: 'Inter', sans-serif; /* Use a professional font */
-  font-weight: bold; /* Apply bold weight */
-`;
-
-
-
-const ProfileHeader = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 40px 10px;
-  position: relative;
-  flex-direction: column;
-
-  .profile-icon {
-    font-size: 3rem;
-    margin-bottom: 15px;
-    color: #6c757d; // Subtle color for icon
-  }
-
-  .profile-name {
-    font-size: 1.2rem;
-    font-weight: 700; // Bolder text
-    color: black; // Darker gray for a professional look
-    display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
-  }
-
-  hr {
-    width: 100%;
-    border: 0.5px solid #ccc;
-    margin-top: 15px;
-  }
-
-  .profile-position {
-    font-size: 1rem; /* Increase the font size */
-    font-weight: 600; /* Make it bold */
-    color: #007bff; /* Change color to blue for better visibility */
-    display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
-    margin-top: 5px; /* Add some margin for spacing */
-  }
+  font-family: 'Inter', sans-serif;
+  font-weight: bold;
 `;
 
 const Container = styled.div`
@@ -148,9 +44,10 @@ const Container = styled.div`
 
   h3 {
     margin-bottom: 1rem;
-    color: #333333; 
+    color: #333333;
   }
 `;
+
 const SearchBarContainer = styled.div`
   display: flex;
   align-items: center;
@@ -170,96 +67,6 @@ const SearchInput = styled.input`
   width: 100%;
 `;
 
-const SidebarFooter = styled.div`
-  padding: 10px;
-  margin-top: auto; /* Pushes the footer to the bottom */
-  display: flex;
-  align-items: center;
-  justify-content: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
-`;
-
-const LogoutButton = styled(SidebarItem)`
-  margin-top: 5px; /* Add some margin */
-  background-color: #dc3545; /* Bootstrap danger color */
-  color: white;
-  align-items: center;
-  margin-left: 20px;
-  padding: 5px 15px; /* Add padding for a better button size */
-  border-radius: 5px; /* Rounded corners */
-  font-weight: bold; /* Make text bold */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-  transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transitions */
-
-  &:hover {
-    background-color: #c82333; /* Darker red on hover */
-    transform: scale(1.05); /* Slightly scale up on hover */
-  }
-`;
-
-const ProfileImage = styled.img`
-  border-radius: 50%;
-  width: 60px; /* Adjusted for better visibility */
-  height: 60px;
-  margin-bottom: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // Subtle shadow for a polished look
-`;
-const AddUnitButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.8rem 1.6rem; /* Adjust padding for better proportions */
-  font-size: 1.2rem; /* Moderate font size */
-  color: white;
-  background-color: #0047ab; /* Bootstrap primary color */
-  border: none;
-  border-radius: 5px; /* More rounded corners */
-  cursor: pointer;
-  margin-bottom: 20px; /* Space below the button */
-  box-shadow: 0 4px 12px rgba(0, 71, 171, 0.3); /* Subtle shadow with blue tone */
-  transition: background-color 0.3s ease, transform 0.2s ease; /* Added transform for a slight scale effect */
-
-  &:hover {
-    background-color: #0056b3; /* Darker shade on hover */
-    transform: translateY(-2px); /* Slightly lift the button on hover */
-  }
-
-  .plus-icon {
-    margin-right: 0.5rem; /* Space between icon and text */
-    font-size: 1.5rem; /* Adjust icon size for better visibility */
-  }
-`;
-const ActionButtonContainer = styled.div`
-  display: flex;
-  justify-content: flex-end;
-`;
-
-const ActionButton = styled.button`
-  background: none;
-  border: none;
-  margin-left: 10px;
-  cursor: pointer;
-  transition: color 0.2s ease; /* Smooth transition for color change */
-
-  &:hover {
-    color: #007bff; /* Change color on hover */
-  }
-
-  .icon {
-    font-size: 1.5rem; /* Larger icon size for visibility */
-  }
-`;
-
-const UnitCard = styled.div`
-  border: 1px solid #e0e0e0; /* Light border for card separation */
-  border-radius: 8px; /* Rounded corners */
-  padding: 20px; /* Inner padding for content */
-  margin-bottom: 15px; /* Space between cards */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-  display: flex; /* Flexbox for layout */
-  justify-content: space-between; /* Space between elements */
-  align-items: center; /* Center alignment of items */
-`;
-
 const AddButton = styled.button`
   background-color: #008000;
   color: #fff;
@@ -275,54 +82,326 @@ const AddButton = styled.button`
     background-color: #218838;
   }
 `;
+
+const Title = styled.h3`
+  color: #333;
+  margin-bottom: 2rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: bold;
+`;
+
+const CardContainer = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+`;
+
+const UnitCard = styled.div`
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+`;
+
+const UnitName = styled.h4`
+  margin: 0;
+  color: #007bff;
+  font-size: 1.2rem;
+  font-weight: bold;
+`;
+
+const UnitDetails = styled.p`
+  margin: 0.5rem 0;
+  color: #666;
+  font-size: 0.9rem;
+`;
+
+const ActionButtons = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+`;
+
+const ActionButton = styled.button`
+  background-color: ${({ color }) => color || '#007bff'};
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+
+  &:hover {
+    background-color: ${({ hoverColor }) => hoverColor || '#0056b3'};
+    transform: scale(1.05);
+  }
+`;
+
+const ModalContainer = styled.div`
+  display: ${({ show }) => (show ? 'flex' : 'none')};
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  visibility: ${({ show }) => (show ? 'visible' : 'hidden')};
+  opacity: ${({ show }) => (show ? '1' : '0')};
+`;
+
+const ModalContent = styled.div`
+  background-color: #ffffff;
+  padding: 2rem 2.5rem;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  text-align: left;
+  width: 400px;
+  position: relative;
+  max-width: 90%;
+  font-family: 'Arial', sans-serif;
+
+  h3 {
+    color: #333;
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  p {
+    color: #333;
+    font-size: 1rem;
+    margin-bottom: 0.8rem;
+    line-height: 1.6;
+    text-align: left;
+  }
+
+  button {
+    background-color: #2c6b2f;
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: 1.5rem;
+    font-weight: bold;
+    display: block;
+    width: 100%;
+    text-align: center;
+
+    &:hover {
+      background-color: #244f23;
+      transform: translateY(-2px);
+    }
+
+    &:active {
+      background-color: #1d3e1b;
+      transform: translateY(0);
+    }
+  }
+
+  hr {
+    border: 0;
+    height: 1px;
+    background: #ddd;
+    margin: 1.5rem 0;
+  }
+`;
+
+const EditModalContent = styled.div`
+  background-color: #ffffff;
+  padding: 2rem 2.5rem;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  text-align: left;
+  width: 400px;
+  position: relative;
+  max-width: 90%;
+  font-family: 'Arial', sans-serif;
+
+  h3 {
+    color: #333;
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    font-weight: bold;
+  }
+
+  input {
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+
+  button {
+    background-color: #2c6b2f;
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: 1.5rem;
+    font-weight: bold;
+    display: block;
+    width: 100%;
+    text-align: center;
+
+    &:hover {
+      background-color: #244f23;
+      transform: translateY(-2px);
+    }
+
+    &:active {
+      background-color: #1d3e1b;
+      transform: translateY(0);
+    }
+  }
+
+  hr {
+    border: 0;
+    height: 1px;
+    background: #ddd;
+    margin: 1.5rem 0;
+  }
+`;
+
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const sidebarRef = useRef(null);
   const [units, setUnits] = useState([]);
   const [loggedInUser, setLoggedInUser] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedUnit, setSelectedUnit] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState({
+    userManagement: false,
+    addUnit: false,
+    appraise: false,
+    contract: false,
+    ticket: false,
+    manageZone: false,
+    manageSpace: false,
+  });
+  const [editedUnit, setEditedUnit] = useState({
+    name: '',
+    location: '',
+    dateRegistered: '',
+  });
   const navigate = useNavigate();
-  
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const handleDropdownToggle = (dropdown) => {
+    setIsDropdownOpen(prevState => ({
+      ...prevState,
+      [dropdown]: !prevState[dropdown],
+    }));
+  };
+
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+
   const fetchUnits = async () => {
     try {
-      const unitsCollection = collection(interimDb, 'unit');
+      const unitsCollection = collection(rentmobileDb, 'unit');
       const unitsSnapshot = await getDocs(unitsCollection);
-      const unitsList = unitsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      console.log('Fetched units:', unitsList); // Add this line
+      const unitsList = unitsSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
       setUnits(unitsList);
     } catch (error) {
       console.error('Error fetching units: ', error);
     }
   };
-  
+
+  useEffect(() => {
+    fetchUnits();
+  }, []);
+
+  const handleView = (unit) => {
+    setSelectedUnit(unit);
+    setShowModal(true);
+  };
+
+  const openModal = (unit) => {
+    setSelectedUnit(unit);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedUnit(null);
+    setEditMode(false);
+    setEditedUnit({
+      name: '',
+      location: '',
+      dateRegistered: '',
+    });
+  };
+
   const deleteUnit = async (id) => {
     try {
-      await deleteDoc(doc(interimDb, 'unit', id));
+      await deleteDoc(doc(rentmobileDb, 'unit', id));
       fetchUnits(); // Refresh the list after deletion
     } catch (error) {
       console.error('Error deleting unit: ', error);
     }
   };
-  const handleDeleteUnit = (unitId) => {
-    // Your logic to delete a unit goes here
-    console.log(`Deleting unit with ID: ${unitId}`);
-    // Example: call your Firestore function to delete the unit
-};
 
-const handleViewUnit = (unitId) => {
-    // Your logic to view a unit goes here
-    console.log(`Viewing unit with ID: ${unitId}`);
-    // Example: redirect or open a modal to display unit details
-};
+  const handleEdit = (unit) => {
+    setSelectedUnit(unit);
+    setEditedUnit(unit);
+    setEditMode(true);
+    setShowModal(true);
+  };
 
+  const handleUpdateUnit = async () => {
+    try {
+      const unitRef = doc(rentmobileDb, 'unit', selectedUnit.id);
+      await updateDoc(unitRef, editedUnit);
+      fetchUnits(); // Refresh the list after update
+      closeModal();
+    } catch (error) {
+      console.error('Error updating unit: ', error);
+    }
+  };
 
   useEffect(() => {
     const checkAndCreateCollection = async () => {
-      const unitsCollection = collection(interimDb, 'unit');
+      const unitsCollection = collection(rentmobileDb, 'unit');
       const unitsSnapshot = await getDocs(unitsCollection);
-  
+
       // If the collection doesn't exist (no documents in it), create a default document
       if (unitsSnapshot.empty) {
         try {
@@ -339,25 +418,27 @@ const handleViewUnit = (unitId) => {
       // Fetch units after checking/creating the collection
       fetchUnits();
     };
-  
+
     const fetchUserData = async () => {
       const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
       if (loggedInUserData) {
-        const usersCollection = collection(interimDb, 'users');
+        const usersCollection = collection(rentmobileDb, 'admin_users');
         const userDocs = await getDocs(usersCollection);
         const users = userDocs.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  
+
         const currentUser = users.find(user => user.email === loggedInUserData.email);
         setLoggedInUser(currentUser || loggedInUserData);
       }
     };
-  
+
     checkAndCreateCollection(); // Check and create collection on component mount
     fetchUserData(); // Fetch user data
   }, []);
-  
+
   const handleClickOutside = (event) => {
-    
+    if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+      setIsSidebarOpen(false);
+    }
   };
 
   useEffect(() => {
@@ -367,237 +448,115 @@ const handleViewUnit = (unitId) => {
     };
   }, []);
 
-  
-
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // State for dropdown
+  const handleMainContentClick = () => {
+    setIsSidebarOpen(false);
+  };
 
   const handleLogout = () => {
-   
-    localStorage.removeItem('userData'); 
+    localStorage.removeItem('userData');
     navigate('/login');
   };
 
-  const handleDropdownToggle = () => {
-    setIsDropdownOpen(!isDropdownOpen);
-  };
-  
-    
-
   return (
     <DashboardContainer>
-      <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
-        <Link to="/profile" style={{ textDecoration: 'none' }}>
-        <ProfileHeader isSidebarOpen={isSidebarOpen}>
-          {loggedInUser && loggedInUser.Image ? (
-            <ProfileImage src={loggedInUser.Image} alt={`${loggedInUser.firstName} ${loggedInUser.lastName}`} />
-          ) : (
-            <FaUserCircle className="profile-icon" />
-          )}
-          <span className="profile-name">{loggedInUser ? `${loggedInUser.firstName} ${loggedInUser.lastName}` : 'Guest'}</span>
-          
-          <span className="profile-email" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
-            {loggedInUser ? loggedInUser.email : ''}
-          </span>
-          
-          {/* Add position below the email */}
-          <span className="profile-position" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
-            {loggedInUser ? loggedInUser.position : ''}
-          </span>
-        </ProfileHeader>
-      </Link>
-
-
-        <SearchBarContainer isSidebarOpen={isSidebarOpen}>
-          <FaSearch />
-          <SearchInput type="text" placeholder="Search..." />
-        </SearchBarContainer>
-        
-        <SidebarMenu>
-  <Link to="/dashboard" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faHome} className="icon" />
-      <span>Dashboard</span>
-    </SidebarItem>
-  </Link>
-  
-  <Link to="/list" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faShoppingCart} className="icon" />
-      <span>List of Vendors</span>
-    </SidebarItem>
-  </Link>
-  <Link to="/listofstalls" style={{ textDecoration: 'none' }}>
-  <SidebarItem isSidebarOpen={isSidebarOpen}>
-    <FontAwesomeIcon icon={faClipboard} className="icon" />
-    <span>List of Stalls</span>
-  </SidebarItem>
-</Link>
-
-  <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faUser} className="icon" />
-    <span>User Management</span>
-  </SidebarItem>
-
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/usermanagement" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span>View Users</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/newuser" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlus} className="icon" />
-            <span>Add User</span>
-          </SidebarItem>
-        </li>
-      </Link>
-    </ul>
-  )}
-
-  <Link to="/viewunit" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faPlus} className="icon" />
-      <span>Add New Unit</span>
-    </SidebarItem>
-  </Link>
-
-  <Link to="/appraise" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faUsers} className="icon" />
-      <span>Manage Appraisal</span>
-    </SidebarItem>
-  </Link>
-
-  <Link to="/contract" style={{ textDecoration: 'none' }}>
-    <SidebarItem isSidebarOpen={isSidebarOpen}>
-      <FontAwesomeIcon icon={faFileContract} className="icon" />
-      <span>Contract</span>
-    </SidebarItem>
-  </Link>
-
-  <Link to="/ticket" style={{ textDecoration: 'none' }}>
-  <SidebarItem isSidebarOpen={isSidebarOpen}>
-    <FontAwesomeIcon icon={faTicketAlt} className="icon" />
-    <span>Manage Ticket</span>
-  </SidebarItem>
-</Link>
-<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faCogs} className="icon" />
-    <span>Manage Zone</span>
-  </SidebarItem>
-
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/addzone" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
-            <span> Add Zone</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/viewzone" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-          <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span> View Zone</span>
-          </SidebarItem>
-        </li>
-      </Link>
-    
-    </ul>
-  )}
-<SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-    <FontAwesomeIcon icon={faUser} className="icon" />
-    <span>Manage Space</span>
-  </SidebarItem>
-
-  {isDropdownOpen && (
-    <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-      <Link to="/addspace" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlusCircle} className="icon" />
-            <span> Add Space</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/viewspace" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-          <FontAwesomeIcon icon={faSearch} className="icon" />
-            <span> View Space</span>
-          </SidebarItem>
-        </li>
-      </Link>
-      <Link to="/addcollector" style={{ textDecoration: 'none' }}>
-        <li>
-          <SidebarItem isSidebarOpen={isSidebarOpen}>
-            <FontAwesomeIcon icon={faPlus} className="icon" />
-            <span>Add Ambulant Collector</span>
-          </SidebarItem>
-        </li>
-      </Link>
-    </ul>
-  )}
-</SidebarMenu>
-
-      <SidebarFooter isSidebarOpen={isSidebarOpen}>
-          <LogoutButton isSidebarOpen={isSidebarOpen} onClick={handleLogout}>
-            <span><FaSignOutAlt /></span>
-            <span>Logout</span>
-          </LogoutButton>
-        </SidebarFooter>
-      </Sidebar>
-
-      <MainContent isSidebarOpen={isSidebarOpen}>
+      <div ref={sidebarRef}>
+        <IntSidenav
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
+          loggedInUser={loggedInUser}
+        />
+      </div>
+      <MainContent isSidebarOpen={isSidebarOpen} onClick={handleMainContentClick}>
         <AppBar>
-          <ToggleButton onClick={toggleSidebar}>
-            <FaBars />
-          </ToggleButton>
-          <div>LIST OF VENDORS</div>
+          <div className="title">OFFICE OF THE CITY MARKETS</div>
         </AppBar>
         <br></br>
-
-        <ToggleButton isSidebarOpen={isSidebarOpen} onClick={toggleSidebar}>
-          <FaBars />
-        </ToggleButton>
-
-         
 
         <Container>
           {/* Add New Space Button */}
           <AddButton onClick={() => navigate('/addunit')}>
             <FontAwesomeIcon icon={faPlus} style={{ marginRight: '0.5rem' }} />
-            Add New Space
+            Add New Unit
           </AddButton>
-        <h3>Units</h3>
-        {units.map(unit => (
-          <UnitCard key={unit.id}>
-            <div>
-              <p style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>Name: {unit.name}</p>
-              <p>Location: {unit.location}</p>
-            </div>
-            <ActionButtonContainer>
-              <ActionButton onClick={() => navigate(`/view-unit/${unit.id}`)}>
-                <FaEye className="icon" />
-              </ActionButton>
-              <ActionButton onClick={() => navigate(`/edit-unit/${unit.id}`)}>
-                <FaEdit className="icon" />
-              </ActionButton>
-              <ActionButton onClick={() => deleteUnit(unit.id)}>
-                <FaTrash className="icon" />
-              </ActionButton>
-            </ActionButtonContainer>
-          </UnitCard>
-        ))}
-      </Container>
 
+          <Title>Unit Management</Title>
+
+          <CardContainer>
+            {units.map((unit) => (
+              <UnitCard key={unit.id}>
+                <UnitName>{unit.name}</UnitName>
+                <UnitDetails>Location: {unit.location}</UnitDetails>
+                <UnitDetails>Registered: {unit.dateRegistered}</UnitDetails>
+                <ActionButtons>
+                  <ActionButton
+                    color="#007bff"
+                    hoverColor="#0056b3"
+                    onClick={() => openModal(unit)} // Open modal with unit details
+                  >
+                    <FaEye /> View
+                  </ActionButton>
+                  <ActionButton
+                    color="#ffc107"
+                    hoverColor="#e0a800"
+                    onClick={() => handleEdit(unit)}
+                  >
+                    <FaEdit /> Edit
+                  </ActionButton>
+                  <ActionButton
+                    color="#dc3545"
+                    hoverColor="#c82333"
+                    onClick={() => deleteUnit(unit.id)}
+                  >
+                    <FaTrash /> Delete
+                  </ActionButton>
+                </ActionButtons>
+              </UnitCard>
+            ))}
+          </CardContainer>
+
+          {/* Modal Section */}
+          {showModal && (
+            <ModalContainer show={showModal}>
+              <ModalContent>
+                {editMode ? (
+                  <EditModalContent>
+                    <h3>Edit Unit</h3>
+                    <label>Name</label>
+                    <input
+                      type="text"
+                      value={editedUnit.name}
+                      onChange={(e) => setEditedUnit({ ...editedUnit, name: e.target.value })}
+                    />
+                    <label>Location</label>
+                    <input
+                      type="text"
+                      value={editedUnit.location}
+                      onChange={(e) => setEditedUnit({ ...editedUnit, location: e.target.value })}
+                    />
+                    <label>Date Registered</label>
+                    <input
+                      type="date"
+                      value={editedUnit.dateRegistered}
+                      onChange={(e) => setEditedUnit({ ...editedUnit, dateRegistered: e.target.value })}
+                    />
+                    <hr />
+                    <button onClick={handleUpdateUnit}>Update</button>
+                    <button onClick={closeModal}>Cancel</button>
+                  </EditModalContent>
+                ) : (
+                  <>
+                    <h3>Unit Details</h3>
+                    <p><strong>Name:</strong> {selectedUnit.name}</p>
+                    <p><strong>Location:</strong> {selectedUnit.location}</p>
+                    <p><strong>Date Registered:</strong> {selectedUnit.dateRegistered}</p>
+                    <hr />
+                    <button onClick={closeModal}>Close</button>
+                  </>
+                )}
+              </ModalContent>
+            </ModalContainer>
+          )}
+        </Container>
       </MainContent>
     </DashboardContainer>
   );

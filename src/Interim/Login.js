@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import { Link, useNavigate } from 'react-router-dom';
-import { interimAuth, interimDb } from '../components/firebase.config';
-<<<<<<< HEAD
-import { signInWithEmailAndPassword, setPersistence, browserSessionPersistence } from 'firebase/auth';
-=======
-import { signInWithEmailAndPassword } from 'firebase/auth';
->>>>>>> a8f5076 (main)
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import React, { useState } from "react";
+import styled from "styled-components";
+import { Link, useNavigate } from "react-router-dom";
+import { interimAuth, interimDb } from "../components/firebase.config";
+
+import {
+  signInWithEmailAndPassword,
+  setPersistence,
+  browserSessionPersistence,
+} from "firebase/auth";
+
+import { collection, query, where, getDocs } from "firebase/firestore";
 
 const LoginContainer = styled.div`
   display: flex;
@@ -15,9 +17,9 @@ const LoginContainer = styled.div`
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 2rem; 
+  padding: 2rem;
   background-color: #f0f2f5;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 14px;
 `;
 
@@ -25,16 +27,16 @@ const FormContainer = styled.div`
   background-color: #ffffff;
   padding: 3rem;
   border-radius: 20px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); 
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
   width: 100%;
-  max-width: 500px; 
+  max-width: 500px;
 `;
 
 const Title = styled.h2`
   margin-bottom: 2rem;
   text-align: center;
   color: #333;
-  font-size: 2rem; 
+  font-size: 2rem;
   font-weight: bold;
 `;
 
@@ -45,10 +47,10 @@ const Form = styled.form`
 `;
 
 const Input = styled.input`
-  padding: 1.25rem; 
+  padding: 1.25rem;
   border: 1px solid #ddd;
   border-radius: 8px;
-  font-size: 1.25rem; 
+  font-size: 1.25rem;
   width: 100%;
   box-sizing: border-box;
   transition: box-shadow 0.3s ease-in-out;
@@ -79,12 +81,12 @@ const TogglePassword = styled.span`
 `;
 
 const SubmitButton = styled.button`
-  padding: 1rem; 
+  padding: 1rem;
   background-color: #4caf50;
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 1.25rem; 
+  font-size: 1.25rem;
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.3s ease-in-out;
@@ -118,8 +120,11 @@ const ErrorMessage = styled.p`
 `;
 
 const Login = () => {
-  const [credentials, setCredentials] = useState({ username: '', password: '' });
-  const [error, setError] = useState('');
+  const [credentials, setCredentials] = useState({
+    username: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false); // State for password visibility
   const navigate = useNavigate();
 
@@ -133,44 +138,43 @@ const Login = () => {
 
     try {
       const q = query(
-        collection(interimDb, 'users'),
-        where('email', '==', username)
+        collection(interimDb, "users"),
+        where("email", "==", username)
       );
       const querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
-        setError('User not found');
+        setError("User not found");
         return;
       }
 
-<<<<<<< HEAD
       // Set persistence
       await setPersistence(interimAuth, browserSessionPersistence);
 
       // Sign in
-=======
->>>>>>> a8f5076 (main)
+
       await signInWithEmailAndPassword(interimAuth, username, password);
 
       const loggedInUserData = querySnapshot.docs[0].data();
-      localStorage.setItem('userData', JSON.stringify({
-        ...loggedInUserData,
-        image: loggedInUserData.image,
-      }));
+      localStorage.setItem(
+        "userData",
+        JSON.stringify({
+          ...loggedInUserData,
+          image: loggedInUserData.image,
+        })
+      );
 
-<<<<<<< HEAD
-      console.log('Login successful, navigating to dashboard');
-=======
->>>>>>> a8f5076 (main)
-      navigate('/dashboard');
+      console.log("Login successful, navigating to dashboard");
+
+      navigate("/dashboard");
     } catch (error) {
-      console.error('Login failed:', error);
-      if (error.code === 'auth/user-not-found') {
-        setError('User not found');
-      } else if (error.code === 'auth/wrong-password') {
-        setError('Invalid password');
+      console.error("Login failed:", error);
+      if (error.code === "auth/user-not-found") {
+        setError("User not found");
+      } else if (error.code === "auth/wrong-password") {
+        setError("Invalid password");
       } else {
-        setError('Invalid email or password');
+        setError("Invalid email or password");
       }
     }
   };
@@ -191,7 +195,7 @@ const Login = () => {
           />
           <PasswordContainer>
             <Input
-              type={showPassword ? 'text' : 'password'} // Toggle between text and password types
+              type={showPassword ? "text" : "password"} // Toggle between text and password types
               name="password"
               placeholder="Password"
               value={credentials.password}
@@ -199,7 +203,7 @@ const Login = () => {
               required
             />
             <TogglePassword onClick={() => setShowPassword(!showPassword)}>
-              {showPassword ? '🙈' : '👁'} {/* Emoji for toggle */}
+              {showPassword ? "🙈" : "👁"} {/* Emoji for toggle */}
             </TogglePassword>
           </PasswordContainer>
           <SubmitButton type="submit">Login</SubmitButton>

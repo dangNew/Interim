@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { FaBars, FaSearch, FaUserCircle, FaFilter, FaPrint, FaSignOutAlt, FaEye } from 'react-icons/fa';
+import { FaBars, FaSearch, FaUserCircle, FaFilter, FaPrint, FaSignOutAlt, FaEye, FaFileInvoice, FaReceipt, FaBell, FaExclamationTriangle } from 'react-icons/fa';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faClipboard, faPlusCircle, faCogs } from '@fortawesome/free-solid-svg-icons';
-import { collection, getDocs } from 'firebase/firestore';
-import { rentmobileDb, interimDb } from '../components/firebase.config';
-import ConfirmationModal from './ConfirmationModal'; // Import the modal component
+import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faClipboard, faPlusCircle, faCogs, faEye } from '@fortawesome/free-solid-svg-icons';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { rentmobileDb } from '../components/firebase.config';
+import ConfirmationModal from './ConfirmationModal';
+import IntSidenav from './IntSidenav';
+import NoticeModal from './NoticeModal';
+import ViolationModal from './ViolationModal'; // Import the new ViolationModal
 
 const ROWS_PER_PAGE = 10;
 
@@ -15,81 +18,14 @@ const DashboardContainer = styled.div`
   height: 100vh;
 `;
 
-const Sidebar = styled.div`
-  width: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')};
-  background-color: #f8f9fa;
-  padding: 10px;
-  display: flex;
-  border: 1px solid #ddd;
-  flex-direction: column;
-  justify-content: space-between;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  transition: width 0.3s ease;
-  position: fixed;
-  height: 100vh;
-  z-index: 100;
-  overflow: hidden;
-`;
-
-const SidebarMenu = styled.ul`
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-`;
-
-const SidebarItem = styled.li`
-  display: flex;
-  align-items: center;
-  justify-content: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
-  padding: 10px;
-  margin-bottom: 10px;
-  margin-top: -10px;
-  border-radius: 8px;
-  font-size: 14px;
-  color: ${({ active }) => (active ? 'white' : '#333')};
-  background-color: ${({ active }) => (active ? '#007bff' : 'transparent')};
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: ${({ active }) => (active ? '#007bff' : '#f1f3f5')};
-  }
-
-  .icon {
-    font-size: 1rem;
-    color: #000;
-    transition: margin-left 0.2s ease;
-  }
-
-  span:last-child {
-    margin-left: 10px;
-    display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'inline' : 'none')};
-  }
-`;
-
-const ToggleButton = styled.div`
-  display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'none' : 'block')};
-  position: absolute;
-  top: 5px;
-  left: 15px;
-  font-size: 1.8rem;
-  color: #333;
-  cursor: pointer;
-  z-index: 200;
-`;
-
 const MainContent = styled.div`
   margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')};
-  padding-left: 40px;
+  padding-left: 10px;
   background-color: #fff;
   padding: 2rem;
-  width: 100%;
-  transition: margin-left 0.3s ease;
+  width: calc(100% - ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')});
+  transition: margin-left 0.3s ease, width 0.3s ease;
   overflow-y: auto;
-  flex: 1;
 `;
 
 const AppBar = styled.div`
@@ -99,106 +35,9 @@ const AppBar = styled.div`
   padding: 40px 50px;
   background-color: #188423;
   color: white;
-  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
   font-size: 22px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-weight: bold;
-`;
-
-const ProfileHeader = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 40px 10px;
-  position: relative;
-  flex-direction: column;
-
-  .profile-icon {
-    font-size: 3rem;
-    margin-bottom: 15px;
-    color: #6c757d;
-  }
-
-  .profile-name {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: black;
-    display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
-  }
-
-  hr {
-    width: 100%;
-    border: 0.5px solid #ccc;
-    margin-top: 15px;
-  }
-
-  .profile-position {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #007bff;
-    display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
-    margin-top: 5px;
-  }
-`;
-
-const ProfileImage = styled.img`
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  margin-bottom: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-`;
-
-const StatsContainer = styled.div`
-  display: flex;
-  gap: 2rem;
-  margin-top: 50px;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    gap: 1rem;
-  }
-`;
-
-const StatBox = styled.div`
-  background-color: ${({ bgColor }) => bgColor || '#f4f4f4'};
-  padding: 3rem;
-  border-radius: 12px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease;
-
-  &:hover {
-    transform: translateY(-5px);
-  }
-
-  h3 {
-    margin: 0;
-    font-size: 1.2rem;
-    color: white;
-  }
-
-  p {
-    font-size: 2rem;
-    margin: 0;
-    font-weight: bold;
-    color: white;
-  }
-
-  @media (max-width: 768px) {
-    padding: 1rem;
-
-    h3 {
-      font-size: 1rem;
-    }
-
-    p {
-      font-size: 1.6rem;
-    }
-  }
 `;
 
 const FormContainer = styled.div`
@@ -216,10 +55,10 @@ const FormContainer = styled.div`
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px;
+    font-size: 12px;
 
     th, td {
-      padding: 15px;
+      padding: 10px;
       text-align: left;
       border-bottom: 2px solid #dee2e6;
     }
@@ -241,44 +80,30 @@ const FormContainer = styled.div`
     tr:hover {
       background-color: #f1f3f5;
     }
+
+    .actions {
+      display: flex;
+      gap: 5px; /* Space between the buttons */
+    }
+
+    .action-button {
+      display: flex;
+      align-items: center;
+      border: none;
+      background: none;
+      cursor: pointer;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: #0056b3; /* Darken on hover */
+      }
+
+      .icon {
+        font-size: 24px; /* Increase icon size */
+        color: black;
+      }
+    }
   }
-
-  .view-btn {
-    padding: 8px 12px;
-    font-size: 14px;
-    border: none;
-    color: #ffffff;
-    background-color: #007bff;
-    cursor: pointer;
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    transition: background-color 0.3s ease;
-  }
-
-  .view-btn:hover {
-    background-color: #0056b3;
-  }
-`;
-
-const SearchBarContainer = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  background-color: #e9ecef;
-  border-radius: 20px;
-  margin-bottom: 20px;
-  margin-top: -25px;
-  display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex' : 'none')};
-`;
-
-const SearchInput = styled.input`
-  border: none;
-  background: none;
-  outline: none;
-  margin-left: 10px;
-  width: 100%;
 `;
 
 const SearchBarCont = styled.div`
@@ -321,6 +146,10 @@ const SearchIn = styled.input`
   &:focus {
     color: #212529;
   }
+`;
+
+const DateSearchBarCont = styled(SearchBarCont)`
+  margin-left: 20px;
 `;
 
 const TopBarContainer = styled.div`
@@ -378,32 +207,6 @@ const ButtonContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
-`;
-
-const SidebarFooter = styled.div`
-  padding: 10px;
-  margin-top: auto;
-  display: flex;
-  align-items: center;
-  justify-content: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
-`;
-
-const LogoutButton = styled(SidebarItem)`
-  margin-top: 5px;
-  background-color: #dc3545;
-  color: white;
-  align-items: center;
-  margin-left: 20px;
-  padding: 5px 15px;
-  border-radius: 5px;
-  font-weight: bold;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.3s ease, transform 0.2s ease;
-
-  &:hover {
-    background-color: #c82333;
-    transform: scale(1.05);
-  }
 `;
 
 const PaginationContainer = styled.div`
@@ -498,13 +301,59 @@ const ViewButton = styled.button`
   background-color: #28a745;
   color: white;
   border: none;
-  padding: 8px 16px;
+  padding: 6px 14px;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 12px;
+  transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: #218838;
+    background-color: #0056b3; /* Blue color on hover */
+  }
+`;
+
+const TransactionButton = styled.button`
+  background-color: #ffa500;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #e68a00; /* Orange color on hover */
+  }
+`;
+
+const NoticeButton = styled.button`
+  background-color: ${({ hasNotice }) => (hasNotice ? '#FFA500' : '#ddd')}; /* Orange for active, light gray for inactive */
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: ${({ hasNotice }) => (hasNotice ? '#FF8C00' : '#ccc')}; /* Darker orange on hover for active, darker gray for inactive */
+  }
+`;
+
+const ViolationButton = styled.button`
+  background-color: ${({ hasViolation }) => (hasViolation ? '#ff4d4d' : '#ddd')};
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: ${({ hasViolation }) => (hasViolation ? '#e63939' : '#ccc')}; /* Red color on hover */
   }
 `;
 
@@ -515,22 +364,27 @@ const Dashboard = () => {
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [totalUsers, setTotalUsers] = useState(0);
   const [filteredStallHolders, setFilteredStallHolders] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [stallNoFilter, setStallNoFilter] = useState('');
   const [units, setUnits] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState('Select Unit');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [dateSearchTerm, setDateSearchTerm] = useState(''); // State for date search term
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedStallHolder, setSelectedStallHolder] = useState(null);
+  const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
+  const [selectedNotice, setSelectedNotice] = useState(null);
+  const [isViolationModalOpen, setIsViolationModalOpen] = useState(false); // State for ViolationModal
+  const [selectedViolation, setSelectedViolation] = useState(null); // State for selected violation
   const navigate = useNavigate();
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const toggleDropdown = () => {
+  const handleDropdownToggle = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
@@ -548,7 +402,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchUnits = async () => {
       try {
-        const querySnapshot = await getDocs(collection(interimDb, 'unit'));
+        const querySnapshot = await getDocs(collection(rentmobileDb, 'unit'));
         const unitData = querySnapshot.docs.map(doc => doc.data().name);
         setUnits(['All', ...unitData]);
       } catch (error) {
@@ -560,7 +414,6 @@ const Dashboard = () => {
   }, []);
 
   const totalPages = Math.ceil(filteredStallHolders.length / itemsPerPage);
-
   const currentStallHolders = filteredStallHolders.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const handleNextPage = () => {
@@ -602,13 +455,48 @@ const Dashboard = () => {
           areaMeters: stallInfo.stallSize || '',
           billing: stallInfo.ratePerMeter || '',
           date: dateOfRegistration,
+          approvedBy: doc.data().approvedBy || '',
+          contactNumber: doc.data().contactNumber || '',
+          email: doc.data().email || '',
         };
       });
 
-      setStallHolders(data);
-      setTotalUsers(data.length);
+      const checkNotice = async (vendorId) => {
+        try {
+          const noticeCollection = collection(rentmobileDb, 'Notice_Report');
+          const q = query(noticeCollection, where('vendorId', '==', vendorId));
+          const querySnapshot = await getDocs(q);
+          return querySnapshot.size; // Return the count of documents
+        } catch (error) {
+          console.error('Error checking notice:', error);
+          return 0;
+        }
+      };
 
-      let filteredData = data;
+      const checkViolation = async (vendorId) => {
+        try {
+          const violationCollection = collection(rentmobileDb, 'Market_violations');
+          const q = query(violationCollection, where('vendorId', '==', vendorId));
+          const querySnapshot = await getDocs(q);
+          return querySnapshot.size; // Return the count of documents
+        } catch (error) {
+          console.error('Error checking violation:', error);
+          return 0;
+        }
+      };
+
+      const dataWithChecks = await Promise.all(
+        data.map(async (stall) => {
+          const noticeCount = await checkNotice(stall.id);
+          const violationCount = await checkViolation(stall.id);
+          return { ...stall, noticeCount, violationCount };
+        })
+      );
+
+      setStallHolders(dataWithChecks);
+      setTotalUsers(dataWithChecks.length);
+
+      let filteredData = dataWithChecks;
 
       if (selectedUnit !== 'Select Unit') {
         filteredData = filteredData.filter(stall => stall.location === selectedUnit);
@@ -637,10 +525,18 @@ const Dashboard = () => {
     setSearchTerm(event.target.value);
   };
 
+  const handleDateSearchChange = (event) => {
+    setDateSearchTerm(event.target.value);
+  };
+
   useEffect(() => {
     let filteredData = stallHolders.filter(stall =>
-      stall.firstName.toLowerCase().includes(searchTerm.toLowerCase())
+      (stall.firstName + ' ' + stall.lastName).toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    if (dateSearchTerm) {
+      filteredData = filteredData.filter(stall => stall.date === dateSearchTerm);
+    }
 
     if (stallNoFilter) {
       filteredData = filteredData.filter(stall => stall.stallNumber === stallNoFilter);
@@ -650,7 +546,7 @@ const Dashboard = () => {
     }
 
     setFilteredStallHolders(filteredData);
-  }, [searchTerm, stallHolders, stallNoFilter, selectedUnit]);
+  }, [searchTerm, dateSearchTerm, stallHolders, stallNoFilter, selectedUnit]);
 
   const handleLogout = () => {
     localStorage.removeItem('userData');
@@ -678,10 +574,14 @@ const Dashboard = () => {
               <tr>
                 <th>Stall No.</th>
                 <th>Stall Holder</th>
+                <th>Email</th>
                 <th>Unit</th>
                 <th>Area (Meters)</th>
-                <th>Rate Per Meter</th>
                 <th>Date</th>
+                <th>Contact Number</th>
+                <th>Notice</th>
+                <th>Violation</th>
+                <th className="actions">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -689,10 +589,21 @@ const Dashboard = () => {
                 <tr>
                   <td>${stall.stallNumber}</td>
                   <td>${stall.firstName} ${stall.lastName}</td>
+                  <td>${stall.email}</td>
                   <td>${stall.location}</td>
                   <td>${stall.areaMeters}</td>
-                  <td>${stall.billing}</td>
                   <td>${stall.date}</td>
+                  <td>${stall.contactNumber}</td>
+                  <td>
+                    ${stall.noticeCount > 0 ? `<span style="color: red;">Notice (${stall.noticeCount})</span>` : 'No Notice'}
+                  </td>
+                  <td>
+                    ${stall.violationCount > 0 ? `<span style="color: red;">Violation (${stall.violationCount})</span>` : 'No Violation'}
+                  </td>
+                  <td className="actions">
+                    <button onClick="handleView(${stall.id})">View</button>
+                    <button onClick="handleTransaction(${stall.id})">Transaction</button>
+                  </td>
                 </tr>
               `).join('')}
             </tbody>
@@ -720,232 +631,103 @@ const Dashboard = () => {
     }
   }, [stallHolders]);
 
+  const handleMainContentClick = () => {
+    setIsSidebarOpen(false);
+  };
+
+  const handleTransaction = (stallHolder) => {
+    if (stallHolder) {
+      navigate(`/vendor-transaction/${stallHolder.id}`);
+    }
+  };
+
+  const handleNotice = (vendorId) => {
+    setSelectedNotice(vendorId);
+    setIsNoticeModalOpen(true);
+  };
+
+  const handleNoticeModalClose = () => {
+    setIsNoticeModalOpen(false);
+    setSelectedNotice(null);
+  };
+
+  const handleViolation = (vendorId) => {
+    setSelectedViolation(vendorId);
+    setIsViolationModalOpen(true);
+  };
+
+  const handleViolationModalClose = () => {
+    setIsViolationModalOpen(false);
+    setSelectedViolation(null);
+  };
+
   return (
     <DashboardContainer>
-      <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
-        <Link to="/profile" style={{ textDecoration: 'none' }}>
-          <ProfileHeader isSidebarOpen={isSidebarOpen}>
-            {loggedInUser && loggedInUser.Image ? (
-              <ProfileImage src={loggedInUser.Image} alt={`${loggedInUser.firstName} ${loggedInUser.lastName}`} />
-            ) : (
-              <FaUserCircle className="profile-icon" />
-            )}
-            <span className="profile-name">{loggedInUser ? `${loggedInUser.firstName} ${loggedInUser.lastName}` : 'Guest'}</span>
-
-            <span className="profile-email" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
-              {loggedInUser ? loggedInUser.email : ''}
-            </span>
-
-            <span className="profile-position" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
-              {loggedInUser ? loggedInUser.position : ''}
-            </span>
-          </ProfileHeader>
-        </Link>
-
-        <SearchBarContainer isSidebarOpen={isSidebarOpen}>
-          <FaSearch />
-          <SearchInput
-            type="text"
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={handleSearchChange}
-          />
-        </SearchBarContainer>
-
-        <SidebarMenu>
-          <Link to="/dashboard" style={{ textDecoration: 'none' }}>
-            <SidebarItem isSidebarOpen={isSidebarOpen}>
-              <FontAwesomeIcon icon={faHome} className="icon" />
-              <span>Dashboard</span>
-            </SidebarItem>
-          </Link>
-
-          <Link to="/list" style={{ textDecoration: 'none' }}>
-            <SidebarItem isSidebarOpen={isSidebarOpen}>
-              <FontAwesomeIcon icon={faShoppingCart} className="icon" />
-              <span>List of Vendors</span>
-            </SidebarItem>
-          </Link>
-
-          <Link to="/listofstalls" style={{ textDecoration: 'none' }}>
-            <SidebarItem isSidebarOpen={isSidebarOpen}>
-              <FontAwesomeIcon icon={faClipboard} className="icon" />
-              <span>List of Stalls</span>
-            </SidebarItem>
-          </Link>
-
-          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={toggleDropdown}>
-            <FontAwesomeIcon icon={faUser} className="icon" />
-            <span>User Management</span>
-          </SidebarItem>
-
-          {isDropdownOpen && (
-            <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-              <Link to="/usermanagement" style={{ textDecoration: 'none' }}>
-                <li>
-                  <SidebarItem isSidebarOpen={isSidebarOpen}>
-                    <FontAwesomeIcon icon={faSearch} className="icon" />
-                    <span>View Users</span>
-                  </SidebarItem>
-                </li>
-              </Link>
-              <Link to="/newuser" style={{ textDecoration: 'none' }}>
-                <li>
-                  <SidebarItem isSidebarOpen={isSidebarOpen}>
-                    <FontAwesomeIcon icon={faPlus} className="icon" />
-                    <span>Add User</span>
-                  </SidebarItem>
-                </li>
-              </Link>
-            </ul>
-          )}
-
-          <Link to="/Addunit" style={{ textDecoration: 'none' }}>
-            <SidebarItem isSidebarOpen={isSidebarOpen}>
-              <FontAwesomeIcon icon={faPlus} className="icon" />
-              <span>Add New Unit</span>
-            </SidebarItem>
-          </Link>
-
-          <Link to="/appraise" style={{ textDecoration: 'none' }}>
-            <SidebarItem isSidebarOpen={isSidebarOpen}>
-              <FontAwesomeIcon icon={faUsers} className="icon" />
-              <span>Manage Appraisal</span>
-            </SidebarItem>
-          </Link>
-
-          <Link to="/contract" style={{ textDecoration: 'none' }}>
-            <SidebarItem isSidebarOpen={isSidebarOpen}>
-              <FontAwesomeIcon icon={faFileContract} className="icon" />
-              <span>Contract</span>
-            </SidebarItem>
-          </Link>
-
-          <Link to="/ticket" style={{ textDecoration: 'none' }}>
-            <SidebarItem isSidebarOpen={isSidebarOpen}>
-              <FontAwesomeIcon icon={faTicketAlt} className="icon" />
-              <span>Manage Ticket</span>
-            </SidebarItem>
-          </Link>
-
-          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={toggleDropdown}>
-            <FontAwesomeIcon icon={faCogs} className="icon" />
-            <span>Manage Zone</span>
-          </SidebarItem>
-
-          {isDropdownOpen && (
-            <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-              <Link to="/addzone" style={{ textDecoration: 'none' }}>
-                <li>
-                  <SidebarItem isSidebarOpen={isSidebarOpen}>
-                    <FontAwesomeIcon icon={faPlusCircle} className="icon" />
-                    <span> Add Zone</span>
-                  </SidebarItem>
-                </li>
-              </Link>
-              <Link to="/viewzone" style={{ textDecoration: 'none' }}>
-                <li>
-                  <SidebarItem isSidebarOpen={isSidebarOpen}>
-                    <FontAwesomeIcon icon={faSearch} className="icon" />
-                    <span> View Zone</span>
-                  </SidebarItem>
-                </li>
-              </Link>
-            </ul>
-          )}
-
-          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={toggleDropdown}>
-            <FontAwesomeIcon icon={faUser} className="icon" />
-            <span>Manage Space</span>
-          </SidebarItem>
-
-          {isDropdownOpen && (
-            <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-              <Link to="/addspace" style={{ textDecoration: 'none' }}>
-                <li>
-                  <SidebarItem isSidebarOpen={isSidebarOpen}>
-                    <FontAwesomeIcon icon={faPlusCircle} className="icon" />
-                    <span> Add Space</span>
-                  </SidebarItem>
-                </li>
-              </Link>
-              <Link to="/viewspace" style={{ textDecoration: 'none' }}>
-                <li>
-                  <SidebarItem isSidebarOpen={isSidebarOpen}>
-                    <FontAwesomeIcon icon={faSearch} className="icon" />
-                    <span> View Space</span>
-                  </SidebarItem>
-                </li>
-              </Link>
-              <Link to="/addcollector" style={{ textDecoration: 'none' }}>
-                <li>
-                  <SidebarItem isSidebarOpen={isSidebarOpen}>
-                    <FontAwesomeIcon icon={faPlus} className="icon" />
-                    <span>Add Ambulant Collector</span>
-                  </SidebarItem>
-                </li>
-              </Link>
-            </ul>
-          )}
-        </SidebarMenu>
-
-        <SidebarFooter isSidebarOpen={isSidebarOpen}>
-          <LogoutButton isSidebarOpen={isSidebarOpen} onClick={handleLogout}>
-            <span><FaSignOutAlt /></span>
-            <span>Logout</span>
-          </LogoutButton>
-        </SidebarFooter>
-      </Sidebar>
-
-      <MainContent isSidebarOpen={isSidebarOpen}>
+      <div ref={sidebarRef}>
+        <IntSidenav
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
+          loggedInUser={loggedInUser}
+        />
+      </div>
+      <MainContent isSidebarOpen={isSidebarOpen} onClick={handleMainContentClick}>
         <AppBar>
-          <ToggleButton onClick={toggleSidebar}>
-            <FaBars />
-          </ToggleButton>
-          <div>LIST OF VENDORS</div>
+          <div className="title">LIST OF STALLHOLDER</div>
         </AppBar>
 
-        <TopBarContainer>
-          <SearchBarCont>
-            <SearchIcon />
-            <SearchIn
-              type="text"
-              placeholder="Search Stall Holders..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-            />
-          </SearchBarCont>
-
-          <ButtonContainer>
-            <PrintButton onClick={handlePrint}>
-              <FaPrint />
-              Print
-            </PrintButton>
-            <DropdownContainer>
-              <DropdownButton onClick={toggleDropdown}>
-                {selectedUnit}
-              </DropdownButton>
-              <DropdownContent isOpen={isDropdownOpen}>
-                {units.map((unit, index) => (
-                  <DropdownItem key={index} onClick={() => handleUnitSelect(unit)}>
-                    {unit}
-                  </DropdownItem>
-                ))}
-              </DropdownContent>
-            </DropdownContainer>
-          </ButtonContainer>
-        </TopBarContainer>
-
         <FormContainer>
+          <TopBarContainer>
+            <SearchBarCont>
+              <SearchIcon />
+              <SearchIn
+                type="text"
+                placeholder="Search Stall Holders..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
+            </SearchBarCont>
+            <DateSearchBarCont>
+              <SearchIcon />
+              <SearchIn
+                type="date"
+                placeholder="Search by Date..."
+                value={dateSearchTerm}
+                onChange={handleDateSearchChange}
+              />
+            </DateSearchBarCont>
+            <ButtonContainer>
+              <PrintButton onClick={handlePrint}>
+                <FaPrint />
+                Print
+              </PrintButton>
+              <DropdownContainer>
+                <DropdownButton onClick={handleDropdownToggle}>
+                  {selectedUnit}
+                </DropdownButton>
+                <DropdownContent isOpen={isDropdownOpen}>
+                  {units.map((unit, index) => (
+                    <DropdownItem key={index} onClick={() => handleUnitSelect(unit)}>
+                      {unit}
+                    </DropdownItem>
+                  ))}
+                </DropdownContent>
+              </DropdownContainer>
+            </ButtonContainer>
+
+            
+          </TopBarContainer>
           <table>
             <thead>
               <tr>
                 <th>Stall No.</th>
                 <th>Stall Holder</th>
+                <th>Email</th>
                 <th>Unit</th>
-                <th>Area (Meters)</th>
-                <th>Rate Per Meter</th>
+                <th>Area </th>
                 <th>Date</th>
+                <th>Contact Number</th>
+                <th>Notice</th>
+                <th>Violation</th>
                 <th className="actions">Actions</th>
               </tr>
             </thead>
@@ -954,14 +736,38 @@ const Dashboard = () => {
                 <tr key={index}>
                   <td>{stall.stallNumber}</td>
                   <td>{stall.firstName} {stall.lastName}</td>
+                  <td>{stall.email}</td>
                   <td>{stall.location}</td>
                   <td>{stall.areaMeters}</td>
-                  <td>{stall.billing}</td>
                   <td>{stall.date}</td>
+                  <td>{stall.contactNumber}</td>
                   <td>
-                    <button className="view-btn" onClick={() => handleView(stall)}>
+                    {stall.noticeCount > 0 ? (
+                      <NoticeButton hasNotice={true} onClick={() => handleNotice(stall.id)}>
+                        <FaBell style={{ marginRight: '6px' }} /> {/* Add the icon */}
+                        Notice ({stall.noticeCount})
+                      </NoticeButton>
+                    ) : (
+                      'No Notice'
+                    )}
+                  </td>
+                  <td>
+                    {stall.violationCount > 0 ? (
+                      <ViolationButton hasViolation={true} onClick={() => handleViolation(stall.id)}>
+                        <FaExclamationTriangle style={{ marginRight: '6px' }} /> {/* Add the icon */}
+                        Violation ({stall.violationCount})
+                      </ViolationButton>
+                    ) : (
+                      'No Violation'
+                    )}
+                  </td>
+                  <td className="actions">
+                    <ViewButton onClick={() => handleView(stall)}>
                       <FontAwesomeIcon icon={faEye} /> View
-                    </button>
+                    </ViewButton>
+                    <TransactionButton onClick={() => handleTransaction(stall)}>
+                      <FaReceipt /> Transaction
+                    </TransactionButton>
                   </td>
                 </tr>
               ))}
@@ -987,6 +793,9 @@ const Dashboard = () => {
           message="View Stall Holder"
           stallHolder={selectedStallHolder}
         />
+
+        <NoticeModal isOpen={isNoticeModalOpen} onClose={handleNoticeModalClose} vendorId={selectedNotice} />
+        <ViolationModal isOpen={isViolationModalOpen} onClose={handleViolationModalClose} vendorId={selectedViolation} />
       </MainContent>
     </DashboardContainer>
   );

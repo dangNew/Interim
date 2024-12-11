@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { interimDb } from '../components/firebase.config';
+import { rentmobileDb } from '../components/firebase.config';
 import { collection, getDocs } from 'firebase/firestore';
 import { Line } from 'react-chartjs-2';
 import {
@@ -21,7 +21,7 @@ const LoginAnalytics = () => {
 
   useEffect(() => {
     const fetchLoginData = async () => {
-      const usersCollection = collection(interimDb, 'users');
+      const usersCollection = collection(rentmobileDb, 'admin_users');
       const snapshot = await getDocs(usersCollection);
       const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const logins = users.filter(user => user.createdAt);
@@ -107,7 +107,7 @@ const LoginAnalytics = () => {
       },
       tooltip: {
         callbacks: {
-          label: (context) => ` ${context.dataset.label}: ${context.raw}`,
+          label: (context) => `${context.dataset.label}: ${context.raw}`,
         },
       },
     },
@@ -118,16 +118,21 @@ const LoginAnalytics = () => {
   };
 
   return (
-    <div style={{
-      maxWidth: '900px',
-      marginLeft: '50px',
-      padding: '20px',
-      borderRadius: '10px',
-      boxShadow: '0 6px 12px rgba(0, 0, 0, 0.1)',
-      backgroundColor: '#fff',
-    }}>
-      <h2 style={{ textAlign: 'center', color: '#333', marginBottom: '50px' }}>User Login Analytics</h2>
-      <div style={{ height: '400px' }}>
+    <div
+  style={{
+    maxWidth: '100%',
+    width: '100%',
+    marginLeft: '20px',
+    padding: '20px',
+    borderRadius: '10px',
+    boxShadow: '0 6px 12px rgba(0, 0, 0, 0.1)',
+    backgroundColor: '#fff',
+    border: '2px solid #4caf50', // Added border
+  }}
+>
+
+      <h2 style={{ textAlign: 'center', color: '#333', marginBottom: '20px' }}>User Login Analytics</h2>
+      <div style={{ height: '390px', position: 'relative' }}>
         <Line data={data} options={options} />
       </div>
     </div>

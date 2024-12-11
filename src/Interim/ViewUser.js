@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getDoc, doc } from 'firebase/firestore';
-import { interimDb } from '../components/firebase.config';
+import { rentmobileDb } from '../components/firebase.config';
 
 const ViewUser = () => {
   const { userId } = useParams();
@@ -12,7 +12,7 @@ const ViewUser = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const userDoc = await getDoc(doc(interimDb, 'users', userId));
+        const userDoc = await getDoc(doc(rentmobileDb, 'admin_users', userId));
         if (userDoc.exists()) {
           setUserData(userDoc.data());
         } else {
@@ -98,3 +98,4 @@ const styles = {
 };
 
 export default ViewUser;
+ 

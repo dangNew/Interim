@@ -299,7 +299,16 @@ const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const sidebarRef = useRef(null);
   const [loggedInUser, setLoggedInUser] = useState(null);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState({
+    userManagement: false,
+    addUnit: false,
+    appraise: false,
+    contract: false,
+    ticket: false,
+    manageZone: false,
+    manageSpace: false,
+  });
   const [stallholders, setStallholders] = useState([]);
   const [zoneAssignments, setZoneAssignments] = useState([]);
   const [collectors, setCollectors] = useState([]);
@@ -311,6 +320,16 @@ const Dashboard = () => {
   const [selectedCollector, setSelectedCollector] = useState('');
   const [currentAssignments, setCurrentAssignments] = useState([]);
   const navigate = useNavigate();
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+  const handleDropdownToggle = (dropdown) => {
+    setIsDropdownOpen(prevState => ({
+      ...prevState,
+      [dropdown]: !prevState[dropdown],
+    }));
+  };
 
   const fetchStallholders = async () => {
     const stallholderCollection = collection(rentmobileDb, 'users');
@@ -406,9 +425,7 @@ const Dashboard = () => {
     navigate('/login');
   };
 
-  const handleDropdownToggle = () => {
-    setIsDropdownOpen(!isDropdownOpen);
-  };
+
 
   const handleZoneChange = (id, newZone) => {
     setZoneAssignments(prevAssignments =>
@@ -457,9 +474,11 @@ const Dashboard = () => {
               <FaUserCircle className="profile-icon" />
             )}
             <span className="profile-name">{loggedInUser ? `${loggedInUser.firstName} ${loggedInUser.lastName}` : 'Guest'}</span>
+
             <span className="profile-email" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
               {loggedInUser ? loggedInUser.email : ''}
             </span>
+
             <span className="profile-position" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
               {loggedInUser ? loggedInUser.position : ''}
             </span>
@@ -468,7 +487,12 @@ const Dashboard = () => {
 
         <SearchBarContainer isSidebarOpen={isSidebarOpen}>
           <FaSearch />
-          <SearchInput type="text" placeholder="Search..." />
+          <SearchInput
+            type="text"
+            placeholder="Search..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
         </SearchBarContainer>
 
         <SidebarMenu>
@@ -493,12 +517,12 @@ const Dashboard = () => {
             </SidebarItem>
           </Link>
 
-          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={() => handleDropdownToggle('userManagement')}>
             <FontAwesomeIcon icon={faUser} className="icon" />
             <span>User Management</span>
           </SidebarItem>
 
-          {isDropdownOpen && (
+          {isDropdownOpen.userManagement && (
             <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
               <Link to="/usermanagement" style={{ textDecoration: 'none' }}>
                 <li>
@@ -519,7 +543,7 @@ const Dashboard = () => {
             </ul>
           )}
 
-          <Link to="/Addunit" style={{ textDecoration: 'none' }}>
+          <Link to="/viewunit" style={{ textDecoration: 'none' }}>
             <SidebarItem isSidebarOpen={isSidebarOpen}>
               <FontAwesomeIcon icon={faPlus} className="icon" />
               <span>Add New Unit</span>
@@ -547,12 +571,12 @@ const Dashboard = () => {
             </SidebarItem>
           </Link>
 
-          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={() => handleDropdownToggle('manageZone')}>
             <FontAwesomeIcon icon={faCogs} className="icon" />
             <span>Manage Zone</span>
           </SidebarItem>
 
-          {isDropdownOpen && (
+          {isDropdownOpen.manageZone && (
             <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
               <Link to="/addzone" style={{ textDecoration: 'none' }}>
                 <li>
@@ -573,12 +597,12 @@ const Dashboard = () => {
             </ul>
           )}
 
-          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
+          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={() => handleDropdownToggle('manageSpace')}>
             <FontAwesomeIcon icon={faUser} className="icon" />
             <span>Manage Space</span>
           </SidebarItem>
 
-          {isDropdownOpen && (
+          {isDropdownOpen.manageSpace && (
             <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
               <Link to="/addspace" style={{ textDecoration: 'none' }}>
                 <li>
@@ -621,7 +645,7 @@ const Dashboard = () => {
           <ToggleButton onClick={toggleSidebar}>
             <FaBars />
           </ToggleButton>
-          <div>LIST OF VENDORS</div>
+          <div>OFFICE OF THE CITY MARKETS</div>
         </AppBar>
 
         <ToggleButton isSidebarOpen={isSidebarOpen} onClick={toggleSidebar}>

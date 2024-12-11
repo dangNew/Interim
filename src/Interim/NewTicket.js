@@ -1,163 +1,39 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom'; // Import useParams here
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt, FaCalendarAlt } from 'react-icons/fa';
-import { faHome, faShoppingCart, faUser, faUsers, faPlus, faFileContract, faTicketAlt, faSearch, faClipboard, faCheck, faPlusCircle, faCogs } from '@fortawesome/free-solid-svg-icons';
+
 import { rentmobileDb } from '../components/firebase.config';
 import { collection, getDoc, doc, updateDoc, getDocs, setDoc } from 'firebase/firestore';
 import DatePicker from 'react-datepicker';
 import { Timestamp } from 'firebase/firestore';
 import 'react-datepicker/dist/react-datepicker.css';
+import IntSidenav from './IntSidenav';
 
 const NewTicketContainer = styled.div`
   display: flex;
   height: 100vh;
 `;
 
-const Sidebar = styled.div`
-  width: \\${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')};
-  background-color: #f8f9fa;
-  padding: 10px;
-  display: flex;
-  border: 1px solid #ddd;
-  flex-direction: column;
-  justify-content: space-between;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  transition: width 0.3s ease;
-  position: fixed;
-  height: 100vh;
-  z-index: 100;
-  overflow: auto;
-`;
-
-const SidebarMenu = styled.ul`
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-`;
-
-const SidebarItem = styled.li`
-  display: flex;
-  align-items: center;
-  justify-content: \\${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
-  padding: 10px;
-  margin-bottom: 10px;
-  margin-top: -10px;
-  border-radius: 8px;
-  font-size: 14px;
-  color: \\${({ active }) => (active ? 'white' : '#333')};
-  background-color: \\${({ active }) => (active ? '#007bff' : 'transparent')};
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: \\${({ active }) => (active ? '#007bff' : '#f1f3f5')};
-  }
-
-  .icon {
-    font-size: 1rem;
-    color: #000;
-    transition: margin-left 0.2s ease;
-  }
-
-  span:last-child {
-    margin-left: 10px;
-    display: \\${({ isSidebarOpen }) => (isSidebarOpen ? 'inline' : 'none')};
-  }
-`;
-
-const SidebarFooter = styled.div`
-  padding: 10px;
-  margin-top: auto;
-  display: flex;
-  align-items: center;
-  justify-content: \\${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
-`;
-
-const LogoutButton = styled(SidebarItem)`
-  margin-top: 5px;
-  background-color: #dc3545;
-  color: white;
-  align-items: center;
-  margin-left: 20px;
-  padding: 5px 15px;
-  border-radius: 5px;
-  font-weight: bold;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.3s ease, transform 0.2s ease;
-
-  &:hover {
-    background-color: #c82333;
-    transform: scale(1.05);
-  }
-`;
-
-const ToggleButton = styled.div`
-  display: \\${({ isSidebarOpen }) => (isSidebarOpen ? 'none' : 'block')};
-  position: absolute;
-  top: 5px;
-  left: 15px;
-  font-size: 1.8rem;
-  color: #333;
-  cursor: pointer;
-  z-index: 200;
-`;
-
 const MainContent = styled.div`
-  margin-left: \\${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '70px')};
-  padding-left: 40px;
+  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')};
+  padding-left: 10px;
   background-color: #fff;
   padding: 2rem;
-  width: 100%;
-  transition: margin-left 0.3s ease;
+  width: calc(100% - ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')});
+  transition: margin-left 0.3s ease, width 0.3s ease;
   overflow-y: auto;
 `;
-
-const ProfileHeader = styled.div`
-  display: flex;
+const AppBar = styled.div`
+  display: left;
   align-items: center;
-  padding: 40px 10px;
-  position: relative;
-  flex-direction: column;
-
-  .profile-icon {
-    font-size: 3rem;
-    margin-bottom: 15px;
-    color: #6c757d;
-  }
-
-  .profile-name {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: black;
-    display: \\${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
-  }
-
-  hr {
-    width: 100%;
-    border: 0.5px solid #ccc;
-    margin-top: 15px;
-  }
-
-  .profile-position {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #007bff;
-    display: \\${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
-    margin-top: 5px;
-  }
-`;
-
-const ProfileImage = styled.img`
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  margin-bottom: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  justify-content: space-between;
+  padding: 40px 50px;
+  background-color: #188423;
+  color: white;
+  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+  font-size: 22px;
+  font-family: 'Inter', sans-serif;
+  font-weight: bold;
 `;
 
 const FormContainer = styled.div`
@@ -243,40 +119,6 @@ const FormContainer = styled.div`
   }
 `;
 
-const AppBar = styled.div`
-  background-color: #188423;
-  padding: 40px 50px;
-  color: white;
-  font-size: 1.5rem;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-`;
-
-const SearchBarContainer = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  background-color: #e9ecef;
-  border-radius: 20px;
-  margin-bottom: 20px;
-  margin-top: -25px;
-  display: \\${({ isSidebarOpen }) => (isSidebarOpen ? 'flex' : 'none')};
-`;
-
-const SearchInput = styled.input`
-  border: none;
-  background: none;
-  outline: none;
-  margin-left: 10px;
-  width: 100%;
-`;
-
 const Modal = styled.div`
   position: fixed;
   top: 0;
@@ -320,23 +162,6 @@ const ModalButtons = styled.div`
   gap: 15px;
 `;
 
-const CancelButton = styled.button`
-  background-color: #dc3545;
-  color: #ffffff;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
-  flex: 1;
-
-  &:hover {
-    background-color: #c82333;
-    transform: scale(1.05);
-  }
-`;
-
 const OkButton = styled.button`
   background-color: #007bff;
   color: white;
@@ -350,23 +175,6 @@ const OkButton = styled.button`
 
     &:hover {
     background-color: #0056b3;
-    transform: scale(1.05);
-  }
-`;
-
-const ConfirmButton = styled.button`
-  background-color: #28a745;
-  color: #ffffff;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
-  flex: 1;
-
-  &:hover {
-    background-color: #218838;
     transform: scale(1.05);
   }
 `;
@@ -391,6 +199,7 @@ const NewTicket = () => {
 
   const saveTicket = async () => {
     try {
+      console.log("saveTicket called");
       setIsModalOpen(true);
     } catch (error) {
       console.error("Error saving ticket:", error);
@@ -400,11 +209,13 @@ const NewTicket = () => {
   };
 
   const closeModal = () => {
+    console.log("closeModal called");
     setIsModalOpen(false);
     navigate("/ticket");
   };
 
   const closeErrorModal = () => {
+    console.log("closeErrorModal called");
     setIsErrorModal(false);
   };
 
@@ -439,40 +250,45 @@ const NewTicket = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    console.log("handleSubmit called");
+  
     if (!ticketName || !rate || !dateIssued) {
       alert("Please fill out all fields.");
       return;
     }
-
+  
     const ticketData = {
       name: ticketName,
       rate: parseFloat(rate),
       dateIssued: Timestamp.fromDate(new Date(dateIssued)),
     };
-
+  
     try {
       const ticketRef = collection(rentmobileDb, 'rate');
       await setDoc(doc(ticketRef), ticketData);
-
+  
       setShowModal(true);
       setModalMessage("Ticket saved successfully!");
-      setTimeout(() => {
-        navigate("/tickets");
-      }, 2000);
-
+      console.log("Ticket saved successfully!");
+  
+      // Instead of navigating to "/tickets", we can just reset the form or stay on the same page
+      // setTicketName("");
+      // setRate("");
+      // setDateIssued(null);
+  
     } catch (error) {
       console.error("Error saving ticket:", error);
       setShowModal(true);
       setModalMessage("There was an error saving the ticket. Please try again.");
     }
   };
+  
 
   useEffect(() => {
     const fetchUserData = async () => {
       const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
       if (loggedInUserData) {
-        const usersCollection = collection(rentmobileDb, 'users');
+        const usersCollection = collection(rentmobileDb, 'admin_users');
         const userDocs = await getDocs(usersCollection);
         const users = userDocs.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
@@ -486,6 +302,7 @@ const NewTicket = () => {
 
   const handleSaveChanges = async (event) => {
     event.preventDefault();
+    console.log("handleSaveChanges called");
 
     if (!ticketName || !rate) {
       alert('Please fill in all required fields.');
@@ -520,200 +337,55 @@ const NewTicket = () => {
   };
 
   const toggleSidebar = () => {
+    console.log("toggleSidebar called");
     setIsSidebarOpen(!isSidebarOpen);
   };
 
   const handleLogout = () => {
+    console.log("handleLogout called");
     localStorage.removeItem('userData');
     navigate('/login');
   };
+  const handleClickOutside = (event) => {
+    console.log("handleClickOutside called");
+    if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+      setIsSidebarOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleMainContentClick = () => {
+    console.log("handleMainContentClick called");
+    setIsSidebarOpen(false);
+  };
 
   const handleDropdownToggle = () => {
+    console.log("handleDropdownToggle called");
     setIsDropdownOpen(!isDropdownOpen);
   };
 
   return (
     <NewTicketContainer>
-      <Sidebar ref={sidebarRef} isSidebarOpen={isSidebarOpen}>
-        <Link to="/profile" style={{ textDecoration: 'none' }}>
-          <ProfileHeader isSidebarOpen={isSidebarOpen}>
-            {loggedInUser && loggedInUser.Image ? (
-              <ProfileImage src={loggedInUser.Image} alt={`${loggedInUser.firstName} ${loggedInUser.lastName}`} />
-            ) : (
-              <FaUserCircle className="profile-icon" />
-            )}
-            <span className="profile-name">{loggedInUser ? `${loggedInUser.firstName} ${loggedInUser.lastName}` : 'Guest'}</span>
-
-            <span className="profile-email" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
-              {loggedInUser ? loggedInUser.email : ''}
-            </span>
-
-            <span className="profile-position" style={{ fontSize: '0.9rem', color: '#6c757d', display: isSidebarOpen ? 'block' : 'none' }}>
-              {loggedInUser ? loggedInUser.position : ''}
-            </span>
-          </ProfileHeader>
-        </Link>
-
-        <SearchBarContainer isSidebarOpen={isSidebarOpen}>
-          <FaSearch />
-          <SearchInput type="text" placeholder="Search..." />
-        </SearchBarContainer>
-
-        <SidebarMenu>
-          <Link to="/dashboard" style={{ textDecoration: 'none' }}>
-            <SidebarItem isSidebarOpen={isSidebarOpen}>
-              <FontAwesomeIcon icon={faHome} className="icon" />
-              <span>Dashboard</span>
-            </SidebarItem>
-          </Link>
-
-          <Link to="/list" style={{ textDecoration: 'none' }}>
-            <SidebarItem isSidebarOpen={isSidebarOpen}>
-              <FontAwesomeIcon icon={faShoppingCart} className="icon" />
-              <span>List of Vendors</span>
-            </SidebarItem>
-          </Link>
-
-          <Link to="/listofstalls" style={{ textDecoration: 'none' }}>
-            <SidebarItem isSidebarOpen={isSidebarOpen}>
-              <FontAwesomeIcon icon={faClipboard} className="icon" />
-              <span>List of Stalls</span>
-            </SidebarItem>
-          </Link>
-
-          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-            <FontAwesomeIcon icon={faUser} className="icon" />
-            <span>User Management</span>
-          </SidebarItem>
-
-          {isDropdownOpen && (
-            <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-              <Link to="/usermanagement" style={{ textDecoration: 'none' }}>
-                <li>
-                  <SidebarItem isSidebarOpen={isSidebarOpen}>
-                    <FontAwesomeIcon icon={faSearch} className="icon" />
-                    <span>View Users</span>
-                  </SidebarItem>
-                </li>
-              </Link>
-              <Link to="/newuser" style={{ textDecoration: 'none' }}>
-                <li>
-                  <SidebarItem isSidebarOpen={isSidebarOpen}>
-                    <FontAwesomeIcon icon={faPlus} className="icon" />
-                    <span>Add User</span>
-                  </SidebarItem>
-                </li>
-              </Link>
-            </ul>
-          )}
-
-          <Link to="/Addunit" style={{ textDecoration: 'none' }}>
-            <SidebarItem isSidebarOpen={isSidebarOpen}>
-              <FontAwesomeIcon icon={faPlus} className="icon" />
-              <span>Add New Unit</span>
-            </SidebarItem>
-          </Link>
-
-          <Link to="/appraise" style={{ textDecoration: 'none' }}>
-            <SidebarItem isSidebarOpen={isSidebarOpen}>
-              <FontAwesomeIcon icon={faUsers} className="icon" />
-              <span>Manage Appraisal</span>
-            </SidebarItem>
-          </Link>
-
-          <Link to="/contract" style={{ textDecoration: 'none' }}>
-            <SidebarItem isSidebarOpen={isSidebarOpen}>
-              <FontAwesomeIcon icon={faFileContract} className="icon" />
-              <span>Contract</span>
-            </SidebarItem>
-          </Link>
-
-          <Link to="/ticket" style={{ textDecoration: 'none' }}>
-            <SidebarItem isSidebarOpen={isSidebarOpen}>
-              <FontAwesomeIcon icon={faTicketAlt} className="icon" />
-              <span>Manage Ticket</span>
-            </SidebarItem>
-          </Link>
-
-          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-            <FontAwesomeIcon icon={faCogs} className="icon" />
-            <span>Manage Zone</span>
-          </SidebarItem>
-
-          {isDropdownOpen && (
-            <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-              <Link to="/addzone" style={{ textDecoration: 'none' }}>
-                <li>
-                  <SidebarItem isSidebarOpen={isSidebarOpen}>
-                    <FontAwesomeIcon icon={faPlusCircle} className="icon" />
-                    <span> Add Zone</span>
-                  </SidebarItem>
-                </li>
-              </Link>
-              <Link to="/viewzone" style={{ textDecoration: 'none' }}>
-                <li>
-                  <SidebarItem isSidebarOpen={isSidebarOpen}>
-                    <FontAwesomeIcon icon={faSearch} className="icon" />
-                    <span> View Zone</span>
-                  </SidebarItem>
-                </li>
-              </Link>
-            </ul>
-          )}
-
-          <SidebarItem isSidebarOpen={isSidebarOpen} onClick={handleDropdownToggle}>
-            <FontAwesomeIcon icon={faUser} className="icon" />
-            <span>Manage Space</span>
-          </SidebarItem>
-
-          {isDropdownOpen && (
-            <ul style={{ paddingLeft: '20px', listStyleType: 'none' }}>
-              <Link to="/addspace" style={{ textDecoration: 'none' }}>
-                <li>
-                  <SidebarItem isSidebarOpen={isSidebarOpen}>
-                    <FontAwesomeIcon icon={faPlusCircle} className="icon" />
-                    <span> Add Space</span>
-                  </SidebarItem>
-                </li>
-              </Link>
-              <Link to="/viewspace" style={{ textDecoration: 'none' }}>
-                <li>
-                  <SidebarItem isSidebarOpen={isSidebarOpen}>
-                    <FontAwesomeIcon icon={faSearch} className="icon" />
-                    <span> View Space</span>
-                  </SidebarItem>
-                </li>
-              </Link>
-              <Link to="/addcollector" style={{ textDecoration: 'none' }}>
-                <li>
-                  <SidebarItem isSidebarOpen={isSidebarOpen}>
-                    <FontAwesomeIcon icon={faPlus} className="icon" />
-                    <span>Add Ambulant Collector</span>
-                  </SidebarItem>
-                </li>
-              </Link>
-            </ul>
-          )}
-        </SidebarMenu>
-
-        <SidebarFooter isSidebarOpen={isSidebarOpen}>
-          <LogoutButton isSidebarOpen={isSidebarOpen} onClick={handleLogout}>
-            <span><FaSignOutAlt /></span>
-            <span>Logout</span>
-          </LogoutButton>
-        </SidebarFooter>
-      </Sidebar>
-
-      <MainContent isSidebarOpen={isSidebarOpen}>
-        <ToggleButton onClick={toggleSidebar}>
-          <FaBars />
-        </ToggleButton>
-
+      <div ref={sidebarRef}>
+        <IntSidenav
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
+          loggedInUser={loggedInUser}
+        />
+      </div>
+      <MainContent isSidebarOpen={isSidebarOpen} onClick={handleMainContentClick}>
         <AppBar>
-          <div className="title">INTERIM</div>
+          <div className="title">OFFICE OF THE CITY MARKETS</div>
         </AppBar>
+        <br></br>
 
-        <br /><br />
+        <br></br>
 
         <FormContainer>
           <h3>New Ticket</h3>
@@ -727,13 +399,18 @@ const NewTicket = () => {
               placeholder="Enter ticket name"
             />
             <label htmlFor="rate">Rate</label>
-            <input
-              type="number"
-              id="rate"
-              value={rate}
-              onChange={(e) => setRate(e.target.value)}
-              placeholder="Enter rate"
-            />
+<input
+  type="text"
+  id="rate"
+  value={rate}
+  onChange={(e) => {
+    // Only allow numbers or an empty string
+    if (!isNaN(e.target.value)) {
+      setRate(e.target.value);
+    }
+  }}
+  placeholder="Enter rate"
+/>
             <label htmlFor="dateIssued">Date Issued</label>
             <DatePicker
               selected={selectedDate}
@@ -776,5 +453,3 @@ const NewTicket = () => {
 };
 
 export default NewTicket;
-
-
