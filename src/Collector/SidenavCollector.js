@@ -259,13 +259,13 @@ const SidenavCollector = forwardRef(({ isSidebarOpen, setIsSidebarOpen, loggedIn
           <Link to="/stallholders" style={{ textDecoration: "none" }}>
             <SidebarItem isSidebarOpen={isSidebarOpen}>
               <FontAwesomeIcon icon={faShoppingCart} className="icon" />
-              <span>List of Vendors</span>
+              <span> Transaction</span>
             </SidebarItem>
           </Link>
           <Link to="/transaction" style={{ textDecoration: "none" }}>
             <SidebarItem isSidebarOpen={isSidebarOpen}>
               <FontAwesomeIcon icon={faShoppingCart} className="icon" />
-              <span>Transaction</span>
+              <span>List Of Vendors</span>
             </SidebarItem>
           </Link>
         </SidebarMenu>

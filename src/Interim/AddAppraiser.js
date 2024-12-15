@@ -125,6 +125,8 @@ const FormContainer = styled.form`
   label {
     font-size: 20px;
     margin-bottom: 5px;
+    font-weight: bold;
+    color: black;
   }
 
   input, select, textarea {
@@ -135,56 +137,7 @@ const FormContainer = styled.form`
   }
 `;
 
-const ImagePreviewContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  border: 2px dashed #ddd;
-  border-radius: 10px;
-  background-color: #f9f9f9;
-  max-width: 300px;
-  width: 100%;
 
-  .image-preview {
-    height: 200px;
-    width: 200px;
-    background-color: #e0e0e0;
-    border: 1px solid #ddd;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.9rem;
-    color: gray;
-    margin-top: 5px;
-
-    img {
-      max-height: 100%;
-      max-width: 100%;
-      object-fit: cover;
-    }
-  }
-`;
-
-const SearchBarContainer = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  background-color: #e9ecef;
-  border-radius: 20px;
-  margin-bottom: 20px;
-  margin-top: -25px;
-  display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex' : 'none')};
-`;
-
-const SearchInput = styled.input`
-  border: none;
-  background: none;
-  outline: none;
-  margin-left: 10px;
-  width: 100%;
-`;
 
 const ToggleSwitch = styled.div`
   display: flex;
@@ -564,7 +517,7 @@ const NewUnit = () => {
                 <input id="address" type="text" value={userData.address} onChange={handleChange} placeholder="Enter Address" />
               </div>
             </div>
-            
+
             <div className="form-section">
               <label htmlFor="profileImages">Upload Image:</label>
               <input type="file" id="profileImages" onChange={handleFileChange} />

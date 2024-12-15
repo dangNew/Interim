@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt, FaCalendarDay, FaCalendarWeek, FaCalendarAlt, FaExclamationTriangle } from "react-icons/fa";
+import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt, FaCalendarDay, FaCalendarWeek, FaCalendarAlt, FaExclamationTriangle, FaBell } from "react-icons/fa";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faClipboard, faPlusCircle, faEye, faCogs } from "@fortawesome/free-solid-svg-icons";
 import { collection, getDocs, doc, getDoc, query, where } from "firebase/firestore";
@@ -250,7 +250,7 @@ const FormContainer = styled.div`
 
 
 const NoticeButton = styled.button`
-  background-color: ${({ hasNotice }) => (hasNotice ? '#ff4d4d' : '#ddd')};
+  background-color: ${({ hasNotice }) => (hasNotice ? '#FFA500' : '#ddd')}; /* Orange for active, light gray for inactive */
   color: white;
   border: none;
   padding: 6px 14px;
@@ -260,7 +260,7 @@ const NoticeButton = styled.button`
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: ${({ hasNotice }) => (hasNotice ? '#e63939' : '#ccc')}; /* Red color on hover */
+    background-color: ${({ hasNotice }) => (hasNotice ? '#FF8C00' : '#ccc')}; /* Darker orange on hover for active, darker gray for inactive */
   }
 `;
 
@@ -611,9 +611,10 @@ const Dashboard = () => {
                   <td>{stall.stallInfo.location || "N/A"}</td>
                   <td>
                     {stall.noticeCount > 0 ? (
-                      <NoticeButton hasNotice={true} onClick={() => handleNotice(stall.id)}>
-                        Notice ({stall.noticeCount})
-                      </NoticeButton>
+                     <NoticeButton hasNotice={true} onClick={() => handleNotice(stall.id)}>
+                     <FaBell style={{ marginRight: '6px' }} /> {/* Add the icon */}
+                     Notice ({stall.noticeCount})
+                   </NoticeButton>
                     ) : (
                       'No Notice'
                     )}

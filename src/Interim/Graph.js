@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { rentmobileDb } from '../components/firebase.config';
 import { collection, getDocs } from 'firebase/firestore';
 import { Bar } from 'react-chartjs-2';
@@ -11,19 +11,29 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import html2canvas from 'html2canvas';
 
 // Register necessary components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const Graph = () => {
   const [goodsData, setGoodsData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const chartRef = useRef(null);
 
   useEffect(() => {
     const fetchGoodsData = async () => {
-      const carbonCollection = collection(rentmobileDb, 'appraisals');
-      const snapshot = await getDocs(carbonCollection);
-      const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setGoodsData(data);
+      try {
+        const carbonCollection = collection(rentmobileDb, 'appraisals');
+        const snapshot = await getDocs(carbonCollection);
+        const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        setGoodsData(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchGoodsData();
@@ -86,19 +96,19 @@ const Graph = () => {
       {
         label: 'Total Appraisal Value',
         data: totalAmountData,
-        backgroundColor: 'rgba(72, 191, 145, 0.8)', // Soft green
-        borderColor: 'rgba(72, 191, 145, 1)',
+        backgroundColor: 'rgba(0, 176, 155, 0.8)', // Bright teal
+        borderColor: 'rgba(0, 176, 155, 1)',
         borderWidth: 1,
       },
       {
         label: 'Total Quantity',
         data: quantityData,
-        backgroundColor: 'rgba(144, 190, 109, 0.8)', // Light green
-        borderColor: 'rgba(144, 190, 109, 1)',
+        backgroundColor: 'rgba(150, 214, 0, 0.8)', // Bright lime green
+        borderColor: 'rgba(150, 214, 0, 1)',
         borderWidth: 1,
       },
     ];
-
+    
     if (highlightCurrentDate) {
       datasets.forEach((dataset) => {
         dataset.backgroundColor = dataset.data.map((value, index) =>
@@ -185,6 +195,25 @@ const Graph = () => {
     },
   };
 
+  const exportChart = () => {
+    if (chartRef.current) {
+      html2canvas(chartRef.current).then((canvas) => {
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/png');
+        link.download = 'appraisal_chart.png';
+        link.click();
+      });
+    }
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
   return (
     <div
       style={{
@@ -208,19 +237,27 @@ const Graph = () => {
       >
         Appraisal Analytics: Most Appraised Goods
       </h2>
+
+      {/* Export Button */}
+      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <button onClick={exportChart} style={{ padding: '10px 20px', backgroundColor: '#48BF91', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
+          Export Chart
+        </button>
+      </div>
+
       {/* Display Daily Data */}
       <h3 style={{ color: '#48BF91', textAlign: 'center', marginBottom: '20px' }}>
         Daily Appraisals
       </h3>
-      <div style={{ height: '400px' }}>
+      <div style={{ height: '400px' }} ref={chartRef}>
         <Bar data={prepareChartData(dailyAggregatedData, true)} options={options} />
       </div>
 
       {/* Display Monthly Data */}
-      <h3 style={{ color: '#48BF91', textAlign: 'center', marginTop: '40px', marginBottom: '20px' }}>
+      <h3 style={{ color: '#48BF91', textAlign: 'center', marginTop: '70px', marginBottom: '20px' }}>
         Monthly Appraisals
       </h3>
-      <div style={{ height: '400px' }}>
+      <div style={{ height: '400px' }} ref={chartRef}>
         <Bar data={prepareChartData(monthlyAggregatedData)} options={options} />
       </div>
     </div>

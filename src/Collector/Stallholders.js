@@ -64,7 +64,6 @@ const AppBar = styled.div`
   font-weight: bold;
 `;
 
- 
 const StatsContainer = styled.div`
   display: flex;
   gap: 2rem;
@@ -76,36 +75,39 @@ const StatsContainer = styled.div`
 `;
 
 const StatBox = styled.div`
-  background: ${({ bgColor }) =>
-    bgColor || "linear-gradient(135deg, #4e73df, #1c6cd8)"};
+  background: ${({ bgColor }) => bgColor || "#f8f9fa"};
   padding: 2rem;
   border-radius: 12px;
-  border: 1px solid #ccc;
+  border: 1px solid #ddd;
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease, box-shadow 0.3s ease;
   cursor: pointer;
 
   &:hover {
     transform: translateY(-8px);
-    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2);
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.15);
   }
 
   h3 {
     margin: 0;
     font-size: 1.2rem;
-    color: #f8f9fa;
+    color: #333;
   }
 
   p {
     font-size: 2rem;
     margin: 0;
     font-weight: bold;
-    color: #f8f9fa;
+    color: #333;
+  }
+
+  .icon-container {
+    margin-top: 1rem;
   }
 
   @media (max-width: 768px) {
@@ -294,6 +296,8 @@ const TableContainer = styled.div`
       text-align: left;
       border-bottom: 2px solid #dee2e6;
       font-size: 12px;
+      min-height: 40px; /* Set a minimum height for table cells */
+      vertical-align: middle; /* Ensure vertical alignment */
     }
 
     th {
@@ -343,20 +347,55 @@ const FilterButtonContainer = styled.div`
     font-size: 14px;
     border: 1px solid #ddd;
     border-radius: 12px;
-    background-color: #3498db;
+    background-color: #007bff; /* Primary blue color */
     color: #fff;
     cursor: pointer;
     transition: all 0.3s;
 
     &:hover {
-      background-color: #2980b9;
+      background-color: #0056b3; /* Darker blue on hover */
     }
 
     &:active {
-      background-color: #2471a3;
+      background-color: #004494; /* Even darker blue on active */
     }
   }
 `;
+
+const ToggleButtonGroup = styled.div`
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+
+  button {
+    padding: 10px 20px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    background-color: ${(props) =>
+      props.active ? "#023D54" : "#9A6735"}; /* Dark Blue for active, Brown for default */
+    color: ${(props) => (props.active ? "#ffff66" : "#fff")}; /* Yellow text for active, White for default */
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 150px;
+
+    &:hover {
+      background-color: ${(props) =>
+        props.active ? "#022F42" : "#81542C"}; /* Darker Blue and Brown on hover */
+    }
+
+    &:active {
+      background-color: ${(props) =>
+        props.active ? "#021E2D" : "#684322"}; /* Even darker shades for active */
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(2, 61, 84, 0.4); /* Subtle blue focus ring */
+    }
+  }
+`;
+
 
 const StatusButtonContainer = styled.div`
   display: flex;
@@ -404,10 +443,10 @@ const StatusButton = styled.button`
 `;
 
 const MarkAsPaidButton = styled.button`
-  padding: 10px 20px;
-  font-size: 14px;
+  padding: 6px 14px; /* Reduced padding */
+  font-size: 12px; /* Smaller font size */
   border: 1px solid #ddd;
-  border-radius: 12px;
+  border-radius: 8px; /* Slightly smaller radius */
   background-color: ${(props) =>
     props.disabled ? "#cccccc" : "#28a745"};
   color: #fff;
@@ -453,6 +492,7 @@ const Dashboard = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [overduePayments, setOverduePayments] = useState([]); // State for overdue payments
+  const [activeButton, setActiveButton] = useState(null); // State to manage active button
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -838,52 +878,54 @@ const Dashboard = () => {
         <br></br>
 
         <StatsContainer>
-          <StatBox bgColor="#5c6bc0">
-            <h3>Daily Collection</h3>
-            <p>{dailyCollectionCount}</p>
-            <div className="icon-container">
-              <FaCalendarAlt
-                className="fading-icon"
-                style={{
-                  fontSize: "30px",
-                  opacity: 0.7,
-                  animation: "fade 2s infinite alternate",
-                  color: "white",
-                }}
-              />
-            </div>
-          </StatBox>
+        <StatBox bgColor="#f8f9fa">
+          <h3>Daily Collection</h3>
+          <p>{dailyCollectionCount}</p>
+          <div className="icon-container">
+            <FaCalendarAlt
+              className="fading-icon"
+              style={{
+                fontSize: "30px",
+                opacity: 0.7,
+                animation: "fade 2s infinite alternate",
+                color: "#333",
+              }}
+            />
+          </div>
+        </StatBox>
 
-          <StatBox bgColor="#42a5f5">
-            <h3>Weekly Collection</h3>
-            <p>{weeklyCollectionCount}</p>
-            <div className="icon-container">
-              <FaCalendarAlt
-                className="fading-icon"
-                style={{
-                  fontSize: "30px",
-                  opacity: 0.5,
-                  animation: "fade 2s infinite alternate",
-                }}
-              />
-            </div>
-          </StatBox>
+        <StatBox bgColor="#f8f9fa">
+          <h3>Weekly Collection</h3>
+          <p>{weeklyCollectionCount}</p>
+          <div className="icon-container">
+            <FaCalendarAlt
+              className="fading-icon"
+              style={{
+                fontSize: "30px",
+                opacity: 0.5,
+                animation: "fade 2s infinite alternate",
+                color: "#333",
+              }}
+            />
+          </div>
+        </StatBox>
 
-          <StatBox bgColor="#66bb6a">
-            <h3>Monthly Collection</h3>
-            <p>{monthlyCollectionCount}</p>
-            <div className="icon-container">
-              <FaCalendarAlt
-                className="fading-icon"
-                style={{
-                  fontSize: "30px",
-                  opacity: 0.5,
-                  animation: "fade 2s infinite alternate",
-                }}
-              />
-            </div>
-          </StatBox>
-        </StatsContainer>
+        <StatBox bgColor="#f8f9fa">
+          <h3>Monthly Collection</h3>
+          <p>{monthlyCollectionCount}</p>
+          <div className="icon-container">
+            <FaCalendarAlt
+              className="fading-icon"
+              style={{
+                fontSize: "30px",
+                opacity: 0.5,
+                animation: "fade 2s infinite alternate",
+                color: "#333",
+              }}
+            />
+          </div>
+        </StatBox>
+      </StatsContainer>
 
         <br></br>
         <TopBarContainer>
@@ -892,12 +934,27 @@ const Dashboard = () => {
 
         <FormContainer>
           <h3>Stall Holders</h3>
+          <ToggleButtonGroup>
+            <button
+              active={activeButton === "rental"}
+              onClick={() => setActiveButton("rental")}
+            >
+              Rental Offense
+            </button>
+            <button
+              active={activeButton === "final"}
+              onClick={() => setActiveButton("final")}
+            >
+              Final Offense
+            </button>
+            <button>Violation History</button>
+          </ToggleButtonGroup>
           <FilterButtonContainer>
-            <button onClick={() => handleFilter(null)}>ALL</button>
-            <button onClick={() => handleFilter("Daily")}>DAILY</button>
-            <button onClick={() => handleFilter("Weekly")}>WEEKLY</button>
-            <button onClick={() => handleFilter("Monthly")}>MONTHLY</button>
-          </FilterButtonContainer>
+          <button onClick={() => handleFilter(null)}>ALL</button>
+          <button onClick={() => handleFilter("Daily")}>DAILY</button>
+          <button onClick={() => handleFilter("Weekly")}>WEEKLY</button>
+          <button onClick={() => handleFilter("Monthly")}>MONTHLY</button>
+        </FilterButtonContainer>
           <UnitFilterContainer>
             <div className="select-container">
               <select
@@ -977,7 +1034,9 @@ const Dashboard = () => {
                         >
                           Mark as Paid
                         </MarkAsPaidButton>
-                      ) : null}
+                      ) : (
+                        <div style={{ minHeight: "40px" }}></div>
+                      )}
                     </td>
                   </tr>
                 ))}

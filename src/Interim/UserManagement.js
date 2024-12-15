@@ -1,12 +1,39 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import { FaBars, FaEye, FaPen, FaTrash, FaSearch, FaUserCircle, FaUsers, FaUser, FaUserSlash, FaChevronDown, FaSignOutAlt, FaCaretDown, FaPlus } from 'react-icons/fa';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faCheck, faClipboard, faPlusCircle, faCogs } from '@fortawesome/free-solid-svg-icons';
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
-import { rentmobileDb } from '../components/firebase.config';
-import IntSidenav from './IntSidenav';
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import {
+  FaBars,
+  FaEye,
+  FaPen,
+  FaTrash,
+  FaSearch,
+  FaUserCircle,
+  FaUsers,
+  FaUser,
+  FaUserSlash,
+  FaChevronDown,
+  FaSignOutAlt,
+  FaCaretDown,
+  FaPlus,
+} from "react-icons/fa";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faHome,
+  faShoppingCart,
+  faUser,
+  faSearch,
+  faPlus,
+  faUsers,
+  faFileContract,
+  faTicketAlt,
+  faCheck,
+  faClipboard,
+  faPlusCircle,
+  faCogs,
+} from "@fortawesome/free-solid-svg-icons";
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { rentmobileDb } from "../components/firebase.config";
+import IntSidenav from "./IntSidenav";
 
 const UserManagementContainer = styled.div`
   display: flex;
@@ -14,11 +41,13 @@ const UserManagementContainer = styled.div`
 `;
 
 const MainContent = styled.div`
-  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')};
+  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")};
   padding-left: 10px;
   background-color: #fff;
   padding: 2rem;
-  width: calc(100% - ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')});
+  width: calc(
+    100% - ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")}
+  );
   transition: margin-left 0.3s ease, width 0.3s ease;
   overflow-y: auto;
 `;
@@ -32,7 +61,7 @@ const AppBar = styled.div`
   color: white;
   box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
   font-size: 22px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-weight: bold;
 `;
 
@@ -53,7 +82,7 @@ const StatsContainer = styled.div`
 `;
 
 const StatBox = styled.div`
-  background-color: ${({ bgColor }) => bgColor || '#f4f4f4'};
+  background-color: ${({ bgColor }) => bgColor || "#f4f4f4"};
   padding: 2rem;
   border-radius: 12px;
   border: 1px solid #ddd;
@@ -161,7 +190,8 @@ const FormContainer = styled.div`
     border-collapse: collapse;
     font-size: 14px;
 
-    th, td {
+    th,
+    td {
       padding: 15px;
       text-align: left;
       border-bottom: 2px solid #dee2e6;
@@ -256,7 +286,7 @@ const SearchBarContainer = styled.div`
   border-radius: 20px;
   margin-bottom: 20px;
   margin-top: -25px;
-  display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex' : 'none')};
+  display: ${({ isSidebarOpen }) => (isSidebarOpen ? "flex" : "none")};
 `;
 
 const SearchInput = styled.input`
@@ -274,8 +304,15 @@ const ControlsContainer = styled.div`
   margin-bottom: 16px;
 `;
 
+const DropdownContainer = styled.div`
+  position: relative;
+  display: inline-block;
+`;
+
 const DropdownMenu = styled.ul`
   position: absolute;
+  top: 100%;
+  left: 0;
   background-color: white;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   border-radius: 5px;
@@ -283,6 +320,7 @@ const DropdownMenu = styled.ul`
   padding: 0;
   margin: 0;
   z-index: 200;
+  width: 100%;
 
   li {
     padding: 10px;
@@ -329,7 +367,7 @@ const IconWrapper = styled.div`
 const AddButton = styled.button`
   margin-top: 1rem;
   padding: 10px;
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   border: 1rem;
   border-radius: 5px;
@@ -352,6 +390,7 @@ const DropdownButton = styled.button`
   cursor: pointer;
   transition: background-color 0.3s;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
 
   &:hover {
     background-color: #0056b3;
@@ -366,11 +405,11 @@ const UserManagement = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const sidebarRef = useRef(null);
   const [users, setUserData] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState({
     userManagement: false,
     addUnit: false,
@@ -381,8 +420,8 @@ const UserManagement = () => {
     manageSpace: false,
   });
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState('success');
-  const [modalMessage, setModalMessage] = useState('');
+  const [modalType, setModalType] = useState("success");
+  const [modalMessage, setModalMessage] = useState("");
   const [userToDelete, setUserToDelete] = useState(null);
   const [selectedRole, setSelectedRole] = useState(null);
   const [loggedInUser, setLoggedInUser] = useState(null);
@@ -399,7 +438,7 @@ const UserManagement = () => {
   };
 
   const handleDropdownToggle = (dropdown) => {
-    setIsDropdownOpen(prevState => ({
+    setIsDropdownOpen((prevState) => ({
       ...prevState,
       [dropdown]: !prevState[dropdown],
     }));
@@ -407,13 +446,18 @@ const UserManagement = () => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
+      const loggedInUserData = JSON.parse(localStorage.getItem("userData"));
       if (loggedInUserData) {
-        const usersCollection = collection(rentmobileDb, 'admin_users');
+        const usersCollection = collection(rentmobileDb, "admin_users");
         const userDocs = await getDocs(usersCollection);
-        const users = userDocs.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const users = userDocs.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
 
-        const currentUser = users.find(user => user.email === loggedInUserData.email);
+        const currentUser = users.find(
+          (user) => user.email === loggedInUserData.email
+        );
         setLoggedInUser(currentUser || loggedInUserData);
       }
     };
@@ -422,13 +466,13 @@ const UserManagement = () => {
   }, []);
 
   const handleRoleSelect = (role) => {
-    setSelectedRole(role === 'All Users' ? null : role);
+    setSelectedRole(role === "All Users" ? null : role);
     setIsRoleDropdownOpen(false);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('userData');
-    navigate('/login');
+    localStorage.removeItem("userData");
+    navigate("/login");
   };
 
   const handleUserDropdownToggle = () => {
@@ -465,17 +509,23 @@ const UserManagement = () => {
 
   const handleDeleteClick = (user) => {
     setUserToDelete(user);
-    handleShowModal('confirmation', `Are you sure you want to delete ${user.firstName} ${user.lastName}?`);
+    handleShowModal(
+      "confirmation",
+      `Are you sure you want to delete ${user.firstName} ${user.lastName}?`
+    );
   };
 
   const handleConfirmDelete = async () => {
     if (userToDelete) {
       try {
-        await deleteDoc(doc(rentmobileDb, 'admin_users', userToDelete.id));
-        setUserData(users.filter(user => user.id !== userToDelete.id));
-        handleShowModal('success', `${userToDelete.firstName} ${userToDelete.lastName} has been deleted.`);
+        await deleteDoc(doc(rentmobileDb, "admin_users", userToDelete.id));
+        setUserData(users.filter((user) => user.id !== userToDelete.id));
+        handleShowModal(
+          "success",
+          `${userToDelete.firstName} ${userToDelete.lastName} has been deleted.`
+        );
       } catch (error) {
-        handleShowModal('error', 'Failed to delete user');
+        handleShowModal("error", "Failed to delete user");
       } finally {
         setUserToDelete(null);
         handleCloseModal();
@@ -486,15 +536,17 @@ const UserManagement = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const querySnapshot = await getDocs(collection(rentmobileDb, 'admin_users'));
-        const userList = querySnapshot.docs.map(doc => ({
+        const querySnapshot = await getDocs(
+          collection(rentmobileDb, "admin_users")
+        );
+        const userList = querySnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         }));
         setUserData(userList);
         setFilteredUsers(userList);
       } catch (error) {
-        console.error('Error fetching user data:', error);
+        console.error("Error fetching user data:", error);
       }
     };
 
@@ -504,11 +556,11 @@ const UserManagement = () => {
   useEffect(() => {
     let filtered = users;
     if (selectedRole) {
-      filtered = filtered.filter(user => user.position === selectedRole);
+      filtered = filtered.filter((user) => user.position === selectedRole);
     }
     if (searchQuery) {
       const lowerQuery = searchQuery.toLowerCase();
-      filtered = filtered.filter(user =>
+      filtered = filtered.filter((user) =>
         `${user.firstName} ${user.lastName}`.toLowerCase().includes(lowerQuery)
       );
     }
@@ -518,20 +570,23 @@ const UserManagement = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const querySnapshot = await getDocs(collection(rentmobileDb, 'admin_users'));
-        const userList = querySnapshot.docs.map(doc => ({
+        const querySnapshot = await getDocs(
+          collection(rentmobileDb, "admin_users")
+        );
+        const userList = querySnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         }));
 
         setUserData(userList);
 
-        const inactiveCount = userList.filter(user => user.status === 'Inactive').length;
+        const inactiveCount = userList.filter(
+          (user) => user.status === "Inactive"
+        ).length;
         setInactiveUsers(inactiveCount);
-
       } catch (error) {
-        console.error('Error fetching user data:', error);
-        handleShowModal('error', 'Failed to fetch user data');
+        console.error("Error fetching user data:", error);
+        handleShowModal("error", "Failed to fetch user data");
       }
     };
 
@@ -542,12 +597,18 @@ const UserManagement = () => {
     if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
       setIsSidebarOpen(false);
     }
+    if (isRoleDropdownOpen && !event.target.closest(".dropdown-container")) {
+      setIsRoleDropdownOpen(false);
+    }
+    if (isUserDropdownOpen && !event.target.closest(".dropdown-container")) {
+      setIsUserDropdownOpen(false);
+    }
   };
 
   useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -555,25 +616,33 @@ const UserManagement = () => {
     setIsSidebarOpen(false);
   };
 
-  const totalUsers = users.filter(user => user.firstName && user.lastName).length;
-  const activeUsers = users.filter(user => user.status === 'Active' && user.firstName && user.lastName).length;
+  const totalUsers = users.filter(
+    (user) => user.firstName && user.lastName
+  ).length;
+  const activeUsers = users.filter(
+    (user) => user.status === "Active" && user.firstName && user.lastName
+  ).length;
 
   const handleUserTypeSelect = async (userType) => {
     setSelectedUserType(userType);
     setIsUserDropdownOpen(false);
-    if (userType === 'All Admins') {
-      const querySnapshot = await getDocs(collection(rentmobileDb, 'admin_users'));
-      const userList = querySnapshot.docs.map(doc => ({
+    if (userType === "All Admins") {
+      const querySnapshot = await getDocs(
+        collection(rentmobileDb, "admin_users")
+      );
+      const userList = querySnapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       }));
       setUserData(userList);
       setFilteredUsers(userList);
-    } else if (userType === 'All Ambulant Collector') {
-      const querySnapshot = await getDocs(collection(rentmobileDb, 'ambulant_collector'));
-      const userList = querySnapshot.docs.map(doc => ({
+    } else if (userType === "All Ambulant Collector") {
+      const querySnapshot = await getDocs(
+        collection(rentmobileDb, "ambulant_collector")
+      );
+      const userList = querySnapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       }));
       setUserData(userList);
       setFilteredUsers(userList);
@@ -589,7 +658,10 @@ const UserManagement = () => {
           loggedInUser={loggedInUser}
         />
       </div>
-      <MainContent isSidebarOpen={isSidebarOpen} onClick={handleMainContentClick}>
+      <MainContent
+        isSidebarOpen={isSidebarOpen}
+        onClick={handleMainContentClick}
+      >
         <AppBar>
           <div className="title">OFFICE OF THE CITY MARKETS</div>
         </AppBar>
@@ -606,11 +678,14 @@ const UserManagement = () => {
             <h3>Total Users</h3>
             <p>{totalUsers}</p>
             <div className="icon-container">
-              <FaUsers className="fading-icon" style={{
-                fontSize: '30px',
-                opacity: 0.5,
-                animation: 'fade 2s infinite alternate'
-              }} />
+              <FaUsers
+                className="fading-icon"
+                style={{
+                  fontSize: "30px",
+                  opacity: 0.5,
+                  animation: "fade 2s infinite alternate",
+                }}
+              />
             </div>
           </StatBox>
 
@@ -618,11 +693,14 @@ const UserManagement = () => {
             <h3>Active Users</h3>
             <p>{activeUsers}</p>
             <div className="icon-container">
-              <FaUser className="fading-icon" style={{
-                fontSize: '30px',
-                opacity: 0.5,
-                animation: 'fade 2s infinite alternate'
-              }} />
+              <FaUser
+                className="fading-icon"
+                style={{
+                  fontSize: "30px",
+                  opacity: 0.5,
+                  animation: "fade 2s infinite alternate",
+                }}
+              />
             </div>
           </StatBox>
 
@@ -630,50 +708,70 @@ const UserManagement = () => {
             <h3>Inactive Users</h3>
             <p>{inactiveUsers}</p>
             <div className="icon-container">
-              <FaUserSlash className="fading-icon" style={{
-                fontSize: '30px',
-                opacity: 0.5,
-                animation: 'fade 2s infinite alternate'
-              }} />
+              <FaUserSlash
+                className="fading-icon"
+                style={{
+                  fontSize: "30px",
+                  opacity: 0.5,
+                  animation: "fade 2s infinite alternate",
+                }}
+              />
             </div>
           </StatBox>
         </StatsContainer>
 
         <FormContainer>
           <ControlsContainer>
-            <AddButton onClick={() => navigate('/newuser')}>
-              <FaPlus style={{ marginRight: '8px' }} />
+            <AddButton onClick={() => navigate("/newuser")}>
+              <FaPlus style={{ marginRight: "8px" }} />
               Add New User
             </AddButton>
 
-            <DropdownButton onClick={handleRoleDropdownToggle}>
-              <FaUser style={{ marginRight: '8px' }} />
-              <span>{selectedRole || 'Select Role'}</span>
-              <FaCaretDown style={{ marginLeft: '8px' }} />
-            </DropdownButton>
+            <DropdownContainer className="dropdown-container">
+              <DropdownButton onClick={handleRoleDropdownToggle}>
+                <FaUser style={{ marginRight: "8px" }} />
+                <span>{selectedRole || "Select Role"}</span>
+                <FaCaretDown style={{ marginLeft: "8px" }} />
+              </DropdownButton>
 
-            {isRoleDropdownOpen && (
-              <DropdownMenu>
-                <li onClick={() => handleRoleSelect('All Users')}>All Users</li>
-                <li onClick={() => handleRoleSelect('Collector')}>Collector</li>
-                <li onClick={() => handleRoleSelect('CTO')}>CTO</li>
-                <li onClick={() => handleRoleSelect('OIC')}>OIC</li>
-                <li onClick={() => handleRoleSelect('Interim')}>Interim</li>
-              </DropdownMenu>
-            )}
+              {isRoleDropdownOpen && (
+                <DropdownMenu>
+                  <li onClick={() => handleRoleSelect("All Users")}>
+                    All Users
+                  </li>
+                  <li onClick={() => handleRoleSelect("Collector")}>
+                    Collector
+                  </li>
+                  <li onClick={() => handleRoleSelect("CTO")}>CTO</li>
+                  <li onClick={() => handleRoleSelect("OIC")}>OIC</li>
+                  <li onClick={() => handleRoleSelect("Interim")}>Interim</li>
+                  <li onClick={() => handleRoleSelect("Interim")}>Enforcer</li>
+                </DropdownMenu>
+              )}
+            </DropdownContainer>
 
-            <DropdownButton onClick={handleUserDropdownToggle}>
-              <FaUser style={{ marginRight: '8px' }} />
-              <span>{selectedUserType || 'Select User Type'}</span>
-              <FaCaretDown style={{ marginLeft: '8px' }} />
-            </DropdownButton>
+            <DropdownContainer className="dropdown-container">
+              <DropdownButton onClick={handleUserDropdownToggle}>
+                <FaUser style={{ marginRight: "8px" }} />
+                <span>{selectedUserType || "Select User Type"}</span>
+                <FaCaretDown style={{ marginLeft: "8px" }} />
+              </DropdownButton>
 
-            {isUserDropdownOpen && (
-              <DropdownMenu>
-                <li onClick={() => handleUserTypeSelect('All Admins')}>All Admins</li>
-                <li onClick={() => handleUserTypeSelect('All Ambulant Collector')}>All Ambulant Collector</li>
-              </DropdownMenu>
-            )}
+              {isUserDropdownOpen && (
+                <DropdownMenu>
+                  <li onClick={() => handleUserTypeSelect("All Admins")}>
+                    All Admins
+                  </li>
+                  <li
+                    onClick={() =>
+                      handleUserTypeSelect("All Ambulant Collector")
+                    }
+                  >
+                    All Ambulant Collector
+                  </li>
+                </DropdownMenu>
+              )}
+            </DropdownContainer>
 
             <SearchContainer>
               <IconWrapper>
@@ -702,28 +800,41 @@ const UserManagement = () => {
             <tbody>
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="no-data">No data is stored</td>
+                  <td colSpan="6" className="no-data">
+                    No data is stored
+                  </td>
                 </tr>
               ) : (
                 filteredUsers
-                  .filter(user => user.firstName && user.lastName)
+                  .filter((user) => user.firstName && user.lastName)
                   .map((user, index) => (
                     <tr key={index}>
                       <td>{user.email}</td>
-                      <td>{user.firstName} {user.lastName}</td>
+                      <td>
+                        {user.firstName} {user.lastName}
+                      </td>
                       <td>{user.position}</td>
                       <td>{user.location}</td>
                       <td>{user.status}</td>
 
                       <td>
                         <div className="actions">
-                          <ActionButton className="view" onClick={() => handleViewClick(user.id)}>
+                          <ActionButton
+                            className="view"
+                            onClick={() => handleViewClick(user.id)}
+                          >
                             <FaEye className="icon" /> View
                           </ActionButton>
-                          <ActionButton className="edit" onClick={() => handleEditClick(user.id)}>
+                          <ActionButton
+                            className="edit"
+                            onClick={() => handleEditClick(user.id)}
+                          >
                             <FaPen className="icon" /> Edit
                           </ActionButton>
-                          <ActionButton className="delete" onClick={() => handleDeleteClick(user)}>
+                          <ActionButton
+                            className="delete"
+                            onClick={() => handleDeleteClick(user)}
+                          >
                             <FaTrash className="icon" /> Delete
                           </ActionButton>
                         </div>
@@ -738,16 +849,38 @@ const UserManagement = () => {
         {showModal && (
           <ModalOverlay>
             <ModalContent>
-              <ModalHeader>{modalType === 'confirmation' ? 'Confirm Delete' : modalType === 'success' ? 'Success' : 'Error'}</ModalHeader>
-              <ModalBody style={{ fontSize: modalType === 'confirmation' ? '0.9rem' : '1rem' }}>
+              <ModalHeader>
+                {modalType === "confirmation"
+                  ? "Confirm Delete"
+                  : modalType === "success"
+                  ? "Success"
+                  : "Error"}
+              </ModalHeader>
+              <ModalBody
+                style={{
+                  fontSize: modalType === "confirmation" ? "0.9rem" : "1rem",
+                }}
+              >
                 {modalMessage}
               </ModalBody>
-              {modalType === 'confirmation' ? (
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-                  <ModalButton style={{ background: '#4caf50', marginRight: '10px' }} onClick={handleConfirmDelete}>
+              {modalType === "confirmation" ? (
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginTop: "20px",
+                  }}
+                >
+                  <ModalButton
+                    style={{ background: "#4caf50", marginRight: "10px" }}
+                    onClick={handleConfirmDelete}
+                  >
                     Confirm
                   </ModalButton>
-                  <ModalButton style={{ background: '#f44336' }} onClick={handleCloseModal}>
+                  <ModalButton
+                    style={{ background: "#f44336" }}
+                    onClick={handleCloseModal}
+                  >
                     Cancel
                   </ModalButton>
                 </div>

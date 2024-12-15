@@ -3,37 +3,21 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faHome,
   faPlus,
-  faUsers,
-  faFileContract,
-  faTicketAlt,
-  faClipboard,
-  faCheck,
-  faPlusCircle,
-  faCogs,
+  faEye,
+  faEdit,
+  faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   collection,
   getDocs,
-  addDoc,
   deleteDoc,
   doc,
   updateDoc,
-  query,
-  where,
 } from "firebase/firestore";
 import { rentmobileDb } from "../components/firebase.config"; // Import the correct firestore instance
 import IntSidenav from "./IntSidenav";
-import {
-  FaBars,
-  FaSearch,
-  FaUserCircle,
-  FaSignOutAlt,
-  FaTrash,
-  FaEdit,
-  FaEye,
-} from "react-icons/fa";
+import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt, FaEye, FaEdit, FaTrash} from "react-icons/fa";
 
 const DashboardContainer = styled.div`
   display: flex;
@@ -80,7 +64,7 @@ const Container = styled.div`
 const SearchBarContainer = styled.div`
   display: flex;
   align-items: center;
-  padding: 10px 40px; /* Increased padding for wider search bar */
+  padding: 10px;
   background-color: #e9ecef;
   border-radius: 20px;
   margin-bottom: 20px;
@@ -94,7 +78,6 @@ const SearchInput = styled.input`
   outline: none;
   margin-left: 10px;
   width: 100%;
-  flex: 1; /* Make the search bar take available space */
 `;
 
 const AddButton = styled.button`
@@ -380,11 +363,10 @@ const EditModalContent = styled.div`
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const sidebarRef = useRef(null);
-  const [appraisalRates, setAppraisalRates] = useState([]);
-  const [filteredRates, setFilteredRates] = useState([]);
+  const [sections, setSections] = useState([]);
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [selectedRate, setSelectedRate] = useState(null);
+  const [selectedSection, setSelectedSection] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState({
@@ -396,14 +378,10 @@ const Dashboard = () => {
     manageZone: false,
     manageSpace: false,
   });
-  const [editedRate, setEditedRate] = useState({
-    goods_name: "",
-    location: "",
-    rate_size_pairs: [],
-    unit_measure: "",
+  const [editedSection, setEditedSection] = useState({
+    section: "",
+    unit: "",
   });
-  const [units, setUnits] = useState([]);
-  const [selectedUnit, setSelectedUnit] = useState("");
   const navigate = useNavigate();
 
   const handleSearchChange = (event) => {
@@ -421,109 +399,65 @@ const Dashboard = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const fetchAppraisalRates = async () => {
+  const fetchSections = async () => {
     try {
-      const appraisalRatesCollection = collection(
-        rentmobileDb,
-        "appraisal_rate"
-      );
-      const q = searchTerm
-        ? query(
-            appraisalRatesCollection,
-            where("goods_name", ">=", searchTerm),
-            where("goods_name", "<=", searchTerm + "\uf8ff")
-          )
-        : appraisalRatesCollection;
-      const appraisalRatesSnapshot = await getDocs(q);
-      const appraisalRatesList = appraisalRatesSnapshot.docs.map((doc) => ({
+      const sectionsCollection = collection(rentmobileDb, "section");
+      const sectionsSnapshot = await getDocs(sectionsCollection);
+      const sectionsList = sectionsSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      setAppraisalRates(appraisalRatesList);
-      setFilteredRates(appraisalRatesList); // Initialize filtered rates with all rates
-    } catch (error) {
-      console.error("Error fetching appraisal rates: ", error);
-    }
-  };
 
-  const fetchUnits = async () => {
-    try {
-      const unitsCollection = collection(rentmobileDb, "unit");
-      const unitsSnapshot = await getDocs(unitsCollection);
-      const unitsList = unitsSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setUnits(unitsList);
+      // Remove the filter for exactly 2 sections
+      setSections(sectionsList);
     } catch (error) {
-      console.error("Error fetching units: ", error);
+      console.error("Error fetching sections: ", error);
     }
   };
 
   useEffect(() => {
-    fetchAppraisalRates();
-    fetchUnits();
+    fetchSections();
   }, [searchTerm]);
 
-  useEffect(() => {
-    if (selectedUnit === "all") {
-      setFilteredRates(appraisalRates);
-    } else if (selectedUnit) {
-      const filtered = appraisalRates.filter(
-        (rate) => rate.location === selectedUnit
-      );
-      setFilteredRates(filtered);
-    } else {
-      setFilteredRates(appraisalRates);
-    }
-  }, [selectedUnit, appraisalRates]);
-
-  const handleView = (rate) => {
-    setSelectedRate(rate);
-    setShowModal(true);
-  };
-
-  const openModal = (rate) => {
-    setSelectedRate(rate);
+  const handleViewSection = (section) => {
+    setSelectedSection(section);
     setShowModal(true);
   };
 
   const closeModal = () => {
     setShowModal(false);
-    setSelectedRate(null);
+    setSelectedSection(null);
     setEditMode(false);
-    setEditedRate({
-      goods_name: "",
-      location: "",
-      rate_size_pairs: [],
-      unit_measure: "",
+    setEditedSection({
+      section: "",
+      unit: "",
     });
   };
 
-  const deleteRate = async (id) => {
+  const deleteSection = async (id) => {
     try {
-      await deleteDoc(doc(rentmobileDb, "appraisal_rate", id));
-      fetchAppraisalRates(); // Refresh the list after deletion
+      await deleteDoc(doc(rentmobileDb, "section", id));
+      fetchSections(); // Refresh the list after deletion
     } catch (error) {
-      console.error("Error deleting rate: ", error);
+      console.error("Error deleting section: ", error);
     }
   };
 
-  const handleEdit = (rate) => {
-    setSelectedRate(rate);
-    setEditedRate(rate);
+  const handleEditSection = (section) => {
+    setSelectedSection(section);
+    setEditedSection(section);
     setEditMode(true);
     setShowModal(true);
   };
 
-  const handleUpdateRate = async () => {
+  const handleUpdateSection = async () => {
     try {
-      const rateRef = doc(rentmobileDb, "appraisal_rate", selectedRate.id);
-      await updateDoc(rateRef, editedRate);
-      fetchAppraisalRates(); // Refresh the list after update
+      const sectionRef = doc(rentmobileDb, "section", selectedSection.id);
+      await updateDoc(sectionRef, editedSection);
+      fetchSections(); // Refresh the list after update
       closeModal();
     } catch (error) {
-      console.error("Error updating rate: ", error);
+      console.error("Error updating section: ", error);
     }
   };
 
@@ -590,67 +524,46 @@ const Dashboard = () => {
 
         <Container>
           <div style={{ display: "flex", alignItems: "center" }}>
-            <AddButton onClick={() => navigate("/appraise")}>
+            <AddButton onClick={() => navigate("/addsection")}>
               <FontAwesomeIcon
                 icon={faPlus}
                 style={{ marginRight: "0.5rem" }}
               />
-              Add New Appraisal
+              Add New Section
             </AddButton>
-            <Dropdown onChange={(e) => setSelectedUnit(e.target.value)}>
-              <option value="" disabled>
-                Select Unit
-              </option>
-              <option value="all">All</option>
-              {units.map((unit) => (
-                <option key={unit.id} value={unit.name}>
-                  {unit.name}
-                </option>
-              ))}
-            </Dropdown>
             <SearchBar
               type="text"
-              placeholder="Search goods..."
+              placeholder="Search sections..."
               value={searchTerm}
               onChange={handleSearchChange}
             />
           </div>
-          <Title>Appraisal Rate Management</Title>
+          <Title>Section Management</Title>
           <CardContainer>
-            {filteredRates.map((rate) => (
-              <UnitCard key={rate.id}>
-                <UnitName>{rate.goods_name}</UnitName>
-                <UnitDetails>Location: {rate.location}</UnitDetails>
-                <UnitDetails>Unit Measure: {rate.unit_measure}</UnitDetails>
-                <UnitDetails>
-                  Rates:
-                  {rate.rate_size_pairs.map((pair, index) => (
-                    <span key={index}>
-                      {pair.rate_1 || pair.rate_2 || pair.rate_3} (
-                      {pair.size_1 || pair.size_2 || pair.size_3})
-                      {index < rate.rate_size_pairs.length - 1 ? ", " : ""}
-                    </span>
-                  ))}
-                </UnitDetails>
+            {sections.map((section) => (
+              <UnitCard key={section.id}>
+                <UnitName>{section.section}</UnitName>
+                <UnitDetails>Location: {section.location}</UnitDetails>
+                <UnitDetails>Sections: {section.sections.join(", ")}</UnitDetails>
                 <ActionButtons>
                   <ActionButton
                     color="#007bff"
                     hoverColor="#0056b3"
-                    onClick={() => openModal(rate)} // Open modal with rate details
+                    onClick={() => handleViewSection(section)} // Open modal with section details
                   >
                     <FaEye /> View
                   </ActionButton>
                   <ActionButton
                     color="#ffc107"
                     hoverColor="#e0a800"
-                    onClick={() => handleEdit(rate)}
+                    onClick={() => handleEditSection(section)}
                   >
                     <FaEdit /> Edit
                   </ActionButton>
                   <ActionButton
                     color="#dc3545"
                     hoverColor="#c82333"
-                    onClick={() => deleteRate(rate.id)}
+                    onClick={() => deleteSection(section.id)}
                   >
                     <FaTrash /> Delete
                   </ActionButton>
@@ -665,100 +578,56 @@ const Dashboard = () => {
               <ModalContent>
                 {editMode ? (
                   <EditModalContent>
-                    <h3>Edit Rate</h3>
-                    <label>Goods Name</label>
+                    <h3>Edit Section</h3>
+                    <label>Section</label>
                     <input
                       type="text"
-                      value={editedRate.goods_name}
+                      value={editedSection.section}
                       onChange={(e) =>
-                        setEditedRate({
-                          ...editedRate,
-                          goods_name: e.target.value,
+                        setEditedSection({
+                          ...editedSection,
+                          section: e.target.value,
                         })
                       }
                     />
                     <label>Location</label>
                     <input
                       type="text"
-                      value={editedRate.location}
+                      value={editedSection.location}
                       onChange={(e) =>
-                        setEditedRate({
-                          ...editedRate,
+                        setEditedSection({
+                          ...editedSection,
                           location: e.target.value,
                         })
                       }
                     />
-                    <label>Unit Measure</label>
+                    <label>Sections</label>
                     <input
                       type="text"
-                      value={editedRate.unit_measure}
+                      value={editedSection.sections.join(", ")}
                       onChange={(e) =>
-                        setEditedRate({
-                          ...editedRate,
-                          unit_measure: e.target.value,
+                        setEditedSection({
+                          ...editedSection,
+                          sections: e.target.value.split(", "),
                         })
                       }
                     />
-                    <label>Rate Size Pairs</label>
-                    {editedRate.rate_size_pairs.map((pair, index) => (
-                      <div key={index}>
-                        <input
-                          type="number"
-                          value={pair.rate_1 || pair.rate_2 || pair.rate_3}
-                          onChange={(e) => {
-                            const newPairs = [...editedRate.rate_size_pairs];
-                            newPairs[index] = {
-                              ...newPairs[index],
-                              rate_1: parseInt(e.target.value),
-                            };
-                            setEditedRate({
-                              ...editedRate,
-                              rate_size_pairs: newPairs,
-                            });
-                          }}
-                        />
-                        <input
-                          type="text"
-                          value={pair.size_1 || pair.size_2 || pair.size_3}
-                          onChange={(e) => {
-                            const newPairs = [...editedRate.rate_size_pairs];
-                            newPairs[index] = {
-                              ...newPairs[index],
-                              size_1: e.target.value,
-                            };
-                            setEditedRate({
-                              ...editedRate,
-                              rate_size_pairs: newPairs,
-                            });
-                          }}
-                        />
-                      </div>
-                    ))}
                     <hr />
-                    <button onClick={handleUpdateRate}>Update</button>
+                    <button onClick={handleUpdateSection}>Update</button>
                     <button onClick={closeModal}>Cancel</button>
                   </EditModalContent>
                 ) : (
                   <>
-                    <h3>Rate Details</h3>
+                    <h3>Section Details</h3>
                     <p>
-                      <strong>Goods Name:</strong> {selectedRate.goods_name}
+                      <strong>Section:</strong> {selectedSection.section}
                     </p>
                     <p>
-                      <strong>Location:</strong> {selectedRate.location}
+                      <strong>Location:</strong> {selectedSection.location}
                     </p>
                     <p>
-                      <strong>Unit Measure:</strong> {selectedRate.unit_measure}
+                      <strong>Sections:</strong> {selectedSection.sections.join(", ")}
                     </p>
-                    <p>
-                      <strong>Rates:</strong>
-                    </p>
-                    {selectedRate.rate_size_pairs.map((pair, index) => (
-                      <p key={index}>
-                        {pair.rate_1 || pair.rate_2 || pair.rate_3} (
-                        {pair.size_1 || pair.size_2 || pair.size_3})
-                      </p>
-                    ))}
                     <hr />
                     <button onClick={closeModal}>Close</button>
                   </>

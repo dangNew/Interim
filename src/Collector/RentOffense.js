@@ -6,10 +6,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faClipboard, faPlusCircle, faCogs, faEye } from '@fortawesome/free-solid-svg-icons';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { rentmobileDb } from '../components/firebase.config';
-import ConfirmationModal from './ConfirmationModal';
-import IntSidenav from './IntSidenav';
-import NoticeModal from './NoticeModal';
-import ViolationModal from './ViolationModal'; // Import the new ViolationModal
+
+import SidenavCollector from "./SidenavCollector";
+import NoticeModal from '../Interim/NoticeModal';
+import CollectorViolationModal from './CollectorViolationModal'; // Corrected import path
 
 const ROWS_PER_PAGE = 10;
 
@@ -313,35 +313,7 @@ const ViewButton = styled.button`
   }
 `;
 
-const TransactionButton = styled.button`
-  background-color: #ffa500;
-  color: white;
-  border: none;
-  padding: 6px 14px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-  transition: background-color 0.2s ease;
 
-  &:hover {
-    background-color: #e68a00; /* Orange color on hover */
-  }
-`;
-
-const NoticeButton = styled.button`
-  background-color: ${({ hasNotice }) => (hasNotice ? '#FFA500' : '#ddd')}; /* Orange for active, light gray for inactive */
-  color: white;
-  border: none;
-  padding: 6px 14px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: ${({ hasNotice }) => (hasNotice ? '#FF8C00' : '#ccc')}; /* Darker orange on hover for active, darker gray for inactive */
-  }
-`;
 
 const ViolationButton = styled.button`
   background-color: ${({ hasViolation }) => (hasViolation ? '#ff4d4d' : '#ddd')};
@@ -462,17 +434,7 @@ const Dashboard = () => {
         };
       });
 
-      const checkNotice = async (vendorId) => {
-        try {
-          const noticeCollection = collection(rentmobileDb, 'Notice_Report');
-          const q = query(noticeCollection, where('vendorId', '==', vendorId));
-          const querySnapshot = await getDocs(q);
-          return querySnapshot.size; // Return the count of documents
-        } catch (error) {
-          console.error('Error checking notice:', error);
-          return 0;
-        }
-      };
+      
 
       const checkViolation = async (vendorId) => {
         try {
@@ -488,9 +450,9 @@ const Dashboard = () => {
 
       const dataWithChecks = await Promise.all(
         data.map(async (stall) => {
-          const noticeCount = await checkNotice(stall.id);
+         
           const violationCount = await checkViolation(stall.id);
-          return { ...stall, noticeCount, violationCount };
+          return { ...stall, violationCount };
         })
       );
 
@@ -580,7 +542,7 @@ const Dashboard = () => {
                 <th>Area (Meters)</th>
                 <th>Date</th>
                 <th>Contact Number</th>
-                <th>Notice</th>
+            
                 <th>Violation</th>
                 <th className="actions">Actions</th>
               </tr>
@@ -595,16 +557,11 @@ const Dashboard = () => {
                   <td>${stall.areaMeters}</td>
                   <td>${stall.date}</td>
                   <td>${stall.contactNumber}</td>
-                  <td>
-                    ${stall.noticeCount > 0 ? `<span style="color: red;">Notice (${stall.noticeCount})</span>` : 'No Notice'}
-                  </td>
+                  
                   <td>
                     ${stall.violationCount > 0 ? `<span style="color: red;">Violation (${stall.violationCount})</span>` : 'No Violation'}
                   </td>
-                  <td className="actions">
-                    <button onClick="handleView(${stall.id})">View</button>
-                    <button onClick="handleTransaction(${stall.id})">Transaction</button>
-                  </td>
+                  
                 </tr>
               `).join('')}
             </tbody>
@@ -636,11 +593,6 @@ const Dashboard = () => {
     setIsSidebarOpen(false);
   };
 
-  const handleTransaction = (stallHolder) => {
-    if (stallHolder) {
-      navigate(`/vendor-transaction/${stallHolder.id}`);
-    }
-  };
 
   const handleNotice = (vendorId) => {
     setSelectedNotice(vendorId);
@@ -665,7 +617,7 @@ const Dashboard = () => {
   return (
     <DashboardContainer>
       <div ref={sidebarRef}>
-        <IntSidenav
+        <SidenavCollector
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
           loggedInUser={loggedInUser}
@@ -727,7 +679,7 @@ const Dashboard = () => {
                 <th>Area </th>
                 <th>Date</th>
                 <th>Contact Number</th>
-                <th>Notice</th>
+               
                 <th>Violation</th>
                 <th className="actions">Actions</th>
               </tr>
@@ -742,16 +694,8 @@ const Dashboard = () => {
                   <td>{stall.areaMeters}</td>
                   <td>{stall.date}</td>
                   <td>{stall.contactNumber}</td>
-                  <td>
-                    {stall.noticeCount > 0 ? (
-                      <NoticeButton hasNotice={true} onClick={() => handleNotice(stall.id)}>
-                        <FaBell style={{ marginRight: '6px' }} /> {/* Add the icon */}
-                        Notice ({stall.noticeCount})
-                      </NoticeButton>
-                    ) : (
-                      'No Notice'
-                    )}
-                  </td>
+                 
+                 
                   <td>
                     {stall.violationCount > 0 ? (
                       <ViolationButton hasViolation={true} onClick={() => handleViolation(stall.id)}>
@@ -766,9 +710,7 @@ const Dashboard = () => {
                     <ViewButton onClick={() => handleView(stall)}>
                       <FontAwesomeIcon icon={faEye} /> View
                     </ViewButton>
-                    <TransactionButton onClick={() => handleTransaction(stall)}>
-                      <FaReceipt /> Transaction
-                    </TransactionButton>
+                   
                   </td>
                 </tr>
               ))}
@@ -788,15 +730,10 @@ const Dashboard = () => {
           </PageButton>
         </PaginationContainer>
 
-        <ConfirmationModal
-          isOpen={isModalOpen}
-          onClose={handleModalClose}
-          message="View Stall Holder"
-          stallHolder={selectedStallHolder}
-        />
+       
 
         <NoticeModal isOpen={isNoticeModalOpen} onClose={handleNoticeModalClose} vendorId={selectedNotice} />
-        <ViolationModal isOpen={isViolationModalOpen} onClose={handleViolationModalClose} vendorId={selectedViolation} />
+        <CollectorViolationModal isOpen={isViolationModalOpen} onClose={handleViolationModalClose} vendorId={selectedViolation} />
       </MainContent>
     </DashboardContainer>
   );

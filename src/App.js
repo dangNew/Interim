@@ -9,17 +9,19 @@ import {
 import { AuthProvider } from "./Interim/AuthContext"; // Ensure the path is correct
 import ProtectedRoute from "./Interim/ProtectedRoute"; // Ensure the path is correct
 
-import ListOfStallholders from "./Collector/ListOfStallholders";
 import ViewPayment from "./Collector/ViewPayment";
+
+
 import SignUp from "./Interim/Signup";
 import Login from "./Interim/Login";
 import ForgotPassword from "./Interim/ForgotPassword";
+
+
 import Dashboard from "./Interim/Dashboard";
 import ListOfVendors from "./Interim/ListOfVendors";
 import AddUnit from "./Interim/AddUnit";
 import UserManagement from "./Interim/UserManagement";
 import AddNewUser from "./Interim/AddNewUser";
-
 import Modal from "./Interim/Modal";
 import Profile from "./Interim/Profile";
 import UserEdit from "./Interim/UserEdit";
@@ -33,7 +35,7 @@ import Viewunit from "./Interim/viewunit";
 import ViewUser from "./Interim/ViewUser";
 import ViewStallholder from "./Interim/ViewStallholder";
 import EditUnit from "./Interim/EditUnit";
-import AddZone from "./Interim/AddZone";
+import AddSection from "./Interim/AddSection";
 import ListOfStalls from "./Interim/ListOfStalls";
 import ViewSpace from "./Interim/ViewSpace";
 import EditSpace from "./Interim/EditSpace";
@@ -52,9 +54,10 @@ import Appraisers from "./Interim/Appraisers";
 import ViewAppraisers from "./Interim/ViewAppraisers";
 import AddAppraiser from "./Interim/AddAppraiser";
 import VendorTransaction from "./Interim/VendorTransaction";
-import ViewZone from "./Interim/ViewZone";
+import ViewSection from "./Interim/ViewSection";
 import AppraisalProduct from "./Interim/AppraisalProduct";
 import Payment from "./Collector/Payment";
+import RentOffense from "./Collector/RentOffense"
 
 import Payroll from "./payroll/payroll";
 import Quiz from "./quiz";
@@ -161,8 +164,8 @@ function App() {
             element={<ProtectedRoute element={<EditUnit />} />}
           />
           <Route
-            path="/addzone"
-            element={<ProtectedRoute element={<AddZone />} />}
+            path="/addsection"
+            element={<ProtectedRoute element={<AddSection />} />}
           />
           <Route
             path="/listofstalls"
@@ -237,8 +240,8 @@ function App() {
             element={<VendorTransaction />}
           />
           <Route
-            path="/viewzone"
-            element={<ProtectedRoute element={<ViewZone />} />}
+            path="/viewsection"
+            element={<ProtectedRoute element={<ViewSection />} />}
           />
           <Route
             path="/appraiseproduct"
@@ -249,6 +252,13 @@ function App() {
             element={<ProtectedRoute element={<Payment />} />}
           />
 
+
+          /*NEW */
+
+          <Route
+            path="/rentoffense"
+            element={<ProtectedRoute element={<RentOffense />} />}
+          />
           {/* OIC Routes */}
           <Route
             path="/oic_dashboard"

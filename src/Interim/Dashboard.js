@@ -13,6 +13,7 @@ import ActiveModal from './ActiveModal';
 import TotalUsersModal from './TotalUsersModal';
 import InactiveUsersModal from './InactiveUsersModal';
 import CollectorsModal from './CollectorsModal'; // Import the new modal
+import VendorLocationAnalytics from './VendorLocationAnalytics'; // Import the new component
 import IntSidenav from './IntSidenav';
 
 const DashboardContainer = styled.div`
@@ -374,8 +375,6 @@ const Dashboard = () => {
         </AppBar>
         <br /><br />
 
-
-        
 <StatsContainer>
   <StatBox bgColor="#5c6bc0" onClick={handleTotalUsersStatBoxClick}>
     <h3>Total Users</h3>
@@ -434,74 +433,79 @@ const Dashboard = () => {
     </div>
   </StatBox>
 </StatsContainer>
+<br></br>
 
+<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', gap: '5px', padding: '30px' }}>
+  <div style={{ flex: 1, maxWidth: '300px', margin: '0 auto' }}>
+    <LoginAnalytics />
+  </div>
+  <div style={{ flex: 1, maxWidth: '700px', margin: '0 auto' }}>
+    <VendorLocationAnalytics />
+  </div>
+</div>
 
-        <br /><br />
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', gap: '20px', padding: '50px' }}>
-          <div style={{ flex: 1, maxWidth: '800px', margin: '0 auto' }}>
-            <Graph />
-          </div>
-          <div style={{ flex: 1, maxWidth: '600px', margin: '0 auto' }}>
-            <LoginAnalytics />
-          </div>
-        </div>
-       
-        <FormContainer>
-          <h3>Recently Registered</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Email</th>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Phone</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentUsers.map((user, index) => (
-                <tr key={index}>
-                  <td>{user.email || ''}</td>
-                  <td>{user.firstName || ''}</td>
-                  <td>{user.lastName || ''}</td>
-                  <td>{user.contactNum || ''}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </FormContainer>
-        <CollectorTableContainer>
-          <h3>Collector Users</h3>
-          <CollectorTable>
-            <thead>
-              <tr>
-                <th>Email</th>
-                <th>Name</th>
-                <th>Address</th>
-                <th>Collector</th>
-                <th>Location</th>
-                <th>Contact Number</th>
-              </tr>
-            </thead>
-            <tbody>
-              {collectorsData.length > 0 ? (
-                collectorsData.map((collector) => (
-                  <tr key={collector.id}>
-                    <td>{collector.email}</td>
-                    <td>{collector.firstName + ' ' + collector.lastName}</td>
-                    <td>{collector.address}</td>
-                    <td>{collector.collector}</td>
-                    <td>{collector.location}</td>
-                    <td>{collector.contactNum}</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6">No collectors found.</td>
-                </tr>
-              )}
-            </tbody>
-          </CollectorTable>
-        </CollectorTableContainer>
+<div style={{ marginTop: '10px', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', gap: '5px', padding: '50px' }}>
+  <div style={{ flex: 1, maxWidth: '100%', margin: '0 auto' }}>
+    <Graph />
+  </div>
+</div>
+
+<FormContainer>
+  <h3>Recently Registered</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Phone</th>
+      </tr>
+    </thead>
+    <tbody>
+      {recentUsers.map((user, index) => (
+        <tr key={index}>
+          <td>{user.email || ''}</td>
+          <td>{user.firstName || ''}</td>
+          <td>{user.lastName || ''}</td>
+          <td>{user.contactNum || ''}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</FormContainer>
+<CollectorTableContainer>
+  <h3>Collector Users</h3>
+  <CollectorTable>
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>Name</th>
+        <th>Address</th>
+        <th>Collector</th>
+        <th>Location</th>
+        <th>Contact Number</th>
+      </tr>
+    </thead>
+    <tbody>
+      {collectorsData.length > 0 ? (
+        collectorsData.map((collector) => (
+          <tr key={collector.id}>
+            <td>{collector.email}</td>
+            <td>{collector.firstName + ' ' + collector.lastName}</td>
+            <td>{collector.address}</td>
+            <td>{collector.collector}</td>
+            <td>{collector.location}</td>
+            <td>{collector.contactNum}</td>
+          </tr>
+        ))
+      ) : (
+        <tr>
+          <td colSpan="6">No collectors found.</td>
+        </tr>
+      )}
+    </tbody>
+  </CollectorTable>
+</CollectorTableContainer>
       </MainContent>
       {isModalOpen && <ActiveModal users={activeUsersList} onClose={() => setIsModalOpen(false)} />}
       {isTotalUsersModalOpen && <TotalUsersModal users={totalUsersList} onClose={() => setIsTotalUsersModalOpen(false)} />}

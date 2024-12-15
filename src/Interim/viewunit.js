@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faPlus, faUsers, faFileContract, faTicketAlt, faClipboard, faCheck, faPlusCircle, faCogs } from '@fortawesome/free-solid-svg-icons';
-import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc, query, where } from 'firebase/firestore';
 import { rentmobileDb } from '../components/firebase.config'; // Import the correct firestore instance
 import IntSidenav from './IntSidenav';
 import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt, FaTrash, FaEdit, FaEye } from 'react-icons/fa';
@@ -80,6 +80,32 @@ const AddButton = styled.button`
 
   &:hover {
     background-color: #218838;
+  }
+`;
+
+const SearchBar = styled.input`
+  margin-left: 1rem;
+  padding: 0.6rem 1.2rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  background-color: #ffffff; /* White background */
+  color: #333; /* Black text */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+  flex: 1; /* Make the search bar take available space */
+
+  &:hover {
+    background-color: #e0e0e0; /* Light gray on hover */
+    border-color: #aaa;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #66afe9; /* Focus border color */
+    box-shadow: 0 0 4px rgba(102, 175, 233, 0.6); /* Blue glow */
   }
 `;
 
@@ -334,8 +360,11 @@ const Dashboard = () => {
   const fetchUnits = async () => {
     try {
       const unitsCollection = collection(rentmobileDb, 'unit');
-      const unitsSnapshot = await getDocs(unitsCollection);
-      const unitsList = unitsSnapshot.docs.map((doc) => ({
+      const q = searchTerm
+        ? query(unitsCollection, where('name', '>=', searchTerm), where('name', '<=', searchTerm + '\uf8ff'))
+        : unitsCollection;
+      const unitsSnapshot = await getDocs(q);
+      const unitsList = unitsSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
       }));
@@ -347,7 +376,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchUnits();
-  }, []);
+  }, [searchTerm]);
 
   const handleView = (unit) => {
     setSelectedUnit(unit);
@@ -473,16 +502,21 @@ const Dashboard = () => {
         <br></br>
 
         <Container>
-          {/* Add New Space Button */}
-          <AddButton onClick={() => navigate('/addunit')}>
-            <FontAwesomeIcon icon={faPlus} style={{ marginRight: '0.5rem' }} />
-            Add New Unit
-          </AddButton>
-
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <AddButton onClick={() => navigate('/addunit')}>
+              <FontAwesomeIcon icon={faPlus} style={{ marginRight: '0.5rem' }} />
+              Add New Unit
+            </AddButton>
+            <SearchBar
+              type="text"
+              placeholder="Search units..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
+          </div>
           <Title>Unit Management</Title>
-
           <CardContainer>
-            {units.map((unit) => (
+            {units.map(unit => (
               <UnitCard key={unit.id}>
                 <UnitName>{unit.name}</UnitName>
                 <UnitDetails>Location: {unit.location}</UnitDetails>
@@ -525,19 +559,19 @@ const Dashboard = () => {
                     <input
                       type="text"
                       value={editedUnit.name}
-                      onChange={(e) => setEditedUnit({ ...editedUnit, name: e.target.value })}
+                      onChange={e => setEditedUnit({ ...editedUnit, name: e.target.value })}
                     />
                     <label>Location</label>
                     <input
                       type="text"
                       value={editedUnit.location}
-                      onChange={(e) => setEditedUnit({ ...editedUnit, location: e.target.value })}
+                      onChange={e => setEditedUnit({ ...editedUnit, location: e.target.value })}
                     />
                     <label>Date Registered</label>
                     <input
                       type="date"
                       value={editedUnit.dateRegistered}
-                      onChange={(e) => setEditedUnit({ ...editedUnit, dateRegistered: e.target.value })}
+                      onChange={e => setEditedUnit({ ...editedUnit, dateRegistered: e.target.value })}
                     />
                     <hr />
                     <button onClick={handleUpdateUnit}>Update</button>
