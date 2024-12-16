@@ -745,7 +745,7 @@ const UserManagement = () => {
                   <li onClick={() => handleRoleSelect("CTO")}>CTO</li>
                   <li onClick={() => handleRoleSelect("OIC")}>OIC</li>
                   <li onClick={() => handleRoleSelect("Interim")}>Interim</li>
-                  <li onClick={() => handleRoleSelect("Interim")}>Enforcer</li>
+                  <li onClick={() => handleRoleSelect("Enforcer")}>Enforcer</li>
                 </DropdownMenu>
               )}
             </DropdownContainer>

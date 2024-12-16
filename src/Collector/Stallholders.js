@@ -373,20 +373,29 @@ const ToggleButtonGroup = styled.div`
     border: 1px solid #ddd;
     border-radius: 12px;
     background-color: ${(props) =>
-      props.active ? "#023D54" : "#9A6735"}; /* Dark Blue for active, Brown for default */
-    color: ${(props) => (props.active ? "#ffff66" : "#fff")}; /* Yellow text for active, White for default */
+      props.active
+        ? "#023D54"
+        : "#9A6735"}; /* Dark Blue for active, Brown for default */
+    color: ${(props) =>
+      props.active
+        ? "#ffff66"
+        : "#fff"}; /* Yellow text for active, White for default */
     cursor: pointer;
     transition: all 0.3s;
     width: 150px;
 
     &:hover {
       background-color: ${(props) =>
-        props.active ? "#022F42" : "#81542C"}; /* Darker Blue and Brown on hover */
+        props.active
+          ? "#022F42"
+          : "#81542C"}; /* Darker Blue and Brown on hover */
     }
 
     &:active {
       background-color: ${(props) =>
-        props.active ? "#021E2D" : "#684322"}; /* Even darker shades for active */
+        props.active
+          ? "#021E2D"
+          : "#684322"}; /* Even darker shades for active */
     }
 
     &:focus {
@@ -395,7 +404,6 @@ const ToggleButtonGroup = styled.div`
     }
   }
 `;
-
 
 const StatusButtonContainer = styled.div`
   display: flex;
@@ -447,20 +455,17 @@ const MarkAsPaidButton = styled.button`
   font-size: 12px; /* Smaller font size */
   border: 1px solid #ddd;
   border-radius: 8px; /* Slightly smaller radius */
-  background-color: ${(props) =>
-    props.disabled ? "#cccccc" : "#28a745"};
+  background-color: ${(props) => (props.disabled ? "#cccccc" : "#28a745")};
   color: #fff;
   cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
   transition: all 0.3s;
 
   &:hover {
-    background-color: ${(props) =>
-      props.disabled ? "#cccccc" : "#218838"};
+    background-color: ${(props) => (props.disabled ? "#cccccc" : "#218838")};
   }
 
   &:active {
-    background-color: ${(props) =>
-      props.disabled ? "#cccccc" : "#1e7e34"};
+    background-color: ${(props) => (props.disabled ? "#cccccc" : "#1e7e34")};
   }
 `;
 
@@ -548,14 +553,17 @@ const Dashboard = () => {
       }));
 
       const aggregatedData = data.reduce((acc, curr) => {
-        const existingVendor = acc.find((vendor) => vendor.vendorId === curr.vendorId);
+        const existingVendor = acc.find(
+          (vendor) => vendor.vendorId === curr.vendorId
+        );
         if (existingVendor) {
           if (!existingVendor.status.includes(curr.status)) {
             existingVendor.status.push(curr.status);
           }
           if (curr.status === "Overdue") {
             existingVendor.totalAmountDue += curr.totalAmountDue;
-            existingVendor.overdueCount = (existingVendor.overdueCount || 0) + 1;
+            existingVendor.overdueCount =
+              (existingVendor.overdueCount || 0) + 1;
           }
           if (curr.status === "Pending") {
             existingVendor.total += curr.total;
@@ -680,8 +688,12 @@ const Dashboard = () => {
 
       if (stallDoc.exists()) {
         const stallData = stallDoc.data();
-        const totalOverdue = stallData.status.includes("Overdue") ? stallData.totalAmountDue : 0;
-        const totalPending = stallData.status.includes("Pending") ? stallData.total : 0;
+        const totalOverdue = stallData.status.includes("Overdue")
+          ? stallData.totalAmountDue
+          : 0;
+        const totalPending = stallData.status.includes("Pending")
+          ? stallData.total
+          : 0;
         const totalAmount = totalOverdue + totalPending;
         setTotalAmount(totalAmount);
         setDueDate(stallData.dueDate);
@@ -711,7 +723,11 @@ const Dashboard = () => {
   const handleMarkAsPaidConfirm = async () => {
     if (selectedStallHolder) {
       try {
-        const stallRef = doc(rentmobileDb, "stall_payment", selectedStallHolder);
+        const stallRef = doc(
+          rentmobileDb,
+          "stall_payment",
+          selectedStallHolder
+        );
         const stallDoc = await getDoc(stallRef);
 
         if (stallDoc.exists()) {
@@ -727,7 +743,9 @@ const Dashboard = () => {
                 ? { ...stall, status: ["paid"] }
                 : {
                     ...stall,
-                    status: stall.status.filter((s) => s !== "Pending" && s !== "Overdue"),
+                    status: stall.status.filter(
+                      (s) => s !== "Pending" && s !== "Overdue"
+                    ),
                   }
             )
           );
@@ -814,7 +832,11 @@ const Dashboard = () => {
   const handleConfirm = async () => {
     if (selectedStallHolder) {
       try {
-        const stallRef = doc(rentmobileDb, "stall_payment", selectedStallHolder);
+        const stallRef = doc(
+          rentmobileDb,
+          "stall_payment",
+          selectedStallHolder
+        );
         const stallDoc = await getDoc(stallRef);
 
         if (stallDoc.exists()) {
@@ -830,7 +852,9 @@ const Dashboard = () => {
                 ? { ...stall, status: ["paid"] }
                 : {
                     ...stall,
-                    status: stall.status.filter((s) => s !== "Pending" && s !== "Overdue"),
+                    status: stall.status.filter(
+                      (s) => s !== "Pending" && s !== "Overdue"
+                    ),
                   }
             )
           );
@@ -845,9 +869,13 @@ const Dashboard = () => {
 
   const handlePrint = () => {
     const printWindow = window.open("", "", "height=500,width=800");
-    printWindow.document.write("<html><head><title>Payment Receipt</title></head><body>");
+    printWindow.document.write(
+      "<html><head><title>Payment Receipt</title></head><body>"
+    );
     printWindow.document.write("<h3>Payment Receipt</h3>");
-    printWindow.document.write(document.getElementById("receipt-content").innerHTML);
+    printWindow.document.write(
+      document.getElementById("receipt-content").innerHTML
+    );
     printWindow.document.write("</body></html>");
     printWindow.document.close();
     printWindow.print();
@@ -878,54 +906,54 @@ const Dashboard = () => {
         <br></br>
 
         <StatsContainer>
-        <StatBox bgColor="#f8f9fa">
-          <h3>Daily Collection</h3>
-          <p>{dailyCollectionCount}</p>
-          <div className="icon-container">
-            <FaCalendarAlt
-              className="fading-icon"
-              style={{
-                fontSize: "30px",
-                opacity: 0.7,
-                animation: "fade 2s infinite alternate",
-                color: "#333",
-              }}
-            />
-          </div>
-        </StatBox>
+          <StatBox bgColor="#f8f9fa">
+            <h3>Daily Collection</h3>
+            <p>{dailyCollectionCount}</p>
+            <div className="icon-container">
+              <FaCalendarAlt
+                className="fading-icon"
+                style={{
+                  fontSize: "30px",
+                  opacity: 0.7,
+                  animation: "fade 2s infinite alternate",
+                  color: "#333",
+                }}
+              />
+            </div>
+          </StatBox>
 
-        <StatBox bgColor="#f8f9fa">
-          <h3>Weekly Collection</h3>
-          <p>{weeklyCollectionCount}</p>
-          <div className="icon-container">
-            <FaCalendarAlt
-              className="fading-icon"
-              style={{
-                fontSize: "30px",
-                opacity: 0.5,
-                animation: "fade 2s infinite alternate",
-                color: "#333",
-              }}
-            />
-          </div>
-        </StatBox>
+          <StatBox bgColor="#f8f9fa">
+            <h3>Weekly Collection</h3>
+            <p>{weeklyCollectionCount}</p>
+            <div className="icon-container">
+              <FaCalendarAlt
+                className="fading-icon"
+                style={{
+                  fontSize: "30px",
+                  opacity: 0.5,
+                  animation: "fade 2s infinite alternate",
+                  color: "#333",
+                }}
+              />
+            </div>
+          </StatBox>
 
-        <StatBox bgColor="#f8f9fa">
-          <h3>Monthly Collection</h3>
-          <p>{monthlyCollectionCount}</p>
-          <div className="icon-container">
-            <FaCalendarAlt
-              className="fading-icon"
-              style={{
-                fontSize: "30px",
-                opacity: 0.5,
-                animation: "fade 2s infinite alternate",
-                color: "#333",
-              }}
-            />
-          </div>
-        </StatBox>
-      </StatsContainer>
+          <StatBox bgColor="#f8f9fa">
+            <h3>Monthly Collection</h3>
+            <p>{monthlyCollectionCount}</p>
+            <div className="icon-container">
+              <FaCalendarAlt
+                className="fading-icon"
+                style={{
+                  fontSize: "30px",
+                  opacity: 0.5,
+                  animation: "fade 2s infinite alternate",
+                  color: "#333",
+                }}
+              />
+            </div>
+          </StatBox>
+        </StatsContainer>
 
         <br></br>
         <TopBarContainer>
@@ -933,65 +961,53 @@ const Dashboard = () => {
         </TopBarContainer>
 
         <FormContainer>
-          <h3>Stall Holders</h3>
-          <ToggleButtonGroup>
-            <button
-              active={activeButton === "rental"}
-              onClick={() => setActiveButton("rental")}
-            >
-              Rental Offense
-            </button>
-            <button
-              active={activeButton === "final"}
-              onClick={() => setActiveButton("final")}
-            >
-              Final Offense
-            </button>
-            <button>Violation History</button>
-          </ToggleButtonGroup>
-          <FilterButtonContainer>
-          <button onClick={() => handleFilter(null)}>ALL</button>
-          <button onClick={() => handleFilter("Daily")}>DAILY</button>
-          <button onClick={() => handleFilter("Weekly")}>WEEKLY</button>
-          <button onClick={() => handleFilter("Monthly")}>MONTHLY</button>
-        </FilterButtonContainer>
-          <UnitFilterContainer>
-            <div className="select-container">
-              <select
-                value={selectedUnit}
-                onChange={(e) => setSelectedUnit(e.target.value)}
-              >
-                {units.map((unit, index) => (
-                  <option key={index} value={unit}>
-                    {unit}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="filter-container">
-              <button className="filter-button" onClick={handleFilter}>
-                Filter
-              </button>
-            </div>
-
-            <div className="search-container">
-              <input
-                type="text"
-                placeholder="Search Stallholder"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  handleSearch(e.target.value);
-                }}
-              />
-              <div className="search-icon">
-                <FontAwesomeIcon icon={faSearch} />
-              </div>
-            </div>
-          </UnitFilterContainer>
+          
 
           <TableContainer>
+          <h3>Stall Holders</h3>
+
+<FilterButtonContainer>
+  <button onClick={() => handleFilter(null)}>ALL</button>
+  <button onClick={() => handleFilter("Daily")}>DAILY</button>
+  <button onClick={() => handleFilter("Weekly")}>WEEKLY</button>
+  <button onClick={() => handleFilter("Monthly")}>MONTHLY</button>
+</FilterButtonContainer>
+<UnitFilterContainer>
+  <div className="select-container">
+    <select
+      value={selectedUnit}
+      onChange={(e) => setSelectedUnit(e.target.value)}
+    >
+      {units.map((unit, index) => (
+        <option key={index} value={unit}>
+          {unit}
+        </option>
+      ))}
+    </select>
+  </div>
+
+  <div className="filter-container">
+    <button className="filter-button" onClick={handleFilter}>
+      Filter
+    </button>
+  </div>
+
+  <div className="search-container">
+    <input
+      type="text"
+      placeholder="Search Stallholder"
+      value={searchQuery}
+      onChange={(e) => {
+        setSearchQuery(e.target.value);
+        handleSearch(e.target.value);
+      }}
+    />
+    <div className="search-icon">
+      <FontAwesomeIcon icon={faSearch} />
+    </div>
+  </div>
+</UnitFilterContainer>
+
             <table>
               <thead>
                 <tr>
@@ -1020,17 +1036,22 @@ const Dashboard = () => {
                             status={status}
                             onClick={() => openModal(stall.id, status)}
                           >
-                            {status} {status === "Overdue" && `(${stall.overdueCount})`}
+                            {status}{" "}
+                            {status === "Overdue" && `(${stall.overdueCount})`}
                           </StatusButton>
                         ))}
                       </StatusButtonContainer>
                     </td>
                     <td className="actions">
-                      {stall.status.includes("Pending") || stall.status.includes("Overdue") ? (
+                      {stall.status.includes("Pending") ||
+                      stall.status.includes("Overdue") ? (
                         <MarkAsPaidButton
                           onClick={() => openMarkAsPaidModal(stall.id)}
                           style={{ marginLeft: "10px" }}
-                          disabled={stall.billingCycle === "Weekly" && getCurrentDay() !== 1}
+                          disabled={
+                            stall.billingCycle === "Weekly" &&
+                            getCurrentDay() !== 1
+                          }
                         >
                           Mark as Paid
                         </MarkAsPaidButton>

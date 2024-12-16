@@ -14,9 +14,9 @@ import {
   faUser,
   faTriangleExclamation,
   faEye,
-  faCircleUser
+  faCircleUser,
 } from "@fortawesome/free-solid-svg-icons";
-import { FaSignOutAlt} from "react-icons/fa";
+import { FaSignOutAlt } from "react-icons/fa";
 import {
   collection,
   addDoc,
@@ -558,6 +558,9 @@ const NewUnit = () => {
         status: "Active",
       });
       setImagePreviewUrl(null);
+
+      // Redirect to UserManagement.js
+      navigate("/usermanagement");
     } catch (error) {
       console.error("Error adding user: ", error);
       if (error.code === "auth/email-already-in-use") {

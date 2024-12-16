@@ -1,18 +1,48 @@
-import React, { forwardRef, useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FaBars, FaUserCircle, FaSignOutAlt, FaSearch } from 'react-icons/fa';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCogs, faTicketAlt, faCheck, faClipboard, faPlusCircle, faCubes, faUserEdit, faCashRegister, faPlusSquare } from '@fortawesome/free-solid-svg-icons';
-import { initializeApp } from 'firebase/app';
-import { rentmobileDb } from '../components/firebase.config';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import React, { forwardRef, useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FaBars, FaUserCircle, FaSignOutAlt, FaSearch } from "react-icons/fa";
+import {
+  faHome,
+  faShoppingCart,
+  faUser,
+  faSearch,
+  faPlus,
+  faUsers,
+  faFileContract,
+  faCogs,
+  faTicketAlt,
+  faCheck,
+  faClipboard,
+  faPlusCircle,
+  faCubes,
+  faUserEdit,
+  faCashRegister,
+  faPlusSquare,
+} from "@fortawesome/free-solid-svg-icons";
+import { initializeApp } from "firebase/app";
+import { rentmobileDb } from "../components/firebase.config";
+import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
 
-library.add(faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faCogs, faTicketAlt, faCheck, faClipboard, faPlusCircle);
+library.add(
+  faHome,
+  faShoppingCart,
+  faUser,
+  faSearch,
+  faPlus,
+  faUsers,
+  faFileContract,
+  faCogs,
+  faTicketAlt,
+  faCheck,
+  faClipboard,
+  faPlusCircle
+);
 
 const Sidebar = styled.div`
-  width: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')};
+  width: ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")};
   background-color: #f8f9fa;
   padding: 10px;
   display: flex;
@@ -39,19 +69,20 @@ const SidebarMenu = styled.ul`
 const SidebarItem = styled.li`
   display: flex;
   align-items: center;
-  justify-content: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
+  justify-content: ${({ isSidebarOpen }) =>
+    isSidebarOpen ? "flex-start" : "center"};
   padding: 10px;
   margin-bottom: 10px;
   margin-top: -10px;
   border-radius: 8px;
   font-size: 13px;
-  color: ${({ active }) => (active ? 'white' : '#333')};
-  background-color: ${({ active }) => (active ? '#007bff' : 'transparent')};
+  color: ${({ active }) => (active ? "white" : "#333")};
+  background-color: ${({ active }) => (active ? "#007bff" : "transparent")};
   cursor: pointer;
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: ${({ active }) => (active ? '#007bff' : '#f1f3f5')};
+    background-color: ${({ active }) => (active ? "#007bff" : "#f1f3f5")};
   }
 
   .icon {
@@ -62,7 +93,7 @@ const SidebarItem = styled.li`
 
   span:last-child {
     margin-left: 10px;
-    display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'inline' : 'none')};
+    display: ${({ isSidebarOpen }) => (isSidebarOpen ? "inline" : "none")};
   }
 `;
 
@@ -71,7 +102,8 @@ const SidebarFooter = styled.div`
   margin-top: auto;
   display: flex;
   align-items: center;
-  justify-content: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex-start' : 'center')};
+  justify-content: ${({ isSidebarOpen }) =>
+    isSidebarOpen ? "flex-start" : "center"};
 `;
 
 const LogoutButton = styled(SidebarItem)`
@@ -93,7 +125,7 @@ const LogoutButton = styled(SidebarItem)`
 `;
 
 const ToggleButton = styled.div`
-  display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'none' : 'block')};
+  display: ${({ isSidebarOpen }) => (isSidebarOpen ? "none" : "block")};
   position: absolute;
   top: 5px;
   left: 15px;
@@ -102,7 +134,6 @@ const ToggleButton = styled.div`
   cursor: pointer;
   z-index: 200;
 `;
-
 
 const ProfileHeader = styled.div`
   display: flex;
@@ -121,7 +152,7 @@ const ProfileHeader = styled.div`
     font-size: 1.2rem;
     font-weight: 700;
     color: black;
-    display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
+    display: ${({ isSidebarOpen }) => (isSidebarOpen ? "block" : "none")};
   }
 
   hr {
@@ -134,7 +165,7 @@ const ProfileHeader = styled.div`
     font-size: 1rem;
     font-weight: 600;
     color: #007bff;
-    display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'block' : 'none')};
+    display: ${({ isSidebarOpen }) => (isSidebarOpen ? "block" : "none")};
     margin-top: 5px;
   }
 `;
@@ -155,7 +186,7 @@ const SearchBarContainer = styled.div`
   border-radius: 20px;
   margin-bottom: 20px;
   margin-top: -25px;
-  display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex' : 'none')};
+  display: ${({ isSidebarOpen }) => (isSidebarOpen ? "flex" : "none")};
 `;
 const SearchInput = styled.input`
   border: none;
@@ -165,46 +196,46 @@ const SearchInput = styled.input`
   width: 100%;
 `;
 
-const SidenavCollector = forwardRef(({ isSidebarOpen, setIsSidebarOpen, loggedInUser }, ref) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isDropdownOpen, setIsDropdownOpen] = useState({
-    userManagement: false,
-    stallmanagement: false,
-    addUnit: false,
-    appraise: false,
-    contract: false,
-    ticket: false,
-    manageZone: false,
-    manageSpace: false,
-  });
-  const navigate = useNavigate();
+const SidenavCollector = forwardRef(
+  ({ isSidebarOpen, setIsSidebarOpen, loggedInUser }, ref) => {
+    const [searchTerm, setSearchTerm] = useState("");
+    const [isDropdownOpen, setIsDropdownOpen] = useState({
+      userManagement: false,
+      stallmanagement: false,
+      addUnit: false,
+      appraise: false,
+      contract: false,
+      ticket: false,
+      manageZone: false,
+      manageSpace: false,
+    });
+    const navigate = useNavigate();
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+    const toggleSidebar = () => {
+      setIsSidebarOpen(!isSidebarOpen);
+    };
 
-  const handleDropdownToggle = (dropdown) => {
-    setIsDropdownOpen(prevState => ({
-      ...prevState,
-      [dropdown]: !prevState[dropdown],
-    }));
-  };
+    const handleDropdownToggle = (dropdown) => {
+      setIsDropdownOpen((prevState) => ({
+        ...prevState,
+        [dropdown]: !prevState[dropdown],
+      }));
+    };
 
+    const handleSearchChange = (event) => {
+      setSearchTerm(event.target.value);
+    };
 
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
-  };
+    const handleLogout = () => {
+      localStorage.removeItem("userData");
+      navigate("/login");
+    };
 
-  const handleLogout = () => {
-    localStorage.removeItem('userData');
-    navigate('/login');
-  };
-
-  return (
-    <Sidebar ref={ref} isSidebarOpen={isSidebarOpen}>
+    return (
+      <Sidebar ref={ref} isSidebarOpen={isSidebarOpen}>
         <ToggleButton onClick={toggleSidebar}>
-        <FaBars />
-      </ToggleButton>
+          <FaBars />
+        </ToggleButton>
         <Link to="/profile" style={{ textDecoration: "none" }}>
           <ProfileHeader isSidebarOpen={isSidebarOpen}>
             {loggedInUser && loggedInUser.Image ? (
@@ -268,6 +299,12 @@ const SidenavCollector = forwardRef(({ isSidebarOpen, setIsSidebarOpen, loggedIn
               <span>List Of Vendors</span>
             </SidebarItem>
           </Link>
+          <Link to="/rentoffense" style={{ textDecoration: "none" }}>
+            <SidebarItem isSidebarOpen={isSidebarOpen}>
+              <FontAwesomeIcon icon={faShoppingCart} className="icon" />
+              <span> Stallholders Offense</span>
+            </SidebarItem>
+          </Link>
         </SidebarMenu>
 
         <SidebarFooter isSidebarOpen={isSidebarOpen}>
@@ -279,7 +316,8 @@ const SidenavCollector = forwardRef(({ isSidebarOpen, setIsSidebarOpen, loggedIn
           </LogoutButton>
         </SidebarFooter>
       </Sidebar>
-  );
-});
+    );
+  }
+);
 
 export default SidenavCollector;
