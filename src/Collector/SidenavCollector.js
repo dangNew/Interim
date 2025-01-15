@@ -17,6 +17,7 @@ import {
   faCheck,
   faClipboard,
   faPlusCircle,
+  faExchangeAlt,
   faCubes,
   faUserEdit,
   faCashRegister,
@@ -289,7 +290,7 @@ const SidenavCollector = forwardRef(
 
           <Link to="/stallholders" style={{ textDecoration: "none" }}>
             <SidebarItem isSidebarOpen={isSidebarOpen}>
-              <FontAwesomeIcon icon={faShoppingCart} className="icon" />
+              <FontAwesomeIcon icon={faExchangeAlt} className="icon" />
               <span> Transaction</span>
             </SidebarItem>
           </Link>
@@ -299,12 +300,14 @@ const SidenavCollector = forwardRef(
               <span>List Of Vendors</span>
             </SidebarItem>
           </Link>
+
+
           <Link to="/rentoffense" style={{ textDecoration: "none" }}>
-            <SidebarItem isSidebarOpen={isSidebarOpen}>
-              <FontAwesomeIcon icon={faShoppingCart} className="icon" />
-              <span> Stallholders Offense</span>
-            </SidebarItem>
-          </Link>
+  <SidebarItem isSidebarOpen={isSidebarOpen}>
+    <FontAwesomeIcon icon={faUser} className="icon" />
+    <span>Stallholders</span>
+  </SidebarItem>
+</Link>
         </SidebarMenu>
 
         <SidebarFooter isSidebarOpen={isSidebarOpen}>

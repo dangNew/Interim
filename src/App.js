@@ -71,6 +71,14 @@ import DeclinedVendors from "./OIC/DeclinedVendors"; // New import
 import EditVendors from "./OIC/EditVendors";
 import EditVerification from "./OIC/EditVerification";
 
+import Modular from "./AP6/Modular";
+import AnimalInfo from "./AP6/AnimalInfo";
+import TodoList from './AP6/TodoList';
+import BlogrollApp from './AP6/BlogrollApp';
+import DigitalClock from './AP6/DigitalClock';
+
+
+
 import BillingConfiguration from "./Interim/BillingConfig";
 
 function App() {
@@ -78,6 +86,9 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
+        <Route path="/todo" element={<TodoList />} />
+        <Route path="/blog" element={<BlogrollApp />} />
+        <Route path="/digital" element={<DigitalClock />} />
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/signup" element={<SignUp />} />
@@ -301,8 +312,10 @@ function App() {
           <Route path="/payroll" element={<Payroll />} />
           <Route path="/quiz" element={<Quiz />} />
           <Route path="/side_nav" element={<SideNav />} />
-
+          <Route path="/animal" element={<AnimalInfo />} />
+          <Route path="/modular" element={<Modular />} />
           {/* Default Route */}
+
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       </Router>

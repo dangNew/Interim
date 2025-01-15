@@ -118,6 +118,7 @@ const Graph = () => {
           labels[index] === currentDateKey ? 'rgba(255, 0, 0, 1)' : dataset.borderColor
         );
       });
+      
     }
 
     return {

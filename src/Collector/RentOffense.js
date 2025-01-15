@@ -2,24 +2,40 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import {
-
+  FaBars,
   FaSearch,
-  
+  FaUserCircle,
+  FaFilter,
   FaPrint,
-  
+  FaSignOutAlt,
+  FaEye,
+  FaFileInvoice,
+  FaReceipt,
+  FaBell,
   FaExclamationTriangle,
 } from "react-icons/fa";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  
-  faCheck
+  faHome,
+  faShoppingCart,
+  faUser,
+  faSearch,
+  faPlus,
+  faUsers,
+  faFileContract,
+  faTicketAlt,
+  faClipboard,
+  faPlusCircle,
+  faCogs,
+  faEye,
+  faCheck,
 } from "@fortawesome/free-solid-svg-icons";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { rentmobileDb } from "../components/firebase.config";
 
 import SidenavCollector from "./SidenavCollector";
 import NoticeModal from "../Interim/NoticeModal";
-import CollectorViolationModal from "./CollectorViolationModal"; // Corrected import path
+import CollectorViolationModal from "./CollectorViolationModal";
 import OffensePaid from "./OffensePaid"; // Import the OffensePaid modal
 
 const ROWS_PER_PAGE = 10;
@@ -34,9 +50,7 @@ const MainContent = styled.div`
   padding-left: 10px;
   background-color: #fff;
   padding: 2rem;
-  width: calc(
-    100% - ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")}
-  );
+  width: calc(100% - ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")});
   transition: margin-left 0.3s ease, width 0.3s ease;
   overflow-y: auto;
 `;
@@ -542,7 +556,7 @@ const Dashboard = () => {
           <title>Print</title>
           <style>
             body {
-              font-family: 'Arial, sans-serif';
+              font-family: 'Inter', sans-serif;
               margin: 0;
               padding: 0;
               background-color: #f9f9f9;
@@ -562,7 +576,7 @@ const Dashboard = () => {
               width: 100%;
               border-collapse: collapse;
               margin: 20px 0;
-              font-size: 12px;
+              font-size: 14px;
             }
             th, td {
               padding: 12px;
@@ -687,9 +701,30 @@ const Dashboard = () => {
     setSelectedViolation(null);
   };
 
-  const handleMarkAsPaid = (vendorId) => {
-    setSelectedStallHolder(vendorId);
-    setIsOffensePaidModalOpen(true);
+  const handleMarkAsPaid = async (vendorId) => {
+    try {
+      const violationCollection = collection(rentmobileDb, "Market_violations");
+      const q = query(
+        violationCollection,
+        where("vendorId", "==", vendorId),
+        where("status", "==", "Pending")
+      );
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        const doc = querySnapshot.docs[0];
+        const data = doc.data();
+        const { vendorName, violationPayment, warning } = data;
+
+        // Set the fetched data to the state
+        setSelectedStallHolder({ vendorId, vendorName, violationPayment, warning });
+        setIsOffensePaidModalOpen(true);
+      } else {
+        console.log("No documents found with the status 'Pending'");
+      }
+    } catch (error) {
+      console.error("Error fetching violation data:", error);
+    }
   };
 
   const handleOffensePaidModalClose = () => {
@@ -711,7 +746,7 @@ const Dashboard = () => {
         onClick={handleMainContentClick}
       >
         <AppBar>
-          <div className="title">LIST OF STALLHOLDER</div>
+          <div className="title">LIST OF STALLHOLDERS</div>
         </AppBar>
 
         <FormContainer>
@@ -797,7 +832,7 @@ const Dashboard = () => {
                   </td>
                   <td className="actions">
                     <ViewButton onClick={() => handleMarkAsPaid(stall.id)}>
-                      <FontAwesomeIcon icon={faCheck} /> Mark As Paid
+                      <FontAwesomeIcon icon={faCheck} /> Mark as Paid
                     </ViewButton>
                   </td>
                 </tr>
@@ -834,7 +869,7 @@ const Dashboard = () => {
         <OffensePaid
           isOpen={isOffensePaidModalOpen}
           onClose={handleOffensePaidModalClose}
-          vendorId={selectedStallHolder}
+          selectedStallHolder={selectedStallHolder}
         />
       </MainContent>
     </DashboardContainer>

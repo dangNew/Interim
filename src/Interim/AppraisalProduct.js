@@ -257,6 +257,8 @@ const ModalContent = styled.div`
   position: relative;
   max-width: 90%;
   font-family: "Arial", sans-serif;
+  max-height: 80vh; /* Set a maximum height */
+  overflow-y: auto; /* Enable vertical scrolling */
 
   h3 {
     color: #333;
@@ -318,6 +320,8 @@ const EditModalContent = styled.div`
   position: relative;
   max-width: 90%;
   font-family: "Arial", sans-serif;
+  max-height: 80vh; /* Set a maximum height */
+
 
   h3 {
     color: #333;

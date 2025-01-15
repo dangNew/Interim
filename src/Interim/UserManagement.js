@@ -195,6 +195,8 @@ const FormContainer = styled.div`
       padding: 15px;
       text-align: left;
       border-bottom: 2px solid #dee2e6;
+      border-left: none; /* Remove left border */
+      border-right: none; /* Remove right border */
     }
 
     th {
@@ -227,12 +229,13 @@ const FormContainer = styled.div`
       }
 
       .icon {
-        font-size: 24px;
+        font-size: 26px;
         color: black;
       }
     }
   }
 `;
+
 
 const ActionButton = styled.button`
   display: flex;
@@ -242,7 +245,7 @@ const ActionButton = styled.button`
   padding: 5px 5px;
   cursor: pointer;
   gap: 1px;
-  font-size: 12px;
+  font-size: 14px; 
   transition: background-color 0.2s ease;
 
   &.view {
@@ -336,7 +339,7 @@ const SearchContainer = styled.div`
   margin-top: 1rem;
   display: flex;
   align-items: center;
-  width: 400px;
+  width: 800px;
   border: 1px solid #ccc;
   border-radius: 5px;
   padding: 0 10px;

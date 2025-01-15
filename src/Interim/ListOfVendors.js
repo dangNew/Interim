@@ -1,15 +1,41 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import { FaBars, FaSearch, FaUserCircle, FaFilter, FaPrint, FaSignOutAlt, FaEye, FaFileInvoice, FaReceipt, FaBell, FaExclamationTriangle } from 'react-icons/fa';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faClipboard, faPlusCircle, faCogs, faEye } from '@fortawesome/free-solid-svg-icons';
-import { collection, getDocs, query, where } from 'firebase/firestore';
-import { rentmobileDb } from '../components/firebase.config';
-import ConfirmationModal from './ConfirmationModal';
-import IntSidenav from './IntSidenav';
-import NoticeModal from './NoticeModal';
-import ViolationModal from './ViolationModal'; // Import the new ViolationModal
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import {
+  FaBars,
+  FaSearch,
+  FaUserCircle,
+  FaFilter,
+  FaPrint,
+  FaSignOutAlt,
+  FaEye,
+  FaFileInvoice,
+  FaReceipt,
+  FaBell,
+  FaExclamationTriangle,
+} from "react-icons/fa";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faHome,
+  faShoppingCart,
+  faUser,
+  faSearch,
+  faPlus,
+  faUsers,
+  faFileContract,
+  faTicketAlt,
+  faClipboard,
+  faPlusCircle,
+  faCogs,
+  faEye,
+} from "@fortawesome/free-solid-svg-icons";
+import { Timestamp } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { rentmobileDb } from "../components/firebase.config";
+import ConfirmationModal from "./ConfirmationModal";
+import IntSidenav from "./IntSidenav";
+import NoticeModal from "./NoticeModal";
+import ViolationModal from "./ViolationModal"; // Import the new ViolationModal
 
 const ROWS_PER_PAGE = 10;
 
@@ -19,11 +45,13 @@ const DashboardContainer = styled.div`
 `;
 
 const MainContent = styled.div`
-  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')};
+  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")};
   padding-left: 10px;
   background-color: #fff;
   padding: 2rem;
-  width: calc(100% - ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')});
+  width: calc(
+    100% - ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")}
+  );
   transition: margin-left 0.3s ease, width 0.3s ease;
   overflow-y: auto;
 `;
@@ -57,18 +85,18 @@ const FormContainer = styled.div`
     border-collapse: collapse;
     font-size: 12px;
 
-    th, td {
+    th,
+    td {
       padding: 10px;
       text-align: left;
       border-bottom: 2px solid #dee2e6;
     }
 
     th {
-  background-color: #e9ecef;
-  color: #000; /* Change to black */
-  font-weight: bold;
-}
-
+      background-color: #e9ecef;
+      color: #000; /* Change to black */
+      font-weight: bold;
+    }
 
     tr:nth-child(even) {
       background-color: #f2f2f2;
@@ -278,11 +306,11 @@ const DropdownButton = styled.button`
 `;
 
 const DropdownContent = styled.div`
-  display: ${({ isOpen }) => (isOpen ? 'block' : 'none')};
+  display: ${({ isOpen }) => (isOpen ? "block" : "none")};
   position: absolute;
   background-color: #f1f1f1;
   min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   z-index: 1;
 `;
 
@@ -329,7 +357,10 @@ const TransactionButton = styled.button`
 `;
 
 const NoticeButton = styled.button`
-  background-color: ${({ hasNotice }) => (hasNotice ? '#FFA500' : '#ddd')}; /* Orange for active, light gray for inactive */
+  background-color: ${({ hasNotice }) =>
+    hasNotice
+      ? "#FFA500"
+      : "#ddd"}; /* Orange for active, light gray for inactive */
   color: white;
   border: none;
   padding: 6px 14px;
@@ -339,12 +370,16 @@ const NoticeButton = styled.button`
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: ${({ hasNotice }) => (hasNotice ? '#FF8C00' : '#ccc')}; /* Darker orange on hover for active, darker gray for inactive */
+    background-color: ${({ hasNotice }) =>
+      hasNotice
+        ? "#FF8C00"
+        : "#ccc"}; /* Darker orange on hover for active, darker gray for inactive */
   }
 `;
 
 const ViolationButton = styled.button`
-  background-color: ${({ hasViolation }) => (hasViolation ? '#ff4d4d' : '#ddd')};
+  background-color: ${({ hasViolation }) =>
+    hasViolation ? "#ff4d4d" : "#ddd"};
   color: white;
   border: none;
   padding: 6px 14px;
@@ -354,7 +389,8 @@ const ViolationButton = styled.button`
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: ${({ hasViolation }) => (hasViolation ? '#e63939' : '#ccc')}; /* Red color on hover */
+    background-color: ${({ hasViolation }) =>
+      hasViolation ? "#e63939" : "#ccc"}; /* Red color on hover */
   }
 `;
 
@@ -367,17 +403,19 @@ const Dashboard = () => {
   const [filteredStallHolders, setFilteredStallHolders] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const [stallNoFilter, setStallNoFilter] = useState('');
+  const [stallNoFilter, setStallNoFilter] = useState("");
   const [units, setUnits] = useState([]);
-  const [selectedUnit, setSelectedUnit] = useState('Select Unit');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [dateSearchTerm, setDateSearchTerm] = useState(''); // State for date search term
+  const [selectedUnit, setSelectedUnit] = useState("Select Unit");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [dateSearchTerm, setDateSearchTerm] = useState(""); // State for date search term
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedStallHolder, setSelectedStallHolder] = useState(null);
   const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
   const [selectedNotice, setSelectedNotice] = useState(null);
   const [isViolationModalOpen, setIsViolationModalOpen] = useState(false); // State for ViolationModal
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
   const [selectedViolation, setSelectedViolation] = useState(null); // State for selected violation
   const navigate = useNavigate();
 
@@ -397,15 +435,19 @@ const Dashboard = () => {
   const handleUnitSelect = (unit) => {
     setSelectedUnit(unit);
     setIsDropdownOpen(false);
-    setFilteredStallHolders(unit === 'All' ? stallHolders : stallHolders.filter(stall => stall.location === unit));
+    setFilteredStallHolders(
+      unit === "All"
+        ? stallHolders
+        : stallHolders.filter((stall) => stall.location === unit)
+    );
   };
 
   useEffect(() => {
     const fetchUnits = async () => {
       try {
-        const querySnapshot = await getDocs(collection(rentmobileDb, 'unit'));
-        const unitData = querySnapshot.docs.map(doc => doc.data().name);
-        setUnits(['All', ...unitData]);
+        const querySnapshot = await getDocs(collection(rentmobileDb, "unit"));
+        const unitData = querySnapshot.docs.map((doc) => doc.data().name);
+        setUnits(["All", ...unitData]);
       } catch (error) {
         console.error("Error fetching units:", error);
       }
@@ -415,7 +457,10 @@ const Dashboard = () => {
   }, []);
 
   const totalPages = Math.ceil(filteredStallHolders.length / itemsPerPage);
-  const currentStallHolders = filteredStallHolders.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const currentStallHolders = filteredStallHolders.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handleNextPage = () => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
@@ -432,56 +477,65 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   useEffect(() => {
     const fetchData = async () => {
-      const querySnapshot = await getDocs(collection(rentmobileDb, 'approvedVendors'));
+      const querySnapshot = await getDocs(
+        collection(rentmobileDb, "approvedVendors")
+      );
       const data = querySnapshot.docs.map((doc) => {
         const stallInfo = doc.data().stallInfo || {};
         const dateOfRegistration = doc.data().dateOfRegistration
           ? doc.data().dateOfRegistration.toDate().toLocaleDateString()
-          : '';
+          : "";
 
         return {
           id: doc.id,
-          stallNumber: stallInfo.stallNumber || '',
-          firstName: doc.data().firstName || '',
-          lastName: doc.data().lastName || '',
-          location: stallInfo.location || '',
-          areaMeters: stallInfo.stallSize || '',
-          billing: stallInfo.ratePerMeter || '',
+          stallNumber: stallInfo.stallNumber || "",
+          firstName: doc.data().firstName || "",
+          lastName: doc.data().lastName || "",
+          location: stallInfo.location || "",
+          areaMeters: stallInfo.stallSize || "",
+          billing: stallInfo.ratePerMeter || "",
           date: dateOfRegistration,
-          approvedBy: doc.data().approvedBy || '',
-          contactNumber: doc.data().contactNumber || '',
-          email: doc.data().email || '',
+          approvedAt: doc.data().approvedAt || "",
+          approvedBy: doc.data().approvedBy || "",
+          contactNumber: doc.data().contactNumber || "",
+          email: doc.data().email || "",
         };
       });
 
       const checkNotice = async (vendorId) => {
         try {
-          const noticeCollection = collection(rentmobileDb, 'Notice_Report');
-          const q = query(noticeCollection, where('vendorId', '==', vendorId));
+          const noticeCollection = collection(rentmobileDb, "Notice_Report");
+          const q = query(noticeCollection, where("vendorId", "==", vendorId));
           const querySnapshot = await getDocs(q);
           return querySnapshot.size; // Return the count of documents
         } catch (error) {
-          console.error('Error checking notice:', error);
+          console.error("Error checking notice:", error);
           return 0;
         }
       };
 
       const checkViolation = async (vendorId) => {
         try {
-          const violationCollection = collection(rentmobileDb, 'Market_violations');
-          const q = query(violationCollection, where('vendorId', '==', vendorId));
+          const violationCollection = collection(
+            rentmobileDb,
+            "Market_violations"
+          );
+          const q = query(
+            violationCollection,
+            where("vendorId", "==", vendorId)
+          );
           const querySnapshot = await getDocs(q);
           return querySnapshot.size; // Return the count of documents
         } catch (error) {
-          console.error('Error checking violation:', error);
+          console.error("Error checking violation:", error);
           return 0;
         }
       };
@@ -499,8 +553,10 @@ const Dashboard = () => {
 
       let filteredData = dataWithChecks;
 
-      if (selectedUnit !== 'Select Unit') {
-        filteredData = filteredData.filter(stall => stall.location === selectedUnit);
+      if (selectedUnit !== "Select Unit") {
+        filteredData = filteredData.filter(
+          (stall) => stall.location === selectedUnit
+        );
       }
 
       setFilteredStallHolders(filteredData);
@@ -510,10 +566,12 @@ const Dashboard = () => {
   }, [selectedUnit]);
 
   useEffect(() => {
-    if (selectedUnit === 'All') {
+    if (selectedUnit === "All") {
       setFilteredStallHolders(stallHolders);
-    } else if (selectedUnit !== 'Select Unit') {
-      setFilteredStallHolders(stallHolders.filter(stall => stall.location === selectedUnit));
+    } else if (selectedUnit !== "Select Unit") {
+      setFilteredStallHolders(
+        stallHolders.filter((stall) => stall.location === selectedUnit)
+      );
     }
   }, [selectedUnit, stallHolders]);
 
@@ -526,32 +584,72 @@ const Dashboard = () => {
     setSearchTerm(event.target.value);
   };
 
-  const handleDateSearchChange = (event) => {
-    setDateSearchTerm(event.target.value);
+  
+  const handleDateSearchChange = async () => {
+    if (fromDate && toDate) {
+      const startOfDay = Timestamp.fromDate(new Date(fromDate));
+      const endOfDay = Timestamp.fromDate(new Date(toDate));
+
+      const q = query(
+        collection(rentmobileDb, 'approvedVendors'),
+        where('approvedAt', '>=', startOfDay),
+        where('approvedAt', '<=', endOfDay)
+      );
+      const querySnapshot = await getDocs(q);
+      const vendors = querySnapshot.docs.map(doc => {
+        const stallInfo = doc.data().stallInfo || {};
+        const dateOfRegistration = doc.data().dateOfRegistration
+          ? doc.data().dateOfRegistration.toDate().toLocaleDateString()
+          : '';
+        return {
+          id: doc.id,
+          stallNumber: stallInfo.stallNumber || '',
+          firstName: doc.data().firstName || '',
+          lastName: doc.data().lastName || '',
+          location: stallInfo.location || '',
+          areaMeters: stallInfo.stallSize || '',
+          billing: stallInfo.ratePerMeter || '',
+          date: dateOfRegistration,
+          approvedAt: doc.data().approvedAt.toDate().toLocaleDateString(),
+          approvedBy: doc.data().approvedBy || '',
+          contactNumber: doc.data().contactNumber || '',
+          email: doc.data().email || '',
+        };
+      });
+      setFilteredStallHolders(vendors);
+    }
   };
 
   useEffect(() => {
-    let filteredData = stallHolders.filter(stall =>
-      (stall.firstName + ' ' + stall.lastName).toLowerCase().includes(searchTerm.toLowerCase())
+    let filteredData = stallHolders.filter((stall) =>
+      (stall.firstName + " " + stall.lastName)
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
     );
 
     if (dateSearchTerm) {
-      filteredData = filteredData.filter(stall => stall.date === dateSearchTerm);
+      filteredData = filteredData.filter(
+        (stall) => stall.date === dateSearchTerm
+      );
     }
 
     if (stallNoFilter) {
-      filteredData = filteredData.filter(stall => stall.stallNumber === stallNoFilter);
+      filteredData = filteredData.filter(
+        (stall) => stall.stallNumber === stallNoFilter
+      );
     }
-    if (selectedUnit !== 'Select Unit') {
-      filteredData = filteredData.filter(stall => stall.location === selectedUnit);
+    if (selectedUnit !== "Select Unit") {
+      filteredData = filteredData.filter(
+        (stall) => stall.location === selectedUnit
+      );
     }
 
     setFilteredStallHolders(filteredData);
   }, [searchTerm, dateSearchTerm, stallHolders, stallNoFilter, selectedUnit]);
 
   const handleLogout = () => {
-    localStorage.removeItem('userData');
-    navigate('/login');
+    localStorage.removeItem("userData");
+    navigate("/login");
   };
 
   const handlePrint = () => {
@@ -661,7 +759,7 @@ const Dashboard = () => {
         </body>
       </html>
     `;
-  
+
     const newWindow = window.open("", "_blank");
     newWindow.document.write(printContent);
     newWindow.document.close();
@@ -671,13 +769,15 @@ const Dashboard = () => {
 
   useEffect(() => {
     try {
-      const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
+      const loggedInUserData = JSON.parse(localStorage.getItem("userData"));
       if (loggedInUserData) {
-        const currentUser = stallHolders.find(user => user.email === loggedInUserData.email);
+        const currentUser = stallHolders.find(
+          (user) => user.email === loggedInUserData.email
+        );
         setLoggedInUser(currentUser || loggedInUserData);
       }
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error("Error fetching users:", error);
     }
   }, [stallHolders]);
 
@@ -720,7 +820,10 @@ const Dashboard = () => {
           loggedInUser={loggedInUser}
         />
       </div>
-      <MainContent isSidebarOpen={isSidebarOpen} onClick={handleMainContentClick}>
+      <MainContent
+        isSidebarOpen={isSidebarOpen}
+        onClick={handleMainContentClick}
+      >
         <AppBar>
           <div className="title">LIST OF STALLHOLDER</div>
         </AppBar>
@@ -740,10 +843,17 @@ const Dashboard = () => {
               <SearchIcon />
               <SearchIn
                 type="date"
-                placeholder="Search by Date..."
-                value={dateSearchTerm}
-                onChange={handleDateSearchChange}
+                placeholder="From Date..."
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
               />
+              <SearchIn
+                type="date"
+                placeholder="To Date..."
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
+              />
+              <button onClick={handleDateSearchChange}>Search</button>
             </DateSearchBarCont>
             <ButtonContainer>
               <PrintButton onClick={handlePrint}>
@@ -756,15 +866,16 @@ const Dashboard = () => {
                 </DropdownButton>
                 <DropdownContent isOpen={isDropdownOpen}>
                   {units.map((unit, index) => (
-                    <DropdownItem key={index} onClick={() => handleUnitSelect(unit)}>
+                    <DropdownItem
+                      key={index}
+                      onClick={() => handleUnitSelect(unit)}
+                    >
                       {unit}
                     </DropdownItem>
                   ))}
                 </DropdownContent>
               </DropdownContainer>
             </ButtonContainer>
-
-            
           </TopBarContainer>
           <table>
             <thead>
@@ -785,7 +896,9 @@ const Dashboard = () => {
               {currentStallHolders.map((stall, index) => (
                 <tr key={index}>
                   <td>{stall.stallNumber}</td>
-                  <td>{stall.firstName} {stall.lastName}</td>
+                  <td>
+                    {stall.firstName} {stall.lastName}
+                  </td>
                   <td>{stall.email}</td>
                   <td>{stall.location}</td>
                   <td>{stall.areaMeters}</td>
@@ -793,22 +906,30 @@ const Dashboard = () => {
                   <td>{stall.contactNumber}</td>
                   <td>
                     {stall.noticeCount > 0 ? (
-                      <NoticeButton hasNotice={true} onClick={() => handleNotice(stall.id)}>
-                        <FaBell style={{ marginRight: '6px' }} /> {/* Add the icon */}
+                      <NoticeButton
+                        hasNotice={true}
+                        onClick={() => handleNotice(stall.id)}
+                      >
+                        <FaBell style={{ marginRight: "6px" }} />{" "}
+                        {/* Add the icon */}
                         Notice ({stall.noticeCount})
                       </NoticeButton>
                     ) : (
-                      'No Notice'
+                      "No Notice"
                     )}
                   </td>
                   <td>
                     {stall.violationCount > 0 ? (
-                      <ViolationButton hasViolation={true} onClick={() => handleViolation(stall.id)}>
-                        <FaExclamationTriangle style={{ marginRight: '6px' }} /> {/* Add the icon */}
+                      <ViolationButton
+                        hasViolation={true}
+                        onClick={() => handleViolation(stall.id)}
+                      >
+                        <FaExclamationTriangle style={{ marginRight: "6px" }} />{" "}
+                        {/* Add the icon */}
                         Violation ({stall.violationCount})
                       </ViolationButton>
                     ) : (
-                      'No Violation'
+                      "No Violation"
                     )}
                   </td>
                   <td className="actions">
@@ -832,7 +953,10 @@ const Dashboard = () => {
           <CurrentPageIndicator>
             Page {currentPage} of {totalPages}
           </CurrentPageIndicator>
-          <PageButton onClick={handleNextPage} disabled={currentPage === totalPages}>
+          <PageButton
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages}
+          >
             Next
           </PageButton>
         </PaginationContainer>
@@ -844,11 +968,20 @@ const Dashboard = () => {
           stallHolder={selectedStallHolder}
         />
 
-        <NoticeModal isOpen={isNoticeModalOpen} onClose={handleNoticeModalClose} vendorId={selectedNotice} />
-        <ViolationModal isOpen={isViolationModalOpen} onClose={handleViolationModalClose} vendorId={selectedViolation} />
+        <NoticeModal
+          isOpen={isNoticeModalOpen}
+          onClose={handleNoticeModalClose}
+          vendorId={selectedNotice}
+        />
+        <ViolationModal
+          isOpen={isViolationModalOpen}
+          onClose={handleViolationModalClose}
+          vendorId={selectedViolation}
+        />
       </MainContent>
     </DashboardContainer>
   );
 };
 
 export default Dashboard;
+//put a function in the handleDateSearchChange that searxh the list by date range and display the result in the table example if the user select a date range of 1st january to 31st january the table will display all the stallholder that register within that date range

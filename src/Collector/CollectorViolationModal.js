@@ -49,13 +49,13 @@ const MarkAsPaidButton = styled.button`
   position: absolute;
   bottom: 10px;
   right: 10px;
-  transition: background 0.3s ease;
+  transition: background-color 0.3s;
   display: flex;
   align-items: center;
   gap: 10px; /* Space between icon and text */
 
   &:hover {
-    background: #218838;
+    background-color: #218838;
   }
 `;
 

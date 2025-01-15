@@ -1,0 +1,40 @@
+// Create an object called car with the specified properties
+const car = {
+  make: "Toyota",
+  model: "Corolla",
+  year: 2024
+};
+
+// 1. Access the model property of the car object
+console.log(car.model); // Output: Corolla
+
+// 2. Add a new property color to the car object with the value "red"
+car.color = "red";
+
+// 3. Write a function getCarInfo that takes a car object as an argument and returns a string in the specified format
+function getCarInfo(car) {
+  return `This car is a ${car.year} ${car.make} ${car.model}.`;
+}
+
+// Test the getCarInfo function
+console.log(getCarInfo(car)); // Output: This car is a 2024 Toyota Corolla.
+
+// 4. Create an array of objects called cars, where each object represents a car with properties make, model, color, and year
+const cars = [
+  {
+    make: "Honda",
+    model: "Civic",
+    color: "blue",
+    year: 2023
+  },
+  {
+    make: "Ford",
+    model: "Mustang",
+    color: "black",
+    year: 2022
+  }
+];
+
+// 5. Display all car objects created
+console.log(car);
+console.log(cars);

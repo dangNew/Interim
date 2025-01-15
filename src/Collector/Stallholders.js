@@ -347,7 +347,7 @@ const FilterButtonContainer = styled.div`
     font-size: 14px;
     border: 1px solid #ddd;
     border-radius: 12px;
-    background-color: #007bff; /* Primary blue color */
+    background-color:rgb(0, 255, 34); /* Primary blue color */
     color: #fff;
     cursor: pointer;
     transition: all 0.3s;
@@ -901,7 +901,7 @@ const Dashboard = () => {
         onClick={handleMainContentClick}
       >
         <AppBar>
-          <div className="title">OFFICE OF THE CITY MARKETS</div>
+          <div className="title">Collector</div>
         </AppBar>
         <br></br>
 
@@ -961,52 +961,50 @@ const Dashboard = () => {
         </TopBarContainer>
 
         <FormContainer>
-          
-
           <TableContainer>
-          <h3>Stall Holders</h3>
+            <h3>Stall Holders</h3>
 
-<FilterButtonContainer>
-  <button onClick={() => handleFilter(null)}>ALL</button>
-  <button onClick={() => handleFilter("Daily")}>DAILY</button>
-  <button onClick={() => handleFilter("Weekly")}>WEEKLY</button>
-  <button onClick={() => handleFilter("Monthly")}>MONTHLY</button>
-</FilterButtonContainer>
-<UnitFilterContainer>
-  <div className="select-container">
-    <select
-      value={selectedUnit}
-      onChange={(e) => setSelectedUnit(e.target.value)}
-    >
-      {units.map((unit, index) => (
-        <option key={index} value={unit}>
-          {unit}
-        </option>
-      ))}
-    </select>
-  </div>
+            <FilterButtonContainer>
+              <button onClick={() => handleFilter(null)}>ALL</button>
+              <button onClick={() => handleFilter("Daily")}>DAILY</button>
+              <button onClick={() => handleFilter("Weekly")}>WEEKLY</button>
+              <button onClick={() => handleFilter("Monthly")}>MONTHLY</button>
+            </FilterButtonContainer>
+            <UnitFilterContainer>
+              <div className="select-container">
+                <select
+                  value={selectedUnit}
+                  onChange={(e) => setSelectedUnit(e.target.value)}
+                >
+                  {units.map((unit, index) => (
+                    <option key={index} value={unit}>
+                      {unit}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-  <div className="filter-container">
-    <button className="filter-button" onClick={handleFilter}>
-      Filter
-    </button>
-  </div>
+              <div className="filter-container">
+                <button className="filter-button" onClick={handleFilter}>
+                  Filter
+                </button>
+              </div>
 
-  <div className="search-container">
-    <input
-      type="text"
-      placeholder="Search Stallholder"
-      value={searchQuery}
-      onChange={(e) => {
-        setSearchQuery(e.target.value);
-        handleSearch(e.target.value);
-      }}
-    />
-    <div className="search-icon">
-      <FontAwesomeIcon icon={faSearch} />
-    </div>
-  </div>
-</UnitFilterContainer>
+              <div className="search-container">
+                <input
+                  type="text"
+                  placeholder="Search Stallholder"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    handleSearch(e.target.value);
+                  }}
+                />
+                <div className="search-icon">
+                  <FontAwesomeIcon icon={faSearch} />
+                </div>
+              </div>
+            </UnitFilterContainer>
 
             <table>
               <thead>
