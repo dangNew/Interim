@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt, FaUserSlash, FaUser, FaUsers, FaWallet, FaList } from 'react-icons/fa';
+import { FaUserSlash, FaUser, FaWallet } from 'react-icons/fa';
 import SidenavCollector from "./SidenavCollector";
 import { rentmobileDb } from '../components/firebase.config';
 import { collection, getDocs, query, where } from 'firebase/firestore';

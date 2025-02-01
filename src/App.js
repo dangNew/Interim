@@ -77,7 +77,7 @@ import TodoList from './AP6/TodoList';
 import BlogrollApp from './AP6/BlogrollApp';
 import DigitalClock from './AP6/DigitalClock';
 
-import BillingConfiguration from "./Interim/BillingConfig";
+
 
 function App() {
   return (
