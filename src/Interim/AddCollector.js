@@ -35,6 +35,8 @@ import {
 import { interimDb } from "../components/firebase.config";
 import ConfirmationModal from "./ConfirmationModal"; // Import the modal
 import IntSidenav from "./IntSidenav";
+import CarbonLogo from '../CarbonLogo/472647195_1684223168803549_1271657271156175542_n.jpg';
+
 
 const DashboardContainer = styled.div`
   display: flex;
@@ -43,26 +45,34 @@ const DashboardContainer = styled.div`
 
 const MainContent = styled.div`
   margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")};
-  padding-left: 10px;
-  background-color: #fff;
   padding: 2rem;
-  width: calc(
-    100% - ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")}
-  );
+  background-color: #fff;
+  width: calc(100% - ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")});
   transition: margin-left 0.3s ease, width 0.3s ease;
   overflow-y: auto;
 `;
+
 const AppBar = styled.div`
-  display: left;
+  display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 40px 50px;
-  background-color: #188423; /* Updated color */
-  color: white;
-  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
-  font-size: 22px;
-  font-family: "Inter", sans-serif; /* Use a professional font */
-  font-weight: bold; /* Apply bold weight */
+  padding: 1rem 2rem;
+  background-color: #ffffff;
+  color: #333;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  font-size: 1.5rem;
+  font-family: 'Roboto', sans-serif;
+  font-weight: bold;
+`;
+
+const Logo = styled.img`
+  height: 40px;
+  margin-right: 1rem;
+`;
+
+const Title = styled.div`
+  display: flex;
+  align-items: center;
 `;
 
 const FormContainer = styled.form`
@@ -496,8 +506,11 @@ const Dashboard = () => {
         onClick={handleMainContentClick}
       >
         <AppBar>
-          <div className="title">OFFICE OF THE CITY MARKETS</div>
-        </AppBar>
+                  <Title>
+                    <Logo src={CarbonLogo} alt="Carbon Logo" />
+                    <div>Add Collector</div>
+                  </Title>
+                </AppBar>
 
         <FormContainer onSubmit={handleSubmit}>
           <div className="section-title">Basic Details</div>

@@ -12,6 +12,8 @@ import { interimStorage as storage } from '../components/firebase.config';
 import { rentmobileDb, rentmobileAuth } from '../components/firebase.config';
 import IntSidenav from './IntSidenav';
 
+import CarbonLogo from '../CarbonLogo/472647195_1684223168803549_1271657271156175542_n.jpg';
+
 library.add(faList, faPlus, faUser, faIdBadge, faMagnifyingGlass, faHouseChimney, faUsers, faTriangleExclamation, faEye, faCircleUser, faBars, FaSignOutAlt);
 
 const AddUser = styled.div`
@@ -19,15 +21,6 @@ const AddUser = styled.div`
   height: 100vh;
 `;
 
-const MainContent = styled.div`
-  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')};
-  padding-left: 10px;
-  background-color: #fff;
-  padding: 2rem;
-  width: calc(100% - ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')});
-  transition: margin-left 0.3s ease, width 0.3s ease;
-  overflow-y: auto;
-`;
 
 const Divider = styled.hr`
   border: 2;
@@ -190,19 +183,37 @@ const ToggleSwitch = styled.div`
   }
 `;
 
+const MainContent = styled.div`
+  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")};
+  padding: 2rem;
+  background-color: #fff;
+  width: calc(100% - ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")});
+  transition: margin-left 0.3s ease, width 0.3s ease;
+  overflow-y: auto;
+`;
+
 const AppBar = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 40px 50px;
-  background-color: #188423; /* Updated color */
-  color: white;
-  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
-  font-size: 22px;
-  font-family: 'Inter', sans-serif; /* Use a professional font */
-  font-weight: bold; /* Apply bold weight */
+  padding: 1rem 2rem;
+  background-color: #ffffff;
+  color: #333;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  font-size: 1.5rem;
+  font-family: 'Roboto', sans-serif;
+  font-weight: bold;
 `;
 
+const Logo = styled.img`
+  height: 40px;
+  margin-right: 1rem;
+`;
+
+const Title = styled.div`
+  display: flex;
+  align-items: center;
+`;
 const NewUnit = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
@@ -436,9 +447,12 @@ const NewUnit = () => {
           />
         </div>
         <MainContent isSidebarOpen={isSidebarOpen} onClick={handleMainContentClick}>
-          <AppBar>
-            <div className="title">OFFICE OF THE CITY MARKETS</div>
-          </AppBar>
+           <AppBar>
+                    <Title>
+                      <Logo src={CarbonLogo} alt="Carbon Logo" />
+                      <div>Add Appraiser</div>
+                    </Title>
+                  </AppBar>
 
           <FormContainer onSubmit={handleSubmit}>
             <div className="section-title">Basic Details</div>

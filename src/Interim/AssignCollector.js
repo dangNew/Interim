@@ -6,6 +6,7 @@ import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt, FaEdit } from 'react-icon
 import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContract, faTicketAlt, faClipboard, faCheck, faPlusCircle, faCogs } from '@fortawesome/free-solid-svg-icons';
 import { query, where, serverTimestamp, getDocs, updateDoc, collection, addDoc, doc } from 'firebase/firestore';
 import { rentmobileDb } from '../components/firebase.config'; // Import the correct firestore instance
+import CarbonLogo from '../CarbonLogo/472647195_1684223168803549_1271657271156175542_n.jpg';
 
 const DashboardContainer = styled.div`
   display: flex;
@@ -79,27 +80,35 @@ const ToggleButton = styled.div`
 `;
 
 const MainContent = styled.div`
-  margin-left: \\${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')};
-  padding-left: 40px;
-  background-color: #fff;
+  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")};
   padding: 2rem;
-  width: 100%;
-  transition: margin-left 0.3s ease;
+  background-color: #fff;
+  width: calc(100% - ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")});
+  transition: margin-left 0.3s ease, width 0.3s ease;
   overflow-y: auto;
-  flex: 1;
 `;
 
 const AppBar = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 40px 50px;
-  background-color: #188423;
-  color: white;
-  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
-  font-size: 22px;
-  font-family: 'Inter', sans-serif;
+  padding: 1rem 2rem;
+  background-color: #ffffff;
+  color: #333;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  font-size: 1.5rem;
+  font-family: 'Roboto', sans-serif;
   font-weight: bold;
+`;
+
+const Logo = styled.img`
+  height: 40px;
+  margin-right: 1rem;
+`;
+
+const Title = styled.div`
+  display: flex;
+  align-items: center;
 `;
 
 const ProfileHeader = styled.div`
@@ -641,12 +650,12 @@ const Dashboard = () => {
       </Sidebar>
 
       <MainContent isSidebarOpen={isSidebarOpen}>
-        <AppBar>
-          <ToggleButton onClick={toggleSidebar}>
-            <FaBars />
-          </ToggleButton>
-          <div>OFFICE OF THE CITY MARKETS</div>
-        </AppBar>
+         <AppBar>
+                  <Title>
+                    <Logo src={CarbonLogo} alt="Carbon Logo" />
+                    <div>Dashboard</div>
+                  </Title>
+                </AppBar>
 
         <ToggleButton isSidebarOpen={isSidebarOpen} onClick={toggleSidebar}>
           <FaBars />

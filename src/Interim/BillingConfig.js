@@ -6,6 +6,8 @@ import { FaEdit, FaTrash } from 'react-icons/fa';
 import { rentmobileDb } from '../components/firebase.config';
 import IntSidenav from './IntSidenav';
 import Modal from 'react-modal';
+import CarbonLogo from '../CarbonLogo/472647195_1684223168803549_1271657271156175542_n.jpg';
+
 
 const BillingConfigurationContainer = styled.div`
   display: flex;
@@ -14,11 +16,11 @@ const BillingConfigurationContainer = styled.div`
 `;
 
 const MainContent = styled.div`
-  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '70px')};
+  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")};
   padding: 2rem;
   background-color: #fff;
-  width: 100%;
-  transition: margin-left 0.3s ease;
+  width: calc(100% - ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")});
+  transition: margin-left 0.3s ease, width 0.3s ease;
   overflow-y: auto;
 `;
 
@@ -26,15 +28,24 @@ const AppBar = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 30px;
-  background-color: #188423;
-  color: white;
-  font-size: 24px;
-  font-family: 'Inter', sans-serif;
+  padding: 1rem 2rem;
+  background-color: #ffffff;
+  color: #333;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  font-size: 1.5rem;
+  font-family: 'Roboto', sans-serif;
   font-weight: bold;
-  margin-bottom: 20px;
 `;
 
+const Logo = styled.img`
+  height: 40px;
+  margin-right: 1rem;
+`;
+
+const Title = styled.div`
+  display: flex;
+  align-items: center;
+`;
 const AddButton = styled.button`
   padding: 10px 20px;
   background-color: #188423;
@@ -460,9 +471,12 @@ const BillingConfiguration = () => {
         />
       </div>
       <MainContent isSidebarOpen={isSidebarOpen} onClick={handleMainContentClick}>
-        <AppBar>
-          <div className="title">OFFICE OF THE CITY MARKETS</div>
-        </AppBar>
+         <AppBar>
+                  <Title>
+                    <Logo src={CarbonLogo} alt="Carbon Logo" />
+                    <div>Billing Configuration</div>
+                  </Title>
+                </AppBar>
 
         <CenteredContainer>
           <AddButton onClick={openModal}>+ Add Billing Configuration</AddButton>

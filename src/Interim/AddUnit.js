@@ -7,7 +7,7 @@ import { faHome, faShoppingCart, faUser, faSearch, faPlus, faUsers, faFileContra
 import { collection, getDocs, addDoc } from 'firebase/firestore';
 import { interimDb, rentmobileDb } from '../components/firebase.config'; // Import the correct firestore instance
 import IntSidenav from './IntSidenav';
-
+import CarbonLogo from '../CarbonLogo/472647195_1684223168803549_1271657271156175542_n.jpg';
 
 const DashboardContainer = styled.div`
   display: flex;
@@ -25,17 +25,27 @@ const MainContent = styled.div`
 `;
 
 const AppBar = styled.div`
-  display: left;
+  display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 40px 50px;
-  background-color: #188423; /* Updated color */
-  color: white;
-  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
-  font-size: 22px;
-  font-family: 'Inter', sans-serif; /* Use a professional font */
-  font-weight: bold; /* Apply bold weight */
+  padding: 1rem 2rem;
+  background-color: #ffffff;
+  color: #333;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  font-size: 1.5rem;
+  font-family: 'Roboto', sans-serif;
+  font-weight: bold;
 `;
+const Logo = styled.img`
+  height: 40px;
+  margin-right: 1rem;
+`;
+
+const Title = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
 const ProfileHeader = styled.div`
   display: flex;
   align-items: center;
@@ -335,9 +345,11 @@ const Dashboard = () => {
       </div>
       <MainContent isSidebarOpen={isSidebarOpen} onClick={handleMainContentClick}>
         <AppBar>
-          <div className="title">OFFICE OF THE CITY MARKETS</div>
-        </AppBar>
-
+                  <Title>
+                    <Logo src={CarbonLogo} alt="Carbon Logo" />
+                    <div>Add Unit</div>
+                  </Title>
+                </AppBar>
         
         <FormContainer>
           <h3>Add Unit</h3>

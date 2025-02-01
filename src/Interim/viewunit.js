@@ -1,12 +1,40 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faPlus, faUsers, faFileContract, faTicketAlt, faClipboard, faCheck, faPlusCircle, faCogs } from '@fortawesome/free-solid-svg-icons';
-import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc, query, where } from 'firebase/firestore';
-import { rentmobileDb } from '../components/firebase.config'; // Import the correct firestore instance
-import IntSidenav from './IntSidenav';
-import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt, FaTrash, FaEdit, FaEye } from 'react-icons/fa';
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faHome,
+  faPlus,
+  faUsers,
+  faFileContract,
+  faTicketAlt,
+  faClipboard,
+  faCheck,
+  faPlusCircle,
+  faCogs,
+} from "@fortawesome/free-solid-svg-icons";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  deleteDoc,
+  doc,
+  updateDoc,
+  query,
+  where,
+} from "firebase/firestore";
+import { rentmobileDb } from "../components/firebase.config"; // Import the correct firestore instance
+import IntSidenav from "./IntSidenav";
+import {
+  FaBars,
+  FaSearch,
+  FaUserCircle,
+  FaSignOutAlt,
+  FaTrash,
+  FaEdit,
+  FaEye,
+} from "react-icons/fa";
+import CarbonLogo from "../CarbonLogo/472647195_1684223168803549_1271657271156175542_n.jpg";
 
 const DashboardContainer = styled.div`
   display: flex;
@@ -14,11 +42,12 @@ const DashboardContainer = styled.div`
 `;
 
 const MainContent = styled.div`
-  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')};
-  padding-left: 10px;
-  background-color: #fff;
+  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")};
   padding: 2rem;
-  width: calc(100% - ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')});
+  background-color: #fff;
+  width: calc(
+    100% - ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")}
+  );
   transition: margin-left 0.3s ease, width 0.3s ease;
   overflow-y: auto;
 `;
@@ -27,13 +56,23 @@ const AppBar = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 40px 50px;
-  background-color: #188423;
-  color: white;
-  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
-  font-size: 22px;
-  font-family: 'Inter', sans-serif;
+  padding: 1rem 2rem;
+  background-color: #ffffff;
+  color: #333;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  font-size: 1.5rem;
+  font-family: "Roboto", sans-serif;
   font-weight: bold;
+`;
+
+const Logo = styled.img`
+  height: 40px;
+  margin-right: 1rem;
+`;
+
+const Title = styled.div`
+  display: flex;
+  align-items: center;
 `;
 
 const Container = styled.div`
@@ -56,7 +95,7 @@ const SearchBarContainer = styled.div`
   border-radius: 20px;
   margin-bottom: 20px;
   margin-top: -25px;
-  display: ${({ isSidebarOpen }) => (isSidebarOpen ? 'flex' : 'none')};
+  display: ${({ isSidebarOpen }) => (isSidebarOpen ? "flex" : "none")};
 `;
 
 const SearchInput = styled.input`
@@ -89,7 +128,7 @@ const SearchBar = styled.input`
   border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 1rem;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   cursor: pointer;
   background-color: #ffffff; /* White background */
   color: #333; /* Black text */
@@ -109,10 +148,10 @@ const SearchBar = styled.input`
   }
 `;
 
-const Title = styled.h3`
+const Title1 = styled.h3`
   color: #333;
   margin-bottom: 2rem;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-weight: bold;
 `;
 
@@ -153,7 +192,7 @@ const ActionButtons = styled.div`
 `;
 
 const ActionButton = styled.button`
-  background-color: ${({ color }) => color || '#007bff'};
+  background-color: ${({ color }) => color || "#007bff"};
   color: white;
   border: none;
   border-radius: 5px;
@@ -166,13 +205,13 @@ const ActionButton = styled.button`
   transition: background-color 0.3s ease, transform 0.2s ease;
 
   &:hover {
-    background-color: ${({ hoverColor }) => hoverColor || '#0056b3'};
+    background-color: ${({ hoverColor }) => hoverColor || "#0056b3"};
     transform: scale(1.05);
   }
 `;
 
 const ModalContainer = styled.div`
-  display: ${({ show }) => (show ? 'flex' : 'none')};
+  display: ${({ show }) => (show ? "flex" : "none")};
   position: fixed;
   top: 0;
   left: 0;
@@ -183,8 +222,8 @@ const ModalContainer = styled.div`
   background: rgba(0, 0, 0, 0.6);
   z-index: 1000;
   transition: opacity 0.3s ease, visibility 0.3s ease;
-  visibility: ${({ show }) => (show ? 'visible' : 'hidden')};
-  opacity: ${({ show }) => (show ? '1' : '0')};
+  visibility: ${({ show }) => (show ? "visible" : "hidden")};
+  opacity: ${({ show }) => (show ? "1" : "0")};
 `;
 
 const ModalContent = styled.div`
@@ -196,7 +235,7 @@ const ModalContent = styled.div`
   width: 400px;
   position: relative;
   max-width: 90%;
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
 
   h3 {
     color: #333;
@@ -257,7 +296,7 @@ const EditModalContent = styled.div`
   width: 400px;
   position: relative;
   max-width: 90%;
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
 
   h3 {
     color: #333;
@@ -325,7 +364,7 @@ const Dashboard = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState(null);
   const [editMode, setEditMode] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState({
     userManagement: false,
     addUnit: false,
@@ -336,9 +375,9 @@ const Dashboard = () => {
     manageSpace: false,
   });
   const [editedUnit, setEditedUnit] = useState({
-    name: '',
-    location: '',
-    dateRegistered: '',
+    name: "",
+    location: "",
+    dateRegistered: "",
   });
   const navigate = useNavigate();
 
@@ -347,7 +386,7 @@ const Dashboard = () => {
   };
 
   const handleDropdownToggle = (dropdown) => {
-    setIsDropdownOpen(prevState => ({
+    setIsDropdownOpen((prevState) => ({
       ...prevState,
       [dropdown]: !prevState[dropdown],
     }));
@@ -359,18 +398,22 @@ const Dashboard = () => {
 
   const fetchUnits = async () => {
     try {
-      const unitsCollection = collection(rentmobileDb, 'unit');
+      const unitsCollection = collection(rentmobileDb, "unit");
       const q = searchTerm
-        ? query(unitsCollection, where('name', '>=', searchTerm), where('name', '<=', searchTerm + '\uf8ff'))
+        ? query(
+            unitsCollection,
+            where("name", ">=", searchTerm),
+            where("name", "<=", searchTerm + "\uf8ff")
+          )
         : unitsCollection;
       const unitsSnapshot = await getDocs(q);
-      const unitsList = unitsSnapshot.docs.map(doc => ({
+      const unitsList = unitsSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
       setUnits(unitsList);
     } catch (error) {
-      console.error('Error fetching units: ', error);
+      console.error("Error fetching units: ", error);
     }
   };
 
@@ -393,18 +436,18 @@ const Dashboard = () => {
     setSelectedUnit(null);
     setEditMode(false);
     setEditedUnit({
-      name: '',
-      location: '',
-      dateRegistered: '',
+      name: "",
+      location: "",
+      dateRegistered: "",
     });
   };
 
   const deleteUnit = async (id) => {
     try {
-      await deleteDoc(doc(rentmobileDb, 'unit', id));
+      await deleteDoc(doc(rentmobileDb, "unit", id));
       fetchUnits(); // Refresh the list after deletion
     } catch (error) {
-      console.error('Error deleting unit: ', error);
+      console.error("Error deleting unit: ", error);
     }
   };
 
@@ -417,31 +460,31 @@ const Dashboard = () => {
 
   const handleUpdateUnit = async () => {
     try {
-      const unitRef = doc(rentmobileDb, 'unit', selectedUnit.id);
+      const unitRef = doc(rentmobileDb, "unit", selectedUnit.id);
       await updateDoc(unitRef, editedUnit);
       fetchUnits(); // Refresh the list after update
       closeModal();
     } catch (error) {
-      console.error('Error updating unit: ', error);
+      console.error("Error updating unit: ", error);
     }
   };
 
   useEffect(() => {
     const checkAndCreateCollection = async () => {
-      const unitsCollection = collection(rentmobileDb, 'unit');
+      const unitsCollection = collection(rentmobileDb, "unit");
       const unitsSnapshot = await getDocs(unitsCollection);
 
       // If the collection doesn't exist (no documents in it), create a default document
       if (unitsSnapshot.empty) {
         try {
           await addDoc(unitsCollection, {
-            name: 'Default Unit',
-            location: 'Default Location',
-            dateRegistered: new Date().toISOString().split('T')[0],
+            name: "Default Unit",
+            location: "Default Location",
+            dateRegistered: new Date().toISOString().split("T")[0],
           });
-          console.log('Default collection created with a default unit.');
+          console.log("Default collection created with a default unit.");
         } catch (error) {
-          console.error('Error creating default collection: ', error);
+          console.error("Error creating default collection: ", error);
         }
       }
       // Fetch units after checking/creating the collection
@@ -449,13 +492,18 @@ const Dashboard = () => {
     };
 
     const fetchUserData = async () => {
-      const loggedInUserData = JSON.parse(localStorage.getItem('userData'));
+      const loggedInUserData = JSON.parse(localStorage.getItem("userData"));
       if (loggedInUserData) {
-        const usersCollection = collection(rentmobileDb, 'admin_users');
+        const usersCollection = collection(rentmobileDb, "admin_users");
         const userDocs = await getDocs(usersCollection);
-        const users = userDocs.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const users = userDocs.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
 
-        const currentUser = users.find(user => user.email === loggedInUserData.email);
+        const currentUser = users.find(
+          (user) => user.email === loggedInUserData.email
+        );
         setLoggedInUser(currentUser || loggedInUserData);
       }
     };
@@ -471,9 +519,9 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -482,8 +530,8 @@ const Dashboard = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('userData');
-    navigate('/login');
+    localStorage.removeItem("userData");
+    navigate("/login");
   };
 
   return (
@@ -495,16 +543,25 @@ const Dashboard = () => {
           loggedInUser={loggedInUser}
         />
       </div>
-      <MainContent isSidebarOpen={isSidebarOpen} onClick={handleMainContentClick}>
+      <MainContent
+        isSidebarOpen={isSidebarOpen}
+        onClick={handleMainContentClick}
+      >
         <AppBar>
-          <div className="title">OFFICE OF THE CITY MARKETS</div>
+          <Title>
+            <Logo src={CarbonLogo} alt="Carbon Logo" />
+            <div>View Unit</div>
+          </Title>
         </AppBar>
         <br></br>
 
         <Container>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <AddButton onClick={() => navigate('/addunit')}>
-              <FontAwesomeIcon icon={faPlus} style={{ marginRight: '0.5rem' }} />
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <AddButton onClick={() => navigate("/addunit")}>
+              <FontAwesomeIcon
+                icon={faPlus}
+                style={{ marginRight: "0.5rem" }}
+              />
               Add New Unit
             </AddButton>
             <SearchBar
@@ -514,9 +571,9 @@ const Dashboard = () => {
               onChange={handleSearchChange}
             />
           </div>
-          <Title>Unit Management</Title>
+          <Title1>Unit Management</Title1>
           <CardContainer>
-            {units.map(unit => (
+            {units.map((unit) => (
               <UnitCard key={unit.id}>
                 <UnitName>{unit.name}</UnitName>
                 <UnitDetails>Location: {unit.location}</UnitDetails>
@@ -559,19 +616,31 @@ const Dashboard = () => {
                     <input
                       type="text"
                       value={editedUnit.name}
-                      onChange={e => setEditedUnit({ ...editedUnit, name: e.target.value })}
+                      onChange={(e) =>
+                        setEditedUnit({ ...editedUnit, name: e.target.value })
+                      }
                     />
                     <label>Location</label>
                     <input
                       type="text"
                       value={editedUnit.location}
-                      onChange={e => setEditedUnit({ ...editedUnit, location: e.target.value })}
+                      onChange={(e) =>
+                        setEditedUnit({
+                          ...editedUnit,
+                          location: e.target.value,
+                        })
+                      }
                     />
                     <label>Date Registered</label>
                     <input
                       type="date"
                       value={editedUnit.dateRegistered}
-                      onChange={e => setEditedUnit({ ...editedUnit, dateRegistered: e.target.value })}
+                      onChange={(e) =>
+                        setEditedUnit({
+                          ...editedUnit,
+                          dateRegistered: e.target.value,
+                        })
+                      }
                     />
                     <hr />
                     <button onClick={handleUpdateUnit}>Update</button>
@@ -580,9 +649,16 @@ const Dashboard = () => {
                 ) : (
                   <>
                     <h3>Unit Details</h3>
-                    <p><strong>Name:</strong> {selectedUnit.name}</p>
-                    <p><strong>Location:</strong> {selectedUnit.location}</p>
-                    <p><strong>Date Registered:</strong> {selectedUnit.dateRegistered}</p>
+                    <p>
+                      <strong>Name:</strong> {selectedUnit.name}
+                    </p>
+                    <p>
+                      <strong>Location:</strong> {selectedUnit.location}
+                    </p>
+                    <p>
+                      <strong>Date Registered:</strong>{" "}
+                      {selectedUnit.dateRegistered}
+                    </p>
                     <hr />
                     <button onClick={closeModal}>Close</button>
                   </>

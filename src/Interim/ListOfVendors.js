@@ -2,31 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import {
-  FaBars,
   FaSearch,
-  FaUserCircle,
-  FaFilter,
   FaPrint,
-  FaSignOutAlt,
-  FaEye,
-  FaFileInvoice,
   FaReceipt,
   FaBell,
   FaExclamationTriangle,
 } from "react-icons/fa";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faHome,
-  faShoppingCart,
-  faUser,
-  faSearch,
-  faPlus,
-  faUsers,
-  faFileContract,
-  faTicketAlt,
-  faClipboard,
-  faPlusCircle,
-  faCogs,
   faEye,
 } from "@fortawesome/free-solid-svg-icons";
 import { Timestamp } from "firebase/firestore";
@@ -35,7 +18,8 @@ import { rentmobileDb } from "../components/firebase.config";
 import ConfirmationModal from "./ConfirmationModal";
 import IntSidenav from "./IntSidenav";
 import NoticeModal from "./NoticeModal";
-import ViolationModal from "./ViolationModal"; // Import the new ViolationModal
+import ViolationModal from "./ViolationModal"; 
+import CarbonLogo from '../CarbonLogo/472647195_1684223168803549_1271657271156175542_n.jpg';
 
 const ROWS_PER_PAGE = 10;
 
@@ -46,12 +30,9 @@ const DashboardContainer = styled.div`
 
 const MainContent = styled.div`
   margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")};
-  padding-left: 10px;
-  background-color: #fff;
   padding: 2rem;
-  width: calc(
-    100% - ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")}
-  );
+  background-color: #fff;
+  width: calc(100% - ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")});
   transition: margin-left 0.3s ease, width 0.3s ease;
   overflow-y: auto;
 `;
@@ -60,14 +41,23 @@ const AppBar = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 40px 50px;
-  background-color: #188423;
-  color: white;
-  font-size: 22px;
-  font-family: "Inter", sans-serif;
+  padding: 1rem 2rem;
+  background-color: #ffffff;
+  color: #333;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  font-size: 1.5rem;
+  font-family: 'Roboto', sans-serif;
   font-weight: bold;
 `;
+const Logo = styled.img`
+  height: 40px;
+  margin-right: 1rem;
+`;
 
+const Title = styled.div`
+  display: flex;
+  align-items: center;
+`;
 const FormContainer = styled.div`
   margin-top: 2rem;
   padding: 1rem;
@@ -825,8 +815,11 @@ const Dashboard = () => {
         onClick={handleMainContentClick}
       >
         <AppBar>
-          <div className="title">LIST OF STALLHOLDER</div>
-        </AppBar>
+                  <Title>
+                    <Logo src={CarbonLogo} alt="Carbon Logo" />
+                    <div>List Of Stallholders</div>
+                  </Title>
+                </AppBar>
 
         <FormContainer>
           <TopBarContainer>

@@ -1,21 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  
-  FaUserSlash,
-  FaUser,
-  FaUsers,
-  FaWallet,
-  FaList,
-} from "react-icons/fa";
-import {
-  faHome,
-  faShoppingCart,
-  
-} from "@fortawesome/free-solid-svg-icons";
-import { faClipboard } from "@fortawesome/free-regular-svg-icons";
+import { FaUserSlash, FaUser, FaUsers, FaWallet, FaEdit, FaTrash, FaEye } from "react-icons/fa";
 import { rentmobileDb } from "../components/firebase.config";
 import { getDocs, collection, query, where } from "firebase/firestore";
 import LoginAnalytics from "./LoginAnalytics";
@@ -23,9 +9,11 @@ import Graph from "./Graph";
 import ActiveModal from "./ActiveModal";
 import TotalUsersModal from "./TotalUsersModal";
 import InactiveUsersModal from "./InactiveUsersModal";
-import CollectorsModal from "./CollectorsModal"; // Import the new modal
-import VendorLocationAnalytics from "./VendorLocationAnalytics"; // Import the new component
+import CollectorsModal from "./CollectorsModal";
+import VendorLocationAnalytics from "./VendorLocationAnalytics";
 import IntSidenav from "./IntSidenav";
+import CarbonLogo from '../CarbonLogo/472647195_1684223168803549_1271657271156175542_n.jpg';
+import PieChartComponent from "./PieChartComponent";
 
 const DashboardContainer = styled.div`
   display: flex;
@@ -35,80 +23,73 @@ const DashboardContainer = styled.div`
 
 const MainContent = styled.div`
   margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")};
-  padding-left: 10px;
-  background-color: #fff;
   padding: 2rem;
-  width: calc(
-    100% - ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")}
-  );
+  background-color: #fff;
+  width: calc(100% - ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")});
   transition: margin-left 0.3s ease, width 0.3s ease;
   overflow-y: auto;
 `;
+
 const AppBar = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 40px 50px;
-  background-color: #188423; /* Updated color */
-  color: white;
-  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
-  font-size: 22px;
-  font-family: "Inter", sans-serif; /* Use a professional font */
-  font-weight: bold; /* Apply bold weight */
+  padding: 1rem 2rem;
+  background-color: #ffffff;
+  color: #333;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  font-size: 1.5rem;
+  font-family: 'Roboto', sans-serif;
+  font-weight: bold;
 `;
+
+const Logo = styled.img`
+  height: 40px;
+  margin-right: 1rem;
+`;
+
+const Title = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
 const StatsContainer = styled.div`
   display: flex;
-  gap: 2rem;
-
-  @media (max-width: 1000px) {
-    flex-direction: column;
-    gap: 1rem;
-  }
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
 `;
 
 const StatBox = styled.div`
-  background-color: ${({ bgColor }) =>
-    bgColor || "#3b5998"}; /* Default to Soft Blue */
-  padding: 2rem;
-  border-radius: 12px;
-  border: 1px solid #ccc;
+  background-color: ${({ bgColor }) => bgColor || "#4CAF50"}; /* Default to Green */
+  color: #FFFFFF;
+  padding: 1.5rem;
+  border-radius: 10px;
+  border: 1px solid #DDDDDD;
   flex: 1;
+  min-width: 200px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
 
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   }
 
   h3 {
     margin: 0;
-    font-size: 1.2rem;
-    color: #f8f9fa; /* Light Gray-White */
+    font-size: 1rem;
   }
 
   p {
-    font-size: 2rem;
+    font-size: 1.5rem;
     margin: 0;
     font-weight: bold;
-    color: #f8f9fa; /* Light Gray-White */
-  }
-
-  @media (max-width: 768px) {
-    padding: 1rem;
-
-    h3 {
-      font-size: 1rem;
-    }
-
-    p {
-      font-size: 1.6rem;
-    }
   }
 `;
 
@@ -116,13 +97,13 @@ const FormContainer = styled.div`
   margin-top: 2rem;
   padding: 1rem;
   border: 1px solid #ddd;
-  border-radius: 15px;
+  border-radius: 10px;
   background-color: #f8f9fa;
-  box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 
   h3 {
     margin-bottom: 1rem;
-    font-size: 1.6rem;
+    font-size: 1.2rem;
   }
 
   table {
@@ -131,18 +112,16 @@ const FormContainer = styled.div`
     font-size: 14px;
     border: 1px solid #ddd;
 
-    th,
-    td {
-      padding: 15px;
+    th, td {
+      padding: 1rem;
       text-align: left;
-      border-bottom: 2px solid #dee2e6;
-      transition: background-color 0.2s ease;
+      border-bottom: 1px solid #ddd;
     }
 
     th {
-      background-color: #e9ecef;
+      background-color: #f1f3f5;
       font-weight: bold;
-      color: #495057;
+      color: #333;
     }
 
     td {
@@ -157,64 +136,103 @@ const FormContainer = styled.div`
       background-color: #f1f3f5;
     }
   }
-`;
 
-const SearchBarContainer = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  background-color: #e9ecef;
-  border-radius: 20px;
-  margin-bottom: 20px;
-  margin-top: -25px;
-  display: ${({ isSidebarOpen }) => (isSidebarOpen ? "flex" : "none")};
-`;
-
-const SearchInput = styled.input`
-  border: none;
-  background: none;
-  outline: none;
-  margin-left: 10px;
-  width: 100%;
+  .actions {
+    display: flex;
+    gap: 0.5rem;
+    cursor: pointer;
+  }
 `;
 
 const CollectorTableContainer = styled(FormContainer)`
   margin-top: 2rem;
-  padding: 1rem;
-  background-color: #f8f9fa;
 `;
 
-const CollectorTable = styled.table`
+const GraphContainer = styled.div`
   width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-
-  th,
-  td {
-    padding: 15px;
-    text-align: left;
-    border-bottom: 2px solid #dee2e6;
-    transition: background-color 0.2s ease;
-  }
-
-  th {
-    background-color: #e9ecef;
-    font-weight: bold;
-    color: #495057;
-  }
-
-  td {
-    background-color: #fff;
-  }
-
-  tr:nth-child(even) {
-    background-color: #f9f9f9;
-  }
-
-  tr:hover {
-    background-color: #f1f3f5;
-  }
+  max-width: 1200px; /* Adjust this value to make the graph wider */
+  margin: 2rem auto;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background-color: #f8f9fa;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
+
+const PieChartContainer = styled.div`
+  width: 100%;
+  max-width: 600px; /* Adjust this value to make the pie chart wider */
+  margin: 2rem auto;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background-color: #f8f9fa;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+`;
+
+const RecentlyRegistered = ({ recentUsers }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const handleViewDetails = (user) => {
+    // Implement view details functionality
+    console.log("View details for user:", user);
+  };
+
+  const handleEditUser = (user) => {
+    // Implement edit user functionality
+    console.log("Edit user:", user);
+  };
+
+  const handleDeleteUser = (user) => {
+    // Implement delete user functionality
+    console.log("Delete user:", user);
+  };
+
+  const filteredUsers = recentUsers.filter((user) =>
+    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <FormContainer>
+      <h3>Recently Registered</h3>
+      <input
+        type="text"
+        placeholder="Search by email"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        style={{ marginBottom: "1rem", padding: "0.5rem", width: "100%", boxSizing: "border-box" }}
+      />
+      <table>
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Phone</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredUsers.map((user, index) => (
+            <tr key={index}>
+              <td>{user.email || ""}</td>
+              <td>{user.firstName || ""}</td>
+              <td>{user.lastName || ""}</td>
+              <td>{user.contactNum || ""}</td>
+              <td>
+                <div className="actions">
+                  <FaEye onClick={() => handleViewDetails(user)} />
+                  <FaEdit onClick={() => handleEditUser(user)} />
+                  <FaTrash onClick={() => handleDeleteUser(user)} />
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </FormContainer>
+  );
+};
 
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -226,96 +244,56 @@ const Dashboard = () => {
   const [collectorsData, setCollectorsData] = useState([]);
   const [recentUsers, setRecentUsers] = useState([]);
   const [loggedInUser, setLoggedInUser] = useState(null);
-  const [isDropdownOpen, setIsDropdownOpen] = useState({
-    userManagement: false,
-    addUnit: false,
-    appraise: false,
-    contract: false,
-    ticket: false,
-    manageZone: false,
-    manageSpace: false,
-  });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeUsersList, setActiveUsersList] = useState([]);
   const [isTotalUsersModalOpen, setIsTotalUsersModalOpen] = useState(false);
   const [totalUsersList, setTotalUsersList] = useState([]);
-  const [isInactiveUsersModalOpen, setIsInactiveUsersModalOpen] =
-    useState(false);
+  const [isInactiveUsersModalOpen, setIsInactiveUsersModalOpen] = useState(false);
   const [inactiveUsersList, setInactiveUsersList] = useState([]);
-  const [isCollectorsModalOpen, setIsCollectorsModalOpen] = useState(false); // New state for Collectors Modal
-  const [collectorsList, setCollectorsList] = useState([]); // New state for Collectors List
+  const [isCollectorsModalOpen, setIsCollectorsModalOpen] = useState(false);
+  const [collectorsList, setCollectorsList] = useState([]);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Define an async function to fetch collectors data
     const fetchCollectors = async () => {
       try {
-        // Fetch the collection of documents from Firestore
-        const querySnapshot = await getDocs(
-          collection(rentmobileDb, "ambulant_collector")
-        );
-        // Get the total number of collectors
+        const querySnapshot = await getDocs(collection(rentmobileDb, "ambulant_collector"));
         const collectorsCount = querySnapshot.size;
-        // Log the number of collectors fetched
-        console.log("Number of collectors fetched:", collectorsCount);
-        // Update the state with the total number of collectors
         setTotalCollectors(collectorsCount);
-
-        // Map through the documents to extract data and include the document ID
-        const collectorsData = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        // Log the fetched collectors data
-        console.log("Fetched Collectors Data:", collectorsData);
-        // Update the state with the collectors data
+        const collectorsData = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
         setCollectorsData(collectorsData);
       } catch (error) {
-        // Log any errors that occur during the fetch
         console.error("Error fetching collectors:", error);
       }
     };
 
-    // Call the fetchCollectors function
     fetchCollectors();
-  }, []); // The empty dependency array means this effect runs once after the initial render
-
+  }, []);
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const querySnapshot = await getDocs(
-          collection(rentmobileDb, "admin_users")
-        );
+        const querySnapshot = await getDocs(collection(rentmobileDb, "admin_users"));
         const allUsers = querySnapshot.docs.map((doc) => doc.data());
-        console.log("Fetched Users:", allUsers);
-        const validUsers = allUsers.filter(
-          (user) => user.email && user.firstName && user.lastName
-        );
+        const validUsers = allUsers.filter((user) => user.email && user.firstName && user.lastName);
         setTotalUsers(validUsers.length);
 
-        const activeUsersCount = validUsers.filter(
-          (user) => user.status?.toLowerCase() === "active"
-        ).length;
+        const activeUsersCount = validUsers.filter((user) => user.status?.toLowerCase() === "active").length;
         setActiveUsers(activeUsersCount);
 
-        const inactiveUsersCount = validUsers.filter(
-          (user) => user.status?.toLowerCase() === "inactive"
-        ).length;
+        const inactiveUsersCount = validUsers.filter((user) => user.status?.toLowerCase() === "inactive").length;
         setInactiveUsers(inactiveUsersCount);
 
         setRecentUsers(validUsers.slice(-5));
 
         const loggedInUserData = JSON.parse(localStorage.getItem("userData"));
         if (loggedInUserData) {
-          const currentUser = allUsers.find(
-            (user) => user.email === loggedInUserData.email
-          );
+          const currentUser = allUsers.find((user) => user.email === loggedInUserData.email);
           setLoggedInUser(currentUser || loggedInUserData);
         }
 
-        setTotalUsersList(validUsers); // Set the total users list
+        setTotalUsersList(validUsers);
       } catch (error) {
         console.error("Error fetching users:", error);
       }
@@ -329,23 +307,10 @@ const Dashboard = () => {
     navigate("/login");
   };
 
-  const handleDropdownToggle = (dropdown) => {
-    setIsDropdownOpen((prevState) => ({
-      ...prevState,
-      [dropdown]: !prevState[dropdown],
-    }));
-  };
-
   const handleStatBoxClick = async () => {
     try {
-      const querySnapshot = await getDocs(
-        query(
-          collection(rentmobileDb, "admin_users"),
-          where("status", "==", "Active")
-        )
-      );
+      const querySnapshot = await getDocs(query(collection(rentmobileDb, "admin_users"), where("status", "==", "Active")));
       const activeUsers = querySnapshot.docs.map((doc) => doc.data());
-      console.log("Fetched Active Users:", activeUsers);
       setActiveUsersList(activeUsers);
       setIsModalOpen(true);
     } catch (error) {
@@ -355,9 +320,7 @@ const Dashboard = () => {
 
   const handleTotalUsersStatBoxClick = async () => {
     try {
-      const querySnapshot = await getDocs(
-        collection(rentmobileDb, "admin_users")
-      );
+      const querySnapshot = await getDocs(collection(rentmobileDb, "admin_users"));
       const allUsers = querySnapshot.docs.map((doc) => doc.data());
       setTotalUsersList(allUsers);
       setIsTotalUsersModalOpen(true);
@@ -368,14 +331,8 @@ const Dashboard = () => {
 
   const handleInactiveUsersStatBoxClick = async () => {
     try {
-      const querySnapshot = await getDocs(
-        query(
-          collection(rentmobileDb, "admin_users"),
-          where("status", "==", "Inactive")
-        )
-      );
+      const querySnapshot = await getDocs(query(collection(rentmobileDb, "admin_users"), where("status", "==", "Inactive")));
       const inactiveUsers = querySnapshot.docs.map((doc) => doc.data());
-      console.log("Fetched Inactive Users:", inactiveUsers);
       setInactiveUsersList(inactiveUsers);
       setIsInactiveUsersModalOpen(true);
     } catch (error) {
@@ -385,9 +342,7 @@ const Dashboard = () => {
 
   const handleCollectorsStatBoxClick = async () => {
     try {
-      const querySnapshot = await getDocs(
-        collection(rentmobileDb, "ambulant_collector")
-      );
+      const querySnapshot = await getDocs(collection(rentmobileDb, "ambulant_collector"));
       const collectors = querySnapshot.docs.map((doc) => doc.data());
       setCollectorsList(collectors);
       setIsCollectorsModalOpen(true);
@@ -420,140 +375,53 @@ const Dashboard = () => {
   return (
     <DashboardContainer>
       <div ref={sidebarRef}>
-        <IntSidenav
-          isSidebarOpen={isSidebarOpen}
-          setIsSidebarOpen={setIsSidebarOpen}
-          loggedInUser={loggedInUser}
-        />
+        <IntSidenav isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} loggedInUser={loggedInUser} />
       </div>
-      <MainContent
-        isSidebarOpen={isSidebarOpen}
-        onClick={handleMainContentClick}
-      >
+      <MainContent isSidebarOpen={isSidebarOpen} onClick={handleMainContentClick}>
         <AppBar>
-          <div className="title">OFFICE OF THE CITY MARKETS</div>
+          <Title>
+            <Logo src={CarbonLogo} alt="Carbon Logo" />
+            <div>Dashboard</div>
+          </Title>
         </AppBar>
-        <br />
-        <br />
-
+        <br></br>
+        <br></br>
         <StatsContainer>
           <StatBox bgColor="#5c6bc0" onClick={handleTotalUsersStatBoxClick}>
             <h3>Total Users</h3>
             <p>{totalUsers}</p>
-            <div className="icon-container">
-              <FaUsers
-                className="fading-icon"
-                style={{
-                  fontSize: "30px",
-                  opacity: 0.5,
-                  animation: "fade 2s infinite alternate",
-                }}
-              />
-            </div>
+            <FaUsers style={{ fontSize: "2rem", opacity: 0.7 }} />
           </StatBox>
           <StatBox bgColor="#42a5f5" onClick={handleStatBoxClick}>
             <h3>Active Users</h3>
             <p>{activeUsers}</p>
-            <div className="icon-container">
-              <FaUser
-                className="fading-icon"
-                style={{
-                  fontSize: "30px",
-                  opacity: 0.5,
-                  animation: "fade 2s infinite alternate",
-                }}
-              />
-            </div>
+            <FaUser style={{ fontSize: "2rem", opacity: 0.7 }} />
           </StatBox>
           <StatBox bgColor="#66bb6a" onClick={handleInactiveUsersStatBoxClick}>
             <h3>Inactive Users</h3>
             <p>{inactiveUsers}</p>
-            <div className="icon-container">
-              <FaUserSlash
-                className="fading-icon"
-                style={{
-                  fontSize: "30px",
-                  opacity: 0.5,
-                  animation: "fade 2s infinite alternate",
-                }}
-              />
-            </div>
+            <FaUserSlash style={{ fontSize: "2rem", opacity: 0.7 }} />
           </StatBox>
           <StatBox bgColor="#ffa726" onClick={handleCollectorsStatBoxClick}>
             <h3>Total Collectors</h3>
             <p>{totalCollectors}</p>
-            <div className="icon-container">
-              <FaWallet
-                className="fading-icon"
-                style={{
-                  fontSize: "30px",
-                  opacity: 0.5,
-                  animation: "fade 2s infinite alternate",
-                }}
-              />
-            </div>
+            <FaWallet style={{ fontSize: "2rem", opacity: 0.7 }} />
           </StatBox>
         </StatsContainer>
-        <br></br>
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "flex-start",
-            gap: "5px",
-            padding: "30px",
-          }}
-        >
-          <div style={{ flex: 1, maxWidth: "300px", margin: "0 auto" }}>
-            <LoginAnalytics />
-          </div>
-          <div style={{ flex: 1, maxWidth: "700px", margin: "0 auto" }}>
-            <VendorLocationAnalytics />
-          </div>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", padding: "2rem" }}>
+          <PieChartContainer>
+            <PieChartComponent />
+          </PieChartContainer>
+          <VendorLocationAnalytics />
         </div>
-
-        <div
-          style={{
-            marginTop: "10px",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "flex-start",
-            gap: "5px",
-            padding: "50px",
-          }}
-        >
-          <div style={{ flex: 1, maxWidth: "100%", margin: "0 auto" }}>
-            <Graph />
-          </div>
-        </div>
-
-        <FormContainer>
-          <h3>Recently Registered</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Email</th>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Phone</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentUsers.map((user, index) => (
-                <tr key={index}>
-                  <td>{user.email || ""}</td>
-                  <td>{user.firstName || ""}</td>
-                  <td>{user.lastName || ""}</td>
-                  <td>{user.contactNum || ""}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </FormContainer>
+        <GraphContainer>
+          <Graph />
+        </GraphContainer>
+        <LoginAnalytics />
+        <RecentlyRegistered recentUsers={recentUsers} />
         <CollectorTableContainer>
           <h3>Collector Users</h3>
-          <CollectorTable>
+          <table>
             <thead>
               <tr>
                 <th>Email</th>
@@ -582,33 +450,13 @@ const Dashboard = () => {
                 </tr>
               )}
             </tbody>
-          </CollectorTable>
+          </table>
         </CollectorTableContainer>
       </MainContent>
-      {isModalOpen && (
-        <ActiveModal
-          users={activeUsersList}
-          onClose={() => setIsModalOpen(false)}
-        />
-      )}
-      {isTotalUsersModalOpen && (
-        <TotalUsersModal
-          users={totalUsersList}
-          onClose={() => setIsTotalUsersModalOpen(false)}
-        />
-      )}
-      {isInactiveUsersModalOpen && (
-        <InactiveUsersModal
-          users={inactiveUsersList}
-          onClose={() => setIsInactiveUsersModalOpen(false)}
-        />
-      )}
-      {isCollectorsModalOpen && (
-        <CollectorsModal
-          collectors={collectorsList}
-          onClose={() => setIsCollectorsModalOpen(false)}
-        />
-      )}
+      {isModalOpen && <ActiveModal users={activeUsersList} onClose={() => setIsModalOpen(false)} />}
+      {isTotalUsersModalOpen && <TotalUsersModal users={totalUsersList} onClose={() => setIsTotalUsersModalOpen(false)} />}
+      {isInactiveUsersModalOpen && <InactiveUsersModal users={inactiveUsersList} onClose={() => setIsInactiveUsersModalOpen(false)} />}
+      {isCollectorsModalOpen && <CollectorsModal collectors={collectorsList} onClose={() => setIsCollectorsModalOpen(false)} />}
     </DashboardContainer>
   );
 };

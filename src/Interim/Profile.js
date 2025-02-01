@@ -6,6 +6,8 @@ import { rentmobileDb } from '../components/firebase.config';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import IntSidenav from './IntSidenav';
+import CarbonLogo from '../CarbonLogo/472647195_1684223168803549_1271657271156175542_n.jpg';
+
 
 const DashboardContainer = styled.div`
   display: flex;
@@ -13,10 +15,10 @@ const DashboardContainer = styled.div`
 `;
 
 const MainContent = styled.div`
-  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')};
+  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")};
   padding: 2rem;
-  background-color: #f4f4f4;
-  width: calc(100% - ${({ isSidebarOpen }) => (isSidebarOpen ? '230px' : '60px')});
+  background-color: #fff;
+  width: calc(100% - ${({ isSidebarOpen }) => (isSidebarOpen ? "230px" : "60px")});
   transition: margin-left 0.3s ease, width 0.3s ease;
   overflow-y: auto;
 `;
@@ -26,12 +28,22 @@ const AppBar = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 1rem 2rem;
-  background-color: #188423;
-  color: white;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+  color: #333;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   font-size: 1.5rem;
-  font-family: 'Arial', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-weight: bold;
+`;
+
+const Logo = styled.img`
+  height: 40px;
+  margin-right: 1rem;
+`;
+
+const Title = styled.div`
+  display: flex;
+  align-items: center;
 `;
 
 const FormContainer = styled.div`
@@ -281,8 +293,11 @@ const Dashboard = () => {
       </div>
       <MainContent isSidebarOpen={isSidebarOpen} onClick={handleMainContentClick}>
         <AppBar>
-          <div className="title">OFFICE OF THE CITY MARKETS</div>
-        </AppBar>
+                  <Title>
+                    <Logo src={CarbonLogo} alt="Carbon Logo" />
+                    <div>Profile</div>
+                  </Title>
+                </AppBar>
 
         <FormContainer>
           <h3>Edit User Details</h3>
