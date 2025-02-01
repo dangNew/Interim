@@ -2,35 +2,18 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import {
-  FaBars,
   FaEye,
   FaPen,
   FaTrash,
   FaSearch,
   FaUserCircle,
-  FaUsers,
   FaUser,
   FaUserSlash,
-  FaChevronDown,
-  FaSignOutAlt,
   FaCaretDown,
   FaPlus,
 } from "react-icons/fa";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faHome,
-  faShoppingCart,
-  faUser,
-  faSearch,
-  faPlus,
-  faUsers,
-  faFileContract,
-  faTicketAlt,
-  faCheck,
-  faClipboard,
-  faPlusCircle,
-  faCogs,
-} from "@fortawesome/free-solid-svg-icons";
+
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { rentmobileDb } from "../components/firebase.config";
 import IntSidenav from "./IntSidenav";

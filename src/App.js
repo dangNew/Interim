@@ -11,11 +11,9 @@ import ProtectedRoute from "./Interim/ProtectedRoute"; // Ensure the path is cor
 
 import ViewPayment from "./Collector/ViewPayment";
 
-
 import SignUp from "./Interim/Signup";
 import Login from "./Interim/Login";
 import ForgotPassword from "./Interim/ForgotPassword";
-
 
 import Dashboard from "./Interim/Dashboard";
 import ListOfVendors from "./Interim/ListOfVendors";
@@ -57,7 +55,7 @@ import VendorTransaction from "./Interim/VendorTransaction";
 import ViewSection from "./Interim/ViewSection";
 import AppraisalProduct from "./Interim/AppraisalProduct";
 import Payment from "./Collector/Payment";
-import RentOffense from "./Collector/RentOffense"
+import RentOffense from "./Collector/RentOffense";
 
 import Payroll from "./payroll/payroll";
 import Quiz from "./quiz";
@@ -77,16 +75,14 @@ import TodoList from './AP6/TodoList';
 import BlogrollApp from './AP6/BlogrollApp';
 import DigitalClock from './AP6/DigitalClock';
 
-
-
 function App() {
   return (
     <AuthProvider>
       <Router>
         <Routes>
-        <Route path="/todo" element={<TodoList />} />
-        <Route path="/blog" element={<BlogrollApp />} />
-        <Route path="/digital" element={<DigitalClock />} />
+          <Route path="/todo" element={<TodoList />} />
+          <Route path="/blog" element={<BlogrollApp />} />
+          <Route path="/digital" element={<DigitalClock />} />
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/signup" element={<SignUp />} />
@@ -261,8 +257,7 @@ function App() {
             element={<ProtectedRoute element={<Payment />} />}
           />
 
-
-          /*NEW */
+          {/* NEW */}
 
           <Route
             path="/rentoffense"
@@ -305,7 +300,7 @@ function App() {
             path="/edit-verification/:vendorId"
             element={<ProtectedRoute element={<EditVerification />} />}
           />
-          
+
           {/* Other Routes */}
           <Route path="/payroll" element={<Payroll />} />
           <Route path="/quiz" element={<Quiz />} />
